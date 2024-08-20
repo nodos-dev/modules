@@ -444,37 +444,37 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 			return NOS_RESULT_SUCCESS;
 
 		names[0] = NOS_NAME_STATIC("ConnectToServer");
-		fns[0] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs) {
-				if (WebRTCPlayerNodeContext* playerNode = static_cast<WebRTCPlayerNodeContext*>(ctx)) {
-					auto values = nos::GetPinValues(nodeArgs);
-					
-					playerNode->InitializeNodeInternals();
-					playerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
-					playerNode->p_nosWebRTC->StartConnection(playerNode->server);
-				}
-				
+		fns[0] = [](void* ctx, nosFunctionExecuteParams* params) {
+			if (WebRTCPlayerNodeContext* playerNode = static_cast<WebRTCPlayerNodeContext*>(ctx)) {
+				auto values = nos::GetPinValues(params->ParentNodeExecuteParams);
+
+				playerNode->InitializeNodeInternals();
+				playerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
+				playerNode->p_nosWebRTC->StartConnection(playerNode->server);
+			}
+			return NOS_RESULT_SUCCESS;
 			};
 
 		names[1] = NOS_NAME_STATIC("DisconnectFromServer");
-		fns[1] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs) {
+		fns[1] = [](void* ctx, nosFunctionExecuteParams* params) {
 			if (WebRTCPlayerNodeContext* playerNode = static_cast<WebRTCPlayerNodeContext*>(ctx)) {
-				auto values = nos::GetPinValues(nodeArgs);
+				auto values = nos::GetPinValues(params->ParentNodeExecuteParams);
 
 				playerNode->currentState = EWebRTCPlayerStates::eDISCONNECTED_FROM_SERVER;
 				playerNode->WebRTCCallbacksCV.notify_one();
 			}
-
-			};
+			return NOS_RESULT_SUCCESS;
+		};
 
 		names[2] = NOS_NAME_STATIC("ConnectToPeer");
-		fns[2] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs) {
+		fns[2] = [](void* ctx, nosFunctionExecuteParams* params) {
 			if (WebRTCPlayerNodeContext* playerNode = static_cast<WebRTCPlayerNodeContext*>(ctx)) {
-				auto values = nos::GetPinValues(nodeArgs);
+				auto values = nos::GetPinValues(params->ParentNodeExecuteParams);
 
 				playerNode->p_nosWebRTC->SendOffer(*nos::GetPinValue<int>(values, NSN_StreamerID));
 			}
-
-			};
+			return NOS_RESULT_SUCCESS;
+		};
 
 		return NOS_RESULT_SUCCESS;
 	}

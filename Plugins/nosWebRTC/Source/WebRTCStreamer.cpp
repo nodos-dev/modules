@@ -383,32 +383,32 @@ struct WebRTCNodeContext : nos::NodeContext {
 			return NOS_RESULT_SUCCESS;
 
 		names[0] = NOS_NAME_STATIC("ConnectToServer");
-		fns[0] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs) {
-				if (WebRTCNodeContext* streamerNode = static_cast<WebRTCNodeContext*>(ctx)) {
-					auto values = nos::GetPinValues(nodeArgs);
-					
-					streamerNode->InitializeNodeInternals();
-					streamerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
-					streamerNode->p_nosWebRTC->StartConnection(streamerNode->server);
-				}
-				
-			};
+		fns[0] = [](void* ctx, nosFunctionExecuteParams* params) {
+			if (WebRTCNodeContext* streamerNode = static_cast<WebRTCNodeContext*>(ctx)) {
+				auto values = nos::GetPinValues(params->ParentNodeExecuteParams);
+
+				streamerNode->InitializeNodeInternals();
+				streamerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
+				streamerNode->p_nosWebRTC->StartConnection(streamerNode->server);
+			}
+			return NOS_RESULT_SUCCESS;
+		};
 
 		names[1] = NOS_NAME_STATIC("DisconnectFromServer");
-		fns[1] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs) {
+		fns[1] = [](void* ctx, nosFunctionExecuteParams* params) {
 			if (WebRTCNodeContext* streamerNode = static_cast<WebRTCNodeContext*>(ctx)) {
-				auto values = nos::GetPinValues(nodeArgs);
+				auto values = nos::GetPinValues(params->ParentNodeExecuteParams);
 
 				streamerNode->currentState = EWebRTCPlayerStates::eDISCONNECTED_FROM_SERVER;
 				streamerNode->WebRTCCallbacksCV.notify_one();
 			}
-
-			};
+			return NOS_RESULT_SUCCESS;
+		};
 
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) 
+	nosResult ExecuteNode(nosNodeExecuteParams* params) 
 	{
 		copyToLogger.LogStats();
 		int writeIndex = 0;

@@ -23,13 +23,13 @@ public:
 	void DestroyWindowSurface();
 	void DestroyWindow();
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override;
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override;
 
 	void OnPathStop() override;
 	void OnPathStart() override;
 
-	void OnEnterRunner(std::optional<nosUUID> runnerId) override;
-	void OnExitRunner(std::optional<nosUUID> runnerId) override;
+	void OnEnterRunnerThread(std::optional<nosUUID> runnerId) override;
+	void OnExitRunnerThread(std::optional<nosUUID> runnerId) override;
 
 private:
 	void WindowThread();

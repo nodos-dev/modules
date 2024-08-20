@@ -30,7 +30,7 @@ link_directories(${CMAKE_CURRENT_LIST_DIR}/External/lib/Release)
 
 ##Ordering of the 4 libraries (webrtc, websockets, libssl, libcrypto) matters!!!
 nos_add_plugin("nosWebRTC" 
-			"${NOS_PLUGIN_SDK_TARGET};jsoncpp_static.lib;webrtc.lib;websockets_static.lib;libssl.lib;libcrypto.lib;WS2_32.LIB;GDI32.lib;USER32.lib;WinMM.Lib;dmoguids.lib;AdvAPI32.Lib;Secur32.lib;amstrmid.lib;strmiids.lib;Crypt32.Lib;wmcodecdspuuid.lib;iphlpapi.lib;msdmo.lib;"
+			"${NOS_SYS_VULKAN_TARGET_5_8};${NOS_PLUGIN_SDK_TARGET};jsoncpp_static.lib;webrtc.lib;websockets_static.lib;libssl.lib;libcrypto.lib;WS2_32.LIB;GDI32.lib;USER32.lib;WinMM.Lib;dmoguids.lib;AdvAPI32.Lib;Secur32.lib;amstrmid.lib;strmiids.lib;Crypt32.Lib;wmcodecdspuuid.lib;iphlpapi.lib;msdmo.lib;"
  "${CMAKE_CURRENT_SOURCE_DIR}")
 
 #Always force MD (because webrtc.lib built in Release => MD )

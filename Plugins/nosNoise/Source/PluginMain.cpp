@@ -10,6 +10,10 @@
 NOS_INIT()
 NOS_VULKAN_INIT()
 
+NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_INIT()
+NOS_END_IMPORT_DEPS()
+
 namespace nos::noise
 {
 enum Nodes : int
@@ -68,3 +72,4 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 	return NOS_RESULT_SUCCESS;
 }
 }
+} // namespace nos::noise

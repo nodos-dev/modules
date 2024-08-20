@@ -9,7 +9,7 @@
 #include <chrono>
 #include <Nodos/PluginHelpers.hpp>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(0)
+NOS_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 NOS_END_IMPORT_DEPS()
@@ -300,10 +300,7 @@ void RegisterToTransformMatrix(nosNodeFunctions*);
 void RegisterInverse(nosNodeFunctions*);
 void RegisterTranspose(nosNodeFunctions*);
 
-extern "C"
-{
-
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNodeFunctions** outList)
+nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outList)
 {
 	*outCount = (size_t)(MathNodeTypes::Count);
 	if (!outList)
@@ -313,7 +310,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 		auto node = outList[i];
 		switch ((MathNodeTypes)i)
 		{
-		GEN_ALL_CASES()
+			GEN_ALL_CASES()
 		case MathNodeTypes::U32ToString: {
 				node->ClassName = NOS_NAME_STATIC("nos.math.U32ToString");
 				node->ExecuteNode = ToString<u32>;
@@ -339,7 +336,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 				float max = *static_cast<float*>(maxBuf->Data);
 				*(static_cast<float*>(outBuf->Data)) = std::clamp(value, min, max);
 				return NOS_RESULT_SUCCESS;
-			};
+				};
 			break;
 		}
 		case MathNodeTypes::Absolute: {
@@ -352,7 +349,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 				float value = *static_cast<float*>(valueBuf->Data);
 				*(static_cast<float*>(outBuf->Data)) = std::abs(value);
 				return NOS_RESULT_SUCCESS;
-			};
+				};
 			break;
 		}
 		case MathNodeTypes::AddTrack: {
@@ -368,26 +365,26 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 		case MathNodeTypes::PerspectiveView: {
 			node->ClassName = NOS_NAME_STATIC("nos.math.PerspectiveView");
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
-			{
-				auto pins = GetPinValues(params);
+				{
+					auto pins = GetPinValues(params);
 
-				auto fov = *static_cast<float*>(pins[NSN_FOV]);
+					auto fov = *static_cast<float*>(pins[NSN_FOV]);
 
-				// Sanity checks
-				static_assert(alignof(glm::vec3) == alignof(nos::fb::vec3));
-				static_assert(sizeof(glm::vec3) == sizeof(nos::fb::vec3));
-				static_assert(alignof(glm::mat4) == alignof(nos::fb::mat4));
-				static_assert(sizeof(glm::mat4) == sizeof(nos::fb::mat4));
+					// Sanity checks
+					static_assert(alignof(glm::vec3) == alignof(nos::fb::vec3));
+					static_assert(sizeof(glm::vec3) == sizeof(nos::fb::vec3));
+					static_assert(alignof(glm::mat4) == alignof(nos::fb::mat4));
+					static_assert(sizeof(glm::mat4) == sizeof(nos::fb::mat4));
 
-				// glm::dvec3 is compatible with nos::fb::vec3d so it's safe to cast
-				auto const& rot = *static_cast<glm::vec3*>(pins[NSN_Rotation]);
-				auto const& pos = *static_cast<glm::vec3*>(pins[NSN_Position]);
-				auto perspective = glm::perspective(fov, 16.f / 9.f, 10.f, 10000.f);
-				auto view = glm::eulerAngleXYZ(rot.x, rot.y, rot.z);
-				auto& out = *static_cast<glm::mat4*>(pins[NSN_Transformation]);
-				out = perspective * view;
-				return NOS_RESULT_SUCCESS;
-			};
+					// glm::dvec3 is compatible with nos::fb::vec3d so it's safe to cast
+					auto const& rot = *static_cast<glm::vec3*>(pins[NSN_Rotation]);
+					auto const& pos = *static_cast<glm::vec3*>(pins[NSN_Position]);
+					auto perspective = glm::perspective(fov, 16.f / 9.f, 10.f, 10000.f);
+					auto view = glm::eulerAngleXYZ(rot.x, rot.y, rot.z);
+					auto& out = *static_cast<glm::mat4*>(pins[NSN_Transformation]);
+					out = perspective * view;
+					return NOS_RESULT_SUCCESS;
+				};
 			break;
 		}
 		case MathNodeTypes::Eval: {
@@ -416,6 +413,14 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 	}
 	return NOS_RESULT_SUCCESS;
 }
-}
 
+extern "C"
+{
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
+{
+	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	return NOS_RESULT_SUCCESS;
 }
+} // extern "C"
+
+} // namespace nos::math

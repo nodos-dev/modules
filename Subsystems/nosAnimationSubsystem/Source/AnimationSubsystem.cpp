@@ -6,7 +6,9 @@
 #include <PinDataAnimator.h>
 
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(4);
+NOS_INIT()
+NOS_BEGIN_IMPORT_DEPS()
+NOS_END_IMPORT_DEPS()
 
 namespace nos::sys::anim
 {
@@ -16,10 +18,10 @@ namespace editor
 }
 static std::unique_ptr<PinDataAnimator> GAnimator = nullptr;
 
-nosResult OnPreExecuteNode(nosNodeExecuteArgs* args)
+nosResult OnPreExecuteNode(nosNodeExecuteParams* params)
 {
 	nosUUID scheduledNodeId;
-	if (nosEngine.GetCurrentPathInfo(&scheduledNodeId, nullptr) == NOS_RESULT_FAILED)
+	if (nosEngine.GetCurrentRunnerPathInfo(&scheduledNodeId, nullptr) == NOS_RESULT_FAILED)
 		return NOS_RESULT_FAILED;
 
 	auto pathInfo = GAnimator->GetPathInfo(scheduledNodeId);
@@ -29,8 +31,8 @@ nosResult OnPreExecuteNode(nosNodeExecuteArgs* args)
 
 	uint64_t curFrame = pathInfo->StartFSM + pathInfo->CurFrame;
 
-	for (size_t i = 0; i < args->PinCount; ++i)
-		GAnimator->UpdatePin(args->Pins[i].Id, args->DeltaSeconds, curFrame, args->Pins[i].Data);
+	for (size_t i = 0; i < params->PinCount; ++i)
+		GAnimator->UpdatePin(params->Pins[i].Id, params->DeltaSeconds, curFrame, params->Pins[i].Data);
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -39,12 +41,12 @@ void OnPinDeleted(nosUUID pinId)
 	GAnimator->OnPinDeleted(pinId);
 }
 
-nosResult ShouldExecuteNodeWithoutDirty(nosNodeExecuteArgs* args)
+nosResult ShouldExecuteNodeWithoutDirty(nosNodeExecuteParams* params)
 {
-	for (size_t i = 0; i < args->PinCount; ++i)
+	for (size_t i = 0; i < params->PinCount; ++i)
 	{
-		auto const& pinId = args->Pins[i].Id;
-		if(args->Pins[i].ShowAs == fb::ShowAs::OUTPUT_PIN)
+		auto const& pinId = params->Pins[i].Id;
+		if(params->Pins[i].ShowAs == fb::ShowAs::OUTPUT_PIN)
 			continue;
 		if(GAnimator->IsPinAnimating(pinId))
 			return NOS_RESULT_SUCCESS;
@@ -55,7 +57,7 @@ nosResult ShouldExecuteNodeWithoutDirty(nosNodeExecuteArgs* args)
 void OnPathStart(nosUUID scheduledPinId)
 {
 	nosVec2u deltaSec;
-	nosEngine.GetCurrentPathInfo(nullptr, &deltaSec);
+	nosEngine.GetCurrentRunnerPathInfo(nullptr, &deltaSec);
 	GAnimator->CreatePathInfo(scheduledPinId, deltaSec);
 }
 
@@ -64,7 +66,7 @@ void OnPathStop(nosUUID scheduledPinId)
 	GAnimator->DeletePathInfo(scheduledPinId);
 }
 
-void OnPathExecutionFinished(nosUUID scheduledPinId)
+void OnEndFrame(nosUUID scheduledPinId)
 {
 	GAnimator->PathExecutionFinished(scheduledPinId);
 }
@@ -112,31 +114,31 @@ void OnEditorConnected(uint64_t editorId)
 	nosEngine.SendCustomMessageToEditors(NOS_NAME("nos.sys.animation"), buf);
 }
 
+nosResult NOSAPI_CALL OnPreUnloadSubsystem()
+{
+	nos::sys::anim::GAnimator = nullptr;
+	return NOS_RESULT_SUCCESS;
+}
 }
 
 extern "C"
 {
-	NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
-	{
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
+{
 		
-		subsystemFunctions->OnPreExecuteNode = nos::sys::anim::OnPreExecuteNode;
-		subsystemFunctions->ShouldExecuteNodeWithoutDirty = nos::sys::anim::ShouldExecuteNodeWithoutDirty;
-		subsystemFunctions->OnPathStart = nos::sys::anim::OnPathStart;
-		subsystemFunctions->OnPathStop = nos::sys::anim::OnPathStop;
-		subsystemFunctions->OnPathExecutionFinished = nos::sys::anim::OnPathExecutionFinished;
-		subsystemFunctions->OnPinDeleted = nos::sys::anim::OnPinDeleted;
+	subsystemFunctions->OnPreExecuteNode = nos::sys::anim::OnPreExecuteNode;
+	subsystemFunctions->ShouldExecuteNodeWithoutDirty = nos::sys::anim::ShouldExecuteNodeWithoutDirty;
+	subsystemFunctions->OnPathStart = nos::sys::anim::OnPathStart;
+	subsystemFunctions->OnPathStop = nos::sys::anim::OnPathStop;
+	subsystemFunctions->OnEndFrame = nos::sys::anim::OnEndFrame;
+	subsystemFunctions->OnPinDeleted = nos::sys::anim::OnPinDeleted;
 
-		subsystemFunctions->OnMessageFromEditor = nos::sys::anim::OnMessageFromEditor;
-		subsystemFunctions->OnEditorConnected = nos::sys::anim::OnEditorConnected;
+	subsystemFunctions->OnMessageFromEditor = nos::sys::anim::OnMessageFromEditor;
+	subsystemFunctions->OnEditorConnected = nos::sys::anim::OnEditorConnected;
+
+	subsystemFunctions->OnPreUnloadSubsystem = nos::sys::anim::OnPreUnloadSubsystem;
 		
-		nos::sys::anim::GAnimator = std::make_unique<nos::sys::anim::PinDataAnimator>();
-		return NOS_RESULT_SUCCESS;
-	}
-
-	NOSAPI_ATTR nosResult NOSAPI_CALL nosUnloadSubsystem()
-	{
-		nos::sys::anim::GAnimator = nullptr;
-		return NOS_RESULT_SUCCESS;
-	}
-
+	nos::sys::anim::GAnimator = std::make_unique<nos::sys::anim::PinDataAnimator>();
+	return NOS_RESULT_SUCCESS;
+}
 }

@@ -8,13 +8,16 @@
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include "Names.h"
 
-NOS_INIT();
-NOS_VULKAN_INIT();
+NOS_INIT()
+NOS_VULKAN_INIT()
+
+NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_INIT()
+NOS_END_IMPORT_DEPS()
 
 nosResult RegisterWebRTCPlayer(nosNodeFunctions* outFunctions);
 nosResult RegisterWebRTCStreamer(nosNodeFunctions* outFunctions);
 void RegisterWebRTCSignalingServer(nosNodeFunctions* outFunctions);
-
 
 NOS_REGISTER_NAME(In)
 NOS_REGISTER_NAME(Out)
@@ -35,25 +38,29 @@ NOS_REGISTER_NAME(PlaneY);
 NOS_REGISTER_NAME(PlaneU);
 NOS_REGISTER_NAME(PlaneV);
 
+nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions) {
+	*outCount = (size_t)(3);
+	if (!outFunctions)
+		return NOS_RESULT_SUCCESS;
+
+	nosResult res = RegisterWebRTCStreamer(outFunctions[0]);
+	if (res != NOS_RESULT_SUCCESS)
+		return res;
+	res = RegisterWebRTCPlayer(outFunctions[1]);
+	if (res != NOS_RESULT_SUCCESS)
+		return res;
+	RegisterWebRTCSignalingServer(outFunctions[2]);
+
+	return NOS_RESULT_SUCCESS;
+}
+
 extern "C"
 {
-	NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions) {
-		*outCount = (size_t)(3);
-		if (!outFunctions)
-			return NOS_RESULT_SUCCESS;
 
-		nosResult returnRes = RequestVulkanSubsystem();
-		if (returnRes != NOS_RESULT_SUCCESS)
-			return NOS_RESULT_FAILED;
-		 
-		nosResult res = RegisterWebRTCStreamer(outFunctions[0]);
-		if (res != NOS_RESULT_SUCCESS)
-			returnRes = res;
-		res = RegisterWebRTCPlayer(outFunctions[1]);
-		if (res != NOS_RESULT_SUCCESS)
-			returnRes = res;
-		RegisterWebRTCSignalingServer(outFunctions[2]);
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
+{
+	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	return NOS_RESULT_SUCCESS;
+}
 
-		return NOS_RESULT_SUCCESS;
-	}
 }

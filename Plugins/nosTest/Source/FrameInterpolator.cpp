@@ -40,15 +40,15 @@ struct FrameInterpolatorNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		{
 			std::unique_lock guard(Mutex);
-			DeltaNanosec = 1'000'000'000u * (args->DeltaSeconds.x / double(args->DeltaSeconds.y));
+			DeltaNanosec = 1'000'000'000u * (params->DeltaSeconds.x / double(params->DeltaSeconds.y));
 			if (!InputPinId)
-				InputPinId = args->Pins[0].Id;
+				InputPinId = params->Pins[0].Id;
 		}
-		auto pinValues = GetPinValues(args);
+		auto pinValues = GetPinValues(params);
 		auto inputTextureInfo = vkss::DeserializeTextureInfo(pinValues[NSN_Input]);
 		auto outputTextureInfo = vkss::DeserializeTextureInfo(pinValues[NSN_Output]);
 		auto method = GetPinValue<nos::test::FrameInterpolationMethod>(pinValues, NSN_Method);
@@ -107,7 +107,7 @@ nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions)
 	NOS_BIND_NODE_CLASS(NSN_ClassName_FrameInterpolator, FrameInterpolatorNode, nodeFunctions)
 
 
-		fs::path root = nosEngine.Context->RootFolderPath;
+		fs::path root = nosEngine.Module->RootFolderPath;
 	auto basicInterpPath = (root / "." / "Shaders" / "BasicInterpolation.frag").generic_string();
 
 	const std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*>>> shaders = {

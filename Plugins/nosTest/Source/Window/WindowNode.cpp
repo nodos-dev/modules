@@ -40,8 +40,11 @@ bool WindowNode::CreateSwapchain()
 	SignalSemaphore.resize(FrameCount);
 	for (int i = 0; i < FrameCount; i++)
 	{
-		nosVulkan->CreateNosSemaphore(&semaphoreCreateInfo, &WaitSemaphore[i]);
-		nosVulkan->CreateNosSemaphore(&semaphoreCreateInfo, &SignalSemaphore[i]);
+#ifdef CreateSemaphore
+#undef CreateSemaphore
+#endif
+		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &WaitSemaphore[i]);
+		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &SignalSemaphore[i]);
 	}
 	return true;
 }
@@ -91,18 +94,18 @@ void WindowNode::DestroyWindow()
 	Window = nullptr;
 }
 
-nosResult WindowNode::ExecuteNode(const nosNodeExecuteArgs* args)
+nosResult WindowNode::ExecuteNode(nosNodeExecuteParams* params)
 {
 	if (!Window)
 		return NOS_RESULT_FAILED;
-	nosScheduleNodeParams params = {};
-	params.NodeId = NodeId;
-	params.Reset = false;
-	params.AddScheduleCount = 1;
+	nosScheduleNodeParams scheduleParams = {};
+	scheduleParams.NodeId = NodeId;
+	scheduleParams.Reset = false;
+	scheduleParams.AddScheduleCount = 1;
 
-	nos::NodeExecuteArgs execArgs = args;
+	nos::NodeExecuteParams execParams = params;
 
-	auto input = vkss::DeserializeTextureInfo(execArgs[NOS_NAME("Input")].Data->Data);
+	auto input = vkss::DeserializeTextureInfo(execParams[NOS_NAME("Input")].Data->Data);
 	if (!input.Memory.Handle)
 		return NOS_RESULT_FAILED;
 
@@ -123,7 +126,7 @@ nosResult WindowNode::ExecuteNode(const nosNodeExecuteArgs* args)
 		nosCmdEndParams endParams{.ForceSubmit = true};
 		nosVulkan->End(cmd, &endParams);
 		nosVulkan->SwapchainPresent(Swapchain, imageIndex, SignalSemaphore[CurrentFrame]);
-		nosEngine.ScheduleNode(&params);
+		nosEngine.ScheduleNode(&scheduleParams);
 		CurrentFrame = (CurrentFrame + 1) % FrameCount;
 	}
 	else
@@ -135,14 +138,14 @@ nosResult WindowNode::ExecuteNode(const nosNodeExecuteArgs* args)
 	return NOS_RESULT_SUCCESS;
 }
 
-void WindowNode::OnExitRunner(std::optional<nosUUID> runnerId) 
+void WindowNode::OnExitRunnerThread(std::optional<nosUUID> runnerId) 
 { 
 	if (!runnerId)
 		return;
 	Clear(); 
 }
 
-void WindowNode::OnEnterRunner(std::optional<nosUUID> runnerId)
+void WindowNode::OnEnterRunnerThread(std::optional<nosUUID> runnerId)
 {
 	if (!runnerId)
 		return;

@@ -130,12 +130,12 @@ struct WebRTCSignalingServerNodeContext : nos::NodeContext {
 			return NOS_RESULT_SUCCESS;
 
 		names[0] = NOS_NAME_STATIC("StartServer");
-		fns[0] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs) {
+		fns[0] = [](void* ctx, nosFunctionExecuteParams* params) {
 			if (WebRTCSignalingServerNodeContext* serverNode = static_cast<WebRTCSignalingServerNodeContext*>(ctx)) {
 				
 				std::unique_lock<std::mutex> serverLock(serverNode->UpdateMutex);
 
-				auto values = nos::GetPinValues(nodeArgs);
+				auto values = nos::GetPinValues(params->ParentNodeExecuteParams);
 				int streamerPort = *nos::GetPinValue<int>(values, NSN_StreamerPort);
 				int playerPort = *nos::GetPinValue<int>(values, NSN_PlayerPort);
 				if (!serverNode->p_server) {
@@ -150,18 +150,18 @@ struct WebRTCSignalingServerNodeContext : nos::NodeContext {
 				serverNode->ServerUpdateCV.notify_one();
 
 			}
-
-			};
+			return NOS_RESULT_SUCCESS;
+		};
 
 		names[1] = NOS_NAME_STATIC("StopServer");
-		fns[1] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs) {
+		fns[1] = [](void* ctx, nosFunctionExecuteParams* params) {
 			if (WebRTCSignalingServerNodeContext* serverNode = static_cast<WebRTCSignalingServerNodeContext*>(ctx)) {
 				serverNode->ShouldSuspendUpdate = true;
-				auto values = nos::GetPinValues(nodeArgs);
+				auto values = nos::GetPinValues(params->ParentNodeExecuteParams);
 				serverNode->p_server->StopServer();
 			}
-
-			};
+			return NOS_RESULT_SUCCESS;
+		};
 
 		return NOS_RESULT_SUCCESS;
 	}

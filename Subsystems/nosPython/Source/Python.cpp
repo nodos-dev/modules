@@ -14,6 +14,8 @@ namespace pyb = pybind11;
 using namespace pyb::literals;
 
 NOS_INIT()
+NOS_BEGIN_IMPORT_DEPS()
+NOS_END_IMPORT_DEPS()
 
 namespace nos::py
 {
@@ -405,19 +407,20 @@ public:
 	}
 };
 
-} // namespace nos::py
-
-extern "C"
+nosResult NOSAPI_CALL ExportSubsystemNodeFunctions(size_t* outSize, nosSubsystemNodeFunctions** outList)
 {
-
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
-{
-	nos::py::Init();
-	
+	*outSize = 1;
+	if (!outList)
+		return NOS_RESULT_SUCCESS;
+	auto pyFuncs = outList[0];
+	pyFuncs->OnNodeClassRegistered = nos::py::OnPyNodeRegistered;
+	pyFuncs->NodeType = NOS_NAME_STATIC("nos.py.PythonNode");
+	auto* functions = &pyFuncs->NodeFunctions;
+	NOS_BIND_NODE_CLASS(0, nos::py::PyNativeNode, functions);
 	return NOS_RESULT_SUCCESS;
 }
 
-NOSAPI_ATTR nosResult NOSAPI_CALL nosUnloadSubsystem()
+nosResult NOSAPI_CALL OnPreUnloadSubsystem()
 {
 	nos::py::Deinit();
 	// Python DLL might not be released when nos.py is unloaded, due to some third party python module (like numpy).
@@ -434,17 +437,18 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosUnloadSubsystem()
 	return NOS_RESULT_SUCCESS;
 }
 
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystemNodeFunctions(size_t* outSize, nosSubsystemNodeFunctions** outList)
+} // namespace nos::py
+
+extern "C"
 {
-	*outSize = 1;
-	if (!outList)
-		return NOS_RESULT_SUCCESS;
-	auto pyFuncs = outList[0];
-	pyFuncs->OnNodeClassRegistered = nos::py::OnPyNodeRegistered;
-	pyFuncs->NodeType = NOS_NAME_STATIC("nos.py.PythonNode");
-	auto* functions = &pyFuncs->NodeFunctions;
-	NOS_BIND_NODE_CLASS(0, nos::py::PyNativeNode, functions);
+
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
+{
+	nos::py::Init();
+	subsystemFunctions->OnPreUnloadSubsystem = nos::py::OnPreUnloadSubsystem;
+	subsystemFunctions->ExportSubsystemNodeFunctions = nos::py::ExportSubsystemNodeFunctions;
 	return NOS_RESULT_SUCCESS;
 }
+
 
 }

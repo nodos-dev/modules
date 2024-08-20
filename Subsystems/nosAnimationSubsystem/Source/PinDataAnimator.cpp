@@ -247,8 +247,7 @@ bool PinDataAnimator::AddAnimation(nosUUID const& pinId,
 	data.StartTime = nowMs + animate.delay;
 	
 	data.Interp = animate.interpolate;
-	nosTypeInfo typeInfo{};
-	nosEngine.GetPinType(pinId, &typeInfo);
+	nos::TypeInfo typeInfo(pinId);
 	data.TypeName = typeInfo.TypeName;
 
 	// If constant, do not look for interpolator.
