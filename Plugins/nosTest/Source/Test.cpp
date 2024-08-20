@@ -11,7 +11,7 @@
 
 #include "Window/WindowNode.h"
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(0)
+NOS_INIT()
 
 NOS_REGISTER_NAME(in1)
 NOS_REGISTER_NAME(in2)
