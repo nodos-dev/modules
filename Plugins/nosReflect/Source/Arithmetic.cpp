@@ -62,7 +62,7 @@ static void MapScalarToT(nosTypeInfo ty, auto&& f)
     return;
 }
 
-static void DoOp(fb::BinaryOperator op, nosTypeInfo ty, u8* lhs, u8* rhs, u8* dst)
+static void DoOp(fb::BinaryOperator op, nosTypeInfo const& ty, u8* lhs, u8* rhs, u8* dst)
 {
     switch(ty.BaseType)
     {
@@ -113,7 +113,7 @@ const char* BinaryOpToDisplayName(fb::BinaryOperator op)
 
 struct ArithmeticNodeContext : NodeContext
 {
-    nosTypeInfo Type = {};
+    nosTypeInfo* Type = nullptr;
     std::optional<fb::BinaryOperator> Operator;
 
     ArithmeticNodeContext(const fb::Node* node) : NodeContext(node)
@@ -136,10 +136,19 @@ struct ArithmeticNodeContext : NodeContext
 				}
 			}
 		}
-		if (newTypeName)
+		if (newTypeName) {
+			if (Type)
+				nosEngine.FreeTypeInfo(Type);
 			nosEngine.GetTypeInfo(*newTypeName, &Type);
+		}
 		if (Operator)
 			SetOperator(*Operator, false);
+	}
+
+	~ArithmeticNodeContext()
+	{
+		if (Type)
+			nosEngine.FreeTypeInfo(Type);
 	}
 
 	void SetOperator(fb::BinaryOperator op, bool addTemplateParams)
@@ -164,7 +173,7 @@ struct ArithmeticNodeContext : NodeContext
 	{
 		nosEngine.GetTypeInfo(typeName, &Type);
 		flatbuffers::FlatBufferBuilder fbb;
-		std::vector<u8> typeData = nos::Buffer(nos::Name(Type.TypeName).AsCStr(), 1 + nos::Name(Type.TypeName).AsString().size());
+		std::vector<u8> typeData = nos::Buffer(nos::Name(Type->TypeName).AsCStr(), 1 + nos::Name(Type->TypeName).AsString().size());
 		std::vector params = {
 			fb::CreateTemplateParameterDirect(fbb, "string", &typeData)
 		};
@@ -179,38 +188,42 @@ struct ArithmeticNodeContext : NodeContext
 	{
 		if (update->UpdatedField == NOS_PIN_FIELD_TYPE_NAME)
 		{
-			if (Type.TypeName != update->TypeName)
+			if (!Type || Type->TypeName != update->TypeName)
 				SetType(update->TypeName);
 		}
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
 	{
-		nosTypeInfo incomingType{};
+		nosTypeInfo* incomingType = nullptr;
 		nosEngine.GetTypeInfo(params->IncomingTypeName, &incomingType);
-		if (incomingType.AttributeCount == 0)
+		if (incomingType->AttributeCount == 0) {
+			nosEngine.FreeTypeInfo(incomingType);
 			return NOS_RESULT_SUCCESS;
-		for (int i = 0; i < incomingType.AttributeCount; ++i)
+		}
+		for (int i = 0; i < incomingType->AttributeCount; ++i)
 		{
-			if (incomingType.Attributes[i].Name == NOS_NAME_STATIC("resource")) {
+			if (incomingType->Attributes[i].Name == NOS_NAME_STATIC("resource")) {
 				strcpy(params->OutErrorMessage, "Resource types are not supported");
+				nosEngine.FreeTypeInfo(incomingType);
 				return NOS_RESULT_FAILED;
 			}
 		}
+		nosEngine.FreeTypeInfo(incomingType);
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		if (NSN_VOID == Type.TypeName || !Operator)
+		if (!Type || NSN_VOID == Type->TypeName || !Operator)
 			return NOS_RESULT_SUCCESS;
 
 		flatbuffers::FlatBufferBuilder fbb;
-		NodeExecuteArgs pins(args);
+		NodeExecuteParams pins(params);
 
 		nos::Buffer buf(*pins[NSN_Output].Data);
 		// TODO: we can directly set execute node function ptr instead of switch case etc.
-		DoOp(*Operator, Type, (u8*)pins[NSN_A].Data->Data, (u8*)pins[NSN_B].Data->Data, (u8*)buf.Data());
+		DoOp(*Operator, *Type, (u8*)pins[NSN_A].Data->Data, (u8*)pins[NSN_B].Data->Data, (u8*)buf.Data());
 		nosEngine.SetPinValue(pins[NSN_Output].Id, buf);
 
 		return NOS_RESULT_SUCCESS;

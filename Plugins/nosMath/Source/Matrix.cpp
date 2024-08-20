@@ -11,12 +11,12 @@ struct TransformNodeContext : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
+	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
-		nos::NodeExecuteArgs args(execArgs);
-		auto* rhs = args.GetPinData<fb::mat4>(NOS_NAME("A"));
-		auto* lhs = args.GetPinData<fb::mat4>(NOS_NAME("B"));
-		auto* out = args.GetPinData<fb::mat4>(NOS_NAME("Result"));
+		nos::NodeExecuteParams params(execParams);
+		auto* rhs = params.GetPinData<fb::mat4>(NOS_NAME("A"));
+		auto* lhs = params.GetPinData<fb::mat4>(NOS_NAME("B"));
+		auto* out = params.GetPinData<fb::mat4>(NOS_NAME("Result"));
 
 		std::array o = { &out->mutable_x(), &out->mutable_y(), &out->mutable_z(), &out->mutable_w() };
 		std::array l = { &lhs->mutable_x(), &lhs->mutable_y(), &lhs->mutable_z(), &lhs->mutable_w() };
@@ -38,9 +38,9 @@ struct ToTransformMatrixNodeContext : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
+	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
-		nos::NodeExecuteArgs args(execArgs);
+		nos::NodeExecuteParams args(execParams);
 		auto* xform = args.GetPinData<fb::Transform>(NOS_NAME("Transform"));
 		auto* out = args.GetPinData<fb::mat4>(NOS_NAME("Matrix"));
 
@@ -86,10 +86,10 @@ struct MatrixOperationNodeContext : NodeContext
 	std::optional<nos::Name> TypeName = std::nullopt;
 	
 	template <typename T>
-	void ApplyOperation(nos::NodeExecuteArgs& args)
+	void ApplyOperation(nos::NodeExecuteParams& params)
 	{
-		auto* in = args.GetPinData<T>(NOS_NAME("In"));
-		auto* out = args.GetPinData<T>(NOS_NAME("Out"));
+		auto* in = params.GetPinData<T>(NOS_NAME("In"));
+		auto* out = params.GetPinData<T>(NOS_NAME("Out"));
 #define OP(ty, glmty)								\
 			if constexpr (std::is_same_v<T, ty>)				\
 			{													\
@@ -109,22 +109,22 @@ struct MatrixOperationNodeContext : NodeContext
 #undef OP
 	}
 	
-	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
+	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
-		nos::NodeExecuteArgs args(execArgs);
+		nos::NodeExecuteParams params(execParams);
 
 		if (TypeName == NOS_NAME("nos.fb.mat4"))
-			ApplyOperation<fb::mat4>(args);
+			ApplyOperation<fb::mat4>(params);
 		else if (TypeName == NOS_NAME("nos.fb.mat3"))
-			ApplyOperation<fb::mat3>(args);
+			ApplyOperation<fb::mat3>(params);
 		else if (TypeName == NOS_NAME("nos.fb.mat2"))
-			ApplyOperation<fb::mat2>(args);
+			ApplyOperation<fb::mat2>(params);
 		else if (TypeName == NOS_NAME("nos.fb.mat4d"))
-			ApplyOperation<fb::mat4d>(args);
+			ApplyOperation<fb::mat4d>(params);
 		else if (TypeName == NOS_NAME("nos.fb.mat3d"))
-			ApplyOperation<fb::mat3d>(args);
+			ApplyOperation<fb::mat3d>(params);
 		else if (TypeName == NOS_NAME("nos.fb.mat2d"))
-			ApplyOperation<fb::mat2d>(args);
+			ApplyOperation<fb::mat2d>(params);
 
 		return NOS_RESULT_SUCCESS;
 	}

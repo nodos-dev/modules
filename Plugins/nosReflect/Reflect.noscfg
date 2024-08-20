@@ -6,7 +6,12 @@
         },
         "display_name": "Reflect",
         "description": "Collection of type reflection nodes",
-        "dependencies": []
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version":  "5.8"
+			}
+		]
     },
     "binary_path": "Binaries/nosReflect",
     "node_definitions": ["Config/Reflect.nosdef"],

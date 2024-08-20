@@ -2,15 +2,21 @@
 #include <Nodos/PluginHelpers.hpp>
 #include <Nodos/Helpers.hpp>
 
-NOS_INIT();
+NOS_INIT()
 
+nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
+{
+	*outCount = (size_t)(0);
+	if (!outFunctions)
+		return NOS_RESULT_SUCCESS;
+	return NOS_RESULT_SUCCESS;
+}
 extern "C"
 {
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
 {
-    *outCount = (size_t)(0);
-    if (!outFunctions)
-        return NOS_RESULT_SUCCESS;
-    return NOS_RESULT_SUCCESS;
+	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	return NOS_RESULT_SUCCESS;
 }
+
 }

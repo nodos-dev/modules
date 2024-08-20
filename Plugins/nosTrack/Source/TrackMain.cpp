@@ -14,8 +14,7 @@ enum TrackNode : int
 void RegisterFreeDNode(nosNodeFunctions* functions);
 void RegisterController(nosNodeFunctions* functions);
 
-extern "C"
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
+nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
 	*outSize = (size_t)TrackNode::Count;
 	if (!outList)
@@ -37,4 +36,13 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace zd
+extern "C"
+{
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
+{
+	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	return NOS_RESULT_SUCCESS;
+}
+}
+
+} // namespace nos::track

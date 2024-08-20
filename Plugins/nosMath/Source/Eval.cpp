@@ -187,8 +187,7 @@ struct EvalNodeContext : NodeContext
 		case ADD_INPUT:
 		{
 			flatbuffers::FlatBufferBuilder fbb;
-			nosUUID pinId{};
-			nosEngine.GenerateID(&pinId);
+			nosUUID pinId = nosEngine.GenerateID();
 			constexpr std::string_view VARIABLE_NAMES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 			if (Variables.size() >= VARIABLE_NAMES.size())
 			{
@@ -265,9 +264,9 @@ struct EvalNodeContext : NodeContext
 		return true;
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs pins(args);
+		nos::NodeExecuteParams pins(params);
 
 		auto exprStr = InterpretPinValue<const char>(pins[NOS_NAME("Expression")].Data->Data);
 		if (strlen(exprStr) == 0)

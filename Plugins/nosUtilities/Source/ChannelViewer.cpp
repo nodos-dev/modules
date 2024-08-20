@@ -13,7 +13,7 @@ NOS_REGISTER_NAME_SPACED(Nos_Utilities_ChannelViewer, "nos.utilities.ChannelView
 
 namespace nos::utilities
 {
-static nosResult ExecuteNode(void* ctx, const nosNodeExecuteArgs* pins)
+static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* pins)
 {
 	auto values = GetPinValues(pins);
 	const nosResourceShareInfo input = vkss::DeserializeTextureInfo(values[NSN_Input]);
@@ -48,9 +48,9 @@ static nosResult ExecuteNode(void* ctx, const nosNodeExecuteArgs* pins)
 nosResult RegisterChannelViewer(nosNodeFunctions* out)
 {
 	out->ClassName = NSN_Nos_Utilities_ChannelViewer;
-	out->ExecuteNode = nos::utilities::ExecuteNode;
+	out->ExecuteNode = ExecuteNode;
 
-	fs::path root = nosEngine.Context->RootFolderPath;
+	fs::path root = nosEngine.Module->RootFolderPath;
 	auto chViewerPath = (root / "Shaders" / "ChannelViewer.frag").generic_string();
 
 	nosShaderInfo2 shader = {

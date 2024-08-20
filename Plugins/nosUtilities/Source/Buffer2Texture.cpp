@@ -13,14 +13,14 @@ struct Buffer2TextureNodeContext : NodeContext
 	Buffer2TextureNodeContext(const nosFbNode* node) : NodeContext(node)
 	{
 	}
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs execArgs(args);
-		const auto& inputPinData = *InterpretPinValue<sys::vulkan::Buffer>(execArgs[NOS_NAME_STATIC("Input")].Data->Data);
-		const nosBuffer* outputPinData = execArgs[NOS_NAME_STATIC("Output")].Data;
+		nos::NodeExecuteParams execParams(params);
+		const auto& inputPinData = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("Input")].Data->Data);
+		const nosBuffer* outputPinData = execParams[NOS_NAME_STATIC("Output")].Data;
 		const auto& output = *InterpretPinValue<sys::vulkan::Texture>(outputPinData->Data);
-		const auto& size = *InterpretPinValue<fb::vec2u>(execArgs[NOS_NAME_STATIC("Size")].Data->Data);
-		const auto& format = *InterpretPinValue<sys::vulkan::Format>(execArgs[NOS_NAME_STATIC("Format")].Data->Data);
+		const auto& size = *InterpretPinValue<fb::vec2u>(execParams[NOS_NAME_STATIC("Size")].Data->Data);
+		const auto& format = *InterpretPinValue<sys::vulkan::Format>(execParams[NOS_NAME_STATIC("Format")].Data->Data);
 		if (size.x() != output.width() ||
 			size.y() != output.height() ||
 			format != output.format())
@@ -46,8 +46,8 @@ struct Buffer2TextureNodeContext : NodeContext
 		nosVulkan->Begin("Buffer2Texture Copy", &cmd);
 		nosVulkan->Copy(cmd, &in, &out, 0);
 		nosGPUEvent event;
-		nosCmdEndParams params{.ForceSubmit = true, .OutGPUEventHandle = &event};
-		nosVulkan->End(cmd, &params);
+		nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &event};
+		nosVulkan->End(cmd, &endParams);
 		nosVulkan->WaitGpuEvent(&event, UINT_MAX);
 		return NOS_RESULT_SUCCESS;
 	}

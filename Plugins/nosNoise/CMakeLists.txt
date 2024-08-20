@@ -1,5 +1,4 @@
-set(MODULE_DEPENDENCIES "nos.sys.vulkan-5.6")
-list(APPEND MODULE_DEPENDENCIES_TARGETS ${NOS_PLUGIN_SDK_TARGET})
+set(MODULE_DEPENDENCIES "nos.sys.vulkan-5.8")
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     # module_name_version: <MODULE_NAME>-<MODULE_VERSION>
@@ -9,6 +8,7 @@ foreach(module_name_version ${MODULE_DEPENDENCIES})
     nos_get_module("${module_name}" "${module_version}" DEP_${dep_idx})
     list(APPEND MODULE_DEPENDENCIES_TARGETS ${DEP_${dep_idx}})
 endforeach()
+list(APPEND MODULE_DEPENDENCIES_TARGETS ${NOS_PLUGIN_SDK_TARGET})
 
 set(INCLUDE_FOLDERS "")
 nos_add_plugin("nosNoise" "${MODULE_DEPENDENCIES_TARGETS}" "${INCLUDE_FOLDERS}")

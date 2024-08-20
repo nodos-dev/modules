@@ -282,7 +282,7 @@ flatbuffers::uoffset_t CopyTable(
 flatbuffers::uoffset_t CopyArgs(
 	flatbuffers::FlatBufferBuilder& fbb,
 	const nosTypeInfo* type,
-	NodeExecuteArgs& table)
+	NodeExecuteParams& table)
 {
 	if(NOS_BASE_TYPE_STRUCT != type->BaseType)
 		return 0;

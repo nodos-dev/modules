@@ -9,13 +9,13 @@ namespace nos::utilities
 	{
 		using NodeContext::NodeContext;
 
-		nosResult ExecuteNode(nosNodeExecuteArgs const* args) override
+		nosResult ExecuteNode(nosNodeExecuteParams* params) override
 		{
-			NodeExecuteArgs execArgs(args);
+			NodeExecuteParams execParams(params);
 			std::string statusMessage = "";
-			if(execArgs[NOS_NAME("Status")].Data->Size > 0)
-				statusMessage = std::string(reinterpret_cast<const char*>(execArgs[NOS_NAME("Status")].Data->Data));
-			fb::NodeStatusMessageType statusType = *execArgs.GetPinData<fb::NodeStatusMessageType>(NOS_NAME("StatusType"));
+			if(execParams[NOS_NAME("Status")].Data->Size > 0)
+				statusMessage = std::string(reinterpret_cast<const char*>(execParams[NOS_NAME("Status")].Data->Data));
+			fb::NodeStatusMessageType statusType = *execParams.GetPinData<fb::NodeStatusMessageType>(NOS_NAME("StatusType"));
 			if (StatusMessage == statusMessage && StatusType == statusType)
 			{
 				return NOS_RESULT_SUCCESS;

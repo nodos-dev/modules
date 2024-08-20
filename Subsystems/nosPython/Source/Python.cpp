@@ -121,10 +121,10 @@ protected:
 static Interpreter* GInterpreter = nullptr;
 
 // Classes with prefix 'PyNative' are only constructed from C++ side, with 'Py' are for Python-constructible.
-class PyNativeNodeExecuteArgs : public nos::NodeExecuteArgs
+class PyNativeNodeExecuteParams : public nos::NodeExecuteParams
 {
 public:
-	using nos::NodeExecuteArgs::NodeExecuteArgs;
+	using nos::NodeExecuteParams::NodeExecuteParams;
 
 	std::optional<pyb::memoryview> GetPinValue(std::string pinName) const
 	{
@@ -223,11 +223,11 @@ PYBIND11_EMBEDDED_MODULE(__nodos_internal__, m)
 		.def("__hash__", [](const nos::Name& name) -> size_t { return name.ID; })
 		.def("__eq__", [](const nos::Name& self, const nos::Name& other) -> bool { return self == other; });
 
-	pyb::class_<PyNativeNodeExecuteArgs>(m, "NodeExecuteArgs")
-		.def_property_readonly("node_class_name", [](const PyNativeNodeExecuteArgs& args) -> std::string_view { return args.NodeClassName.AsCStr(); })
-		.def_property_readonly("node_name", [](const PyNativeNodeExecuteArgs& args) -> std::string_view { return args.NodeName.AsCStr(); })
-		.def("get_pin_value", &PyNativeNodeExecuteArgs::GetPinValue, "Access the memory of the pin specified by 'pin_name'", "pin_name"_a)
-		.def("get_pin_id", &PyNativeNodeExecuteArgs::GetPinId, "Get the unique identifier of the pin specified by 'pin_name'", "pin_name"_a);
+	pyb::class_<PyNativeNodeExecuteParams>(m, "NodeExecuteArgs")
+		.def_property_readonly("node_class_name", [](const PyNativeNodeExecuteParams& args) -> std::string_view { return args.NodeClassName.AsCStr(); })
+		.def_property_readonly("node_name", [](const PyNativeNodeExecuteParams& args) -> std::string_view { return args.NodeName.AsCStr(); })
+		.def("get_pin_value", &PyNativeNodeExecuteParams::GetPinValue, "Access the memory of the pin specified by 'pin_name'", "pin_name"_a)
+		.def("get_pin_id", &PyNativeNodeExecuteParams::GetPinId, "Get the unique identifier of the pin specified by 'pin_name'", "pin_name"_a);
 
 	pyb::class_<PyNativeOnPinValueChangedArgs>(m, "PinValueChangedArgs")
 		.def_property_readonly("pin_value", [](const PyNativeOnPinValueChangedArgs& args) -> pyb::memoryview { return args.GetPinValue(); })
@@ -365,13 +365,13 @@ public:
 		}
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		auto m = GetPyObject();
 		if (!m)
 			return NOS_RESULT_NOT_FOUND;
 
-		return CallMethod<nosResult>("execute_node", NOS_RESULT_FAILED, PyNativeNodeExecuteArgs(args));
+		return CallMethod<nosResult>("execute_node", NOS_RESULT_FAILED, PyNativeNodeExecuteParams(params));
 	}
 
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override

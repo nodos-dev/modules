@@ -11,32 +11,6 @@ NOS_REGISTER_NAME(Delay)
 NOS_REGISTER_NAME_SPACED(TextureTypeName, "nos.sys.vulkan.Texture")
 NOS_REGISTER_NAME_SPACED(BufferTypeName, "nos.sys.vulkan.Buffer")
 
-struct UseVulkan
-{
-	inline static std::mutex Mutex{};
-	inline static nosVulkanSubsystem* VulkanCtx = nullptr;
-
-	UseVulkan()
-	{
-		Mutex.lock();
-	}
-	~UseVulkan()
-	{
-		Mutex.unlock();
-	}
-	
-	nosVulkanSubsystem& operator()() const
-	{
-		return *VulkanCtx;
-	}
-
-	static void Update(nosVulkanSubsystem* ctx)
-	{
-		std::unique_lock lock(Mutex);
-		VulkanCtx = ctx;
-	}
-};
-
 template <typename T>
 struct RingBuffer {
 	std::deque<T> Ring;
@@ -114,12 +88,12 @@ struct Resource
 			Desc.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
 			Desc.Info.Texture = r;
 		}
-		UseVulkan()().CreateResource(&Desc);
+		nosVulkan->CreateResource(&Desc);
 	}
         
 	~Resource()
 	{ 
-		UseVulkan()().DestroyResource(&Desc);
+		nosVulkan->DestroyResource(&Desc);
 	}
 };
 
@@ -155,11 +129,11 @@ struct ResourceSlot : AnySlot
 			src = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(other.Data));
 		if constexpr (std::is_same_v<T, nosTextureInfo>)
 			src = vkss::DeserializeTextureInfo(other.Data);
-		UseVulkan()().Begin2(&beginParams);
-		UseVulkan()().Copy(cmd, &src, &Res->Desc, 0);
+		nosVulkan->Begin2(&beginParams);
+		nosVulkan->Copy(cmd, &src, &Res->Desc, nullptr);
 		//nosCmdEndParams endParams{.ForceSubmit = NOS_FALSE, .OutGPUEventHandle = &Texture->Params.WaitEvent};
 		//nosVulkan->End(cmd, &endParams);
-		UseVulkan()().End(cmd, nullptr);
+		nosVulkan->End(cmd, nullptr);
 		if constexpr (std::is_same_v<T, nosTextureInfo>)
 			Buffer = nos::Buffer::From(vkss::ConvertTextureInfo(Res->Desc));
 		if constexpr (std::is_same_v<T, nosBufferInfo>)
@@ -212,12 +186,12 @@ struct DelayNode : NodeContext
 		}
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nos::NodeExecuteArgs argss(args);
+		nos::NodeExecuteParams execParams(params);
 
-		auto& inputBuffer = *argss[NSN_Input].Data;
-		auto delay = *InterpretPinValue<uint32_t>(*argss[NSN_Delay].Data);
+		auto& inputBuffer = *execParams[NSN_Input].Data;
+		auto delay = *InterpretPinValue<uint32_t>(*execParams[NSN_Delay].Data);
 
 		if (0 == delay)
 		{
@@ -255,16 +229,8 @@ struct DelayNode : NodeContext
 	}
 };
 
-void OnVulkanSubsystemUnloaded()
-{
-	UseVulkan::Update(nullptr);
-}
-
 nosResult RegisterDelay(nosNodeFunctions* fn)
 {
-	nosVulkanSubsystem* sysCtx{};
-	nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), NOS_VULKAN_SUBSYSTEM_VERSION_MAJOR, 0, (void**)&sysCtx, nullptr);
-	UseVulkan::Update(sysCtx);
 	NOS_BIND_NODE_CLASS(NSN_Delay, DelayNode, fn)
 	return NOS_RESULT_SUCCESS;
 }

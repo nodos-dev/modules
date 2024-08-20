@@ -1,4 +1,4 @@
-set(MODULE_DEPENDENCIES "nos.sys.vulkan-5.6") # nos.sys.vulkan is a soft dependency.
+set(MODULE_DEPENDENCIES "nos.sys.vulkan-5.8") # nos.sys.vulkan is a soft dependency.
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     # module_name_version: <MODULE_NAME>-<MODULE_VERSION>

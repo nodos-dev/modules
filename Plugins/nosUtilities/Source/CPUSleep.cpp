@@ -11,9 +11,9 @@ struct CPUSleepNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto pins = GetPinValues(args);
+		auto pins = GetPinValues(params);
 		bool busyWait = *GetPinValue<bool>(pins, NSN_BusyWait);
 		auto milliseconds = *GetPinValue<double>(pins, NSN_WaitTimeMS);
 		if (busyWait)

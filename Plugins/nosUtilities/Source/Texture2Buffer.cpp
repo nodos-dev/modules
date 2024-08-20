@@ -41,10 +41,10 @@ struct Texture2BufferNodeContext : nos::NodeContext
 		}
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto pinIds = nos::GetPinIds(args);
-		auto pinValues = nos::GetPinValues(args);
+		auto pinIds = nos::GetPinIds(params);
+		auto pinValues = nos::GetPinValues(params);
 		nosResourceShareInfo inputTextureInfo = nos::vkss::DeserializeTextureInfo(pinValues[NSN_Input]);
 		PrepareResources(inputTextureInfo);
 		return NOS_RESULT_SUCCESS;

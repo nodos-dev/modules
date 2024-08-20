@@ -1,7 +1,13 @@
 #include <Nodos/PluginHelpers.hpp>
 #include <Nodos/Helpers.hpp>
+#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(13) // Remember to remove this when transitioning to the next major version of the Nodos Plugin SDK.
+NOS_INIT()
+NOS_VULKAN_INIT()
+
+NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_IMPORT()
+NOS_END_IMPORT_DEPS()
 
 namespace nos::reflect
 {
@@ -25,14 +31,7 @@ nosResult RegisterArray(nosNodeFunctions* node);
 nosResult RegisterDelay(nosNodeFunctions* node);
 nosResult RegisterArithmetic(nosNodeFunctions* node);
 
-void OnVulkanSubsystemUnloaded();
-
 NOS_REGISTER_NAME_SPACED(VulkanSubsystemName, "nos.sys.vulkan")
-void NOSAPI_CALL OnRequestedSubsystemUnloaded(nosName subsystemName, int versionMajor, int versionMinor)
-{
-	if (subsystemName == NSN_VulkanSubsystemName)
-		OnVulkanSubsystemUnloaded();		
-}
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
@@ -72,7 +71,6 @@ extern "C"
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outPluginFunctions)
 {
 	outPluginFunctions->ExportNodeFunctions = ExportNodeFunctions;
-	outPluginFunctions->OnRequestedSubsystemUnloaded = OnRequestedSubsystemUnloaded;
 	return NOS_RESULT_SUCCESS;
 }
 }

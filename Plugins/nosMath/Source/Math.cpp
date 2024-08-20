@@ -9,7 +9,10 @@
 #include <chrono>
 #include <Nodos/PluginHelpers.hpp>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(11);
+NOS_INIT_WITH_MIN_REQUIRED_MINOR(0)
+
+NOS_BEGIN_IMPORT_DEPS()
+NOS_END_IMPORT_DEPS()
 
 NOS_REGISTER_NAME(X);
 NOS_REGISTER_NAME(Y);
@@ -50,11 +53,11 @@ template<class T> T Mul(T x, T y) { return x * y; }
 template<class T> T Div(T x, T y) { return x / y; }
 
 template<class T, T F(T, T)>
-nosResult ScalarBinopExecute(void* ctx, const nosNodeExecuteArgs* args)
+nosResult ScalarBinopExecute(void* ctx, nosNodeExecuteParams* params)
 {
-	auto X = static_cast<T*>(args->Pins[0].Data->Data);
-	auto Y = static_cast<T*>(args->Pins[1].Data->Data);
-	auto Z = static_cast<T*>(args->Pins[2].Data->Data);
+	auto X = static_cast<T*>(params->Pins[0].Data->Data);
+	auto Y = static_cast<T*>(params->Pins[1].Data->Data);
+	auto Z = static_cast<T*>(params->Pins[2].Data->Data);
 	*Z = F(*X, *Y);
 	return NOS_RESULT_SUCCESS;
 }
@@ -90,11 +93,11 @@ struct Vec {
 };
 
 template<class T, int Dim, Vec<T,Dim>F(Vec<T,Dim>,Vec<T,Dim>)>
-nosResult VecBinopExecute(void* ctx, const nosNodeExecuteArgs* args)
+nosResult VecBinopExecute(void* ctx, nosNodeExecuteParams* params)
 {
-	auto X = static_cast<Vec<T, Dim>*>(args->Pins[0].Data->Data);
-	auto Y = static_cast<Vec<T, Dim>*>(args->Pins[1].Data->Data);
-	auto Z = static_cast<Vec<T, Dim>*>(args->Pins[2].Data->Data);
+	auto X = static_cast<Vec<T, Dim>*>(params->Pins[0].Data->Data);
+	auto Y = static_cast<Vec<T, Dim>*>(params->Pins[1].Data->Data);
+	auto Z = static_cast<Vec<T, Dim>*>(params->Pins[2].Data->Data);
 	*Z = F(*X, *Y);
 	return NOS_RESULT_SUCCESS;
 }
@@ -203,11 +206,11 @@ enum class MathNodeTypes : int {
 };
 
 template<class T>
-nosResult ToString(void* ctx, const nosNodeExecuteArgs* args)
+nosResult ToString(void* ctx, nosNodeExecuteParams* params)
 {
-	auto* in = static_cast<u32*>(args->Pins[0].Data->Data);
+	auto* in = static_cast<u32*>(params->Pins[0].Data->Data);
 	auto s = std::to_string(*in);
-	return nosEngine.SetPinValue(args->Pins[1].Id, nosBuffer { .Data = (void*)s.c_str(), .Size = s.size() + 1 });
+	return nosEngine.SetPinValue(params->Pins[1].Id, nosBuffer { .Data = (void*)s.c_str(), .Size = s.size() + 1 });
 }
 
 template<u32 hi, class F, u32 i = 0>
@@ -229,10 +232,10 @@ void FieldIterator(F&& f)
 	});
 }
 
-nosResult AddTrack(void* ctx, const nosNodeExecuteArgs* args)
+nosResult AddTrack(void* ctx, nosNodeExecuteParams* params)
 {
-	auto pins = GetPinValues(args);
-	auto ids = GetPinIds(args);
+	auto pins = GetPinValues(params);
+	auto ids = GetPinIds(params);
 	// TODO: Remove these once generic table aritmetic ops are supported
 	auto* xTrack = flatbuffers::GetMutableRoot<fb::Track>(pins[NSN_X]);
 	auto* yTrack = flatbuffers::GetMutableRoot<fb::Track>(pins[NSN_Y]);
@@ -256,9 +259,9 @@ nosResult AddTrack(void* ctx, const nosNodeExecuteArgs* args)
 	return nosEngine.SetPinValue(ids[NSN_Z], nos::Buffer::From(sumTrack));
 }
 
-nosResult AddTransform(void* ctx, const nosNodeExecuteArgs* args)
+nosResult AddTransform(void* ctx, nosNodeExecuteParams* params)
 {
-	auto pins = GetPinValues(args);
+	auto pins = GetPinValues(params);
 	auto xBuf = pins[NSN_X];
 	auto yBuf = pins[NSN_Y];
 	auto zBuf = pins[NSN_Z];
@@ -273,14 +276,14 @@ struct SineWaveNodeContext : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto ids = GetPinIds(args);
-		auto pins = GetPinValues(args);
+		auto ids = GetPinIds(params);
+		auto pins = GetPinValues(params);
 		auto amplitude = *GetPinValue<float>(pins, NOS_NAME_STATIC("Amplitude"));
 		auto offset = *GetPinValue<float>(pins, NOS_NAME_STATIC("Offset"));
 		auto frequency = *GetPinValue<float>(pins, NOS_NAME_STATIC("Frequency"));
-		double time = (args->DeltaSeconds.x * frameCount++) / (double)args->DeltaSeconds.y;
+		double time = (params->DeltaSeconds.x * frameCount++) / (double)params->DeltaSeconds.y;
 		double sec = glm::mod(time * (double)frequency, glm::pi<double>() * 2.0);
 		float result = (amplitude * glm::sin(sec)) + offset;
 		*GetPinValue<float>(pins, NOS_NAME_STATIC("Out")) = result;
@@ -322,15 +325,15 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 		}
 		case MathNodeTypes::Clamp: {
 			node->ClassName = NOS_NAME_STATIC("nos.math.Clamp");
-			node->ExecuteNode = [](void* ctx, const nosNodeExecuteArgs* args) {
+			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 				constexpr uint32_t PIN_IN = 0;
 				constexpr uint32_t PIN_MIN = 1;
 				constexpr uint32_t PIN_MAX = 2;
 				constexpr uint32_t PIN_OUT = 3;
-				auto valueBuf = args->Pins[PIN_IN].Data;
-				auto minBuf = args->Pins[PIN_MIN].Data;
-				auto maxBuf = args->Pins[PIN_MAX].Data;
-				auto outBuf = args->Pins[PIN_OUT].Data;
+				auto valueBuf = params->Pins[PIN_IN].Data;
+				auto minBuf = params->Pins[PIN_MIN].Data;
+				auto maxBuf = params->Pins[PIN_MAX].Data;
+				auto outBuf = params->Pins[PIN_OUT].Data;
 				float value = *static_cast<float*>(valueBuf->Data);
 				float min = *static_cast<float*>(minBuf->Data);
 				float max = *static_cast<float*>(maxBuf->Data);
@@ -341,11 +344,11 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 		}
 		case MathNodeTypes::Absolute: {
 			node->ClassName = NOS_NAME_STATIC("nos.math.Absolute");
-			node->ExecuteNode = [](void* ctx, const nosNodeExecuteArgs* args) {
+			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 				constexpr uint32_t PIN_IN = 0;
 				constexpr uint32_t PIN_OUT = 1;
-				auto valueBuf = args->Pins[PIN_IN].Data;
-				auto outBuf = args->Pins[PIN_OUT].Data;
+				auto valueBuf = params->Pins[PIN_IN].Data;
+				auto outBuf = params->Pins[PIN_OUT].Data;
 				float value = *static_cast<float*>(valueBuf->Data);
 				*(static_cast<float*>(outBuf->Data)) = std::abs(value);
 				return NOS_RESULT_SUCCESS;
@@ -364,9 +367,9 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNo
 		}
 		case MathNodeTypes::PerspectiveView: {
 			node->ClassName = NOS_NAME_STATIC("nos.math.PerspectiveView");
-			node->ExecuteNode = [](void* ctx, const nosNodeExecuteArgs* args)
+			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 			{
-				auto pins = GetPinValues(args);
+				auto pins = GetPinValues(params);
 
 				auto fov = *static_cast<float*>(pins[NSN_FOV]);
 

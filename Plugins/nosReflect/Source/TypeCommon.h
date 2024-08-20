@@ -38,7 +38,7 @@ flatbuffers::uoffset_t CopyTable(
 flatbuffers::uoffset_t CopyArgs(
 	flatbuffers::FlatBufferBuilder& fbb,
 	const nosTypeInfo* type,
-	NodeExecuteArgs& table);
+	NodeExecuteParams& table);
 
 flatbuffers::uoffset_t GenerateOffset(
     flatbuffers::FlatBufferBuilder& fbb,

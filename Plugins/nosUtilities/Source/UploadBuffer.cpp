@@ -15,12 +15,12 @@ struct UploadBufferNodeContext : NodeContext
 
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto execArgs = nos::NodeExecuteArgs(args);
-		auto& output = *InterpretPinValue<sys::vulkan::Buffer>(execArgs[NOS_NAME_STATIC("Output")].Data->Data);
-		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execArgs[NOS_NAME_STATIC("InputBuffer")].Data->Data);
-		nosGPUEventResource gpuEventRef = InterpretPinValue<sys::vulkan::GPUEventResource>(*execArgs[NOS_NAME_STATIC("InputGPUEventRef")].Data)->handle();
+		auto execParams = nos::NodeExecuteParams(params);
+		auto& output = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("Output")].Data->Data);
+		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("InputBuffer")].Data->Data);
+		nosGPUEventResource gpuEventRef = InterpretPinValue<sys::vulkan::GPUEventResource>(*execParams[NOS_NAME_STATIC("InputGPUEventRef")].Data)->handle();
 		nosGPUEvent* event = nullptr;
 		if (gpuEventRef)
 		{
@@ -42,7 +42,7 @@ struct UploadBufferNodeContext : NodeContext
 			auto bufferDesc = vkss::ConvertBufferInfo(bufInfo);
 			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(bufferDesc));
 
-			output = *InterpretPinValue<sys::vulkan::Buffer>(execArgs[NOS_NAME_STATIC("Output")].Data->Data);
+			output = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("Output")].Data->Data);
 		}
 
 		if (!output.handle() || !input.handle())
@@ -56,8 +56,8 @@ struct UploadBufferNodeContext : NodeContext
 		nosCmd cmd;
 		nosVulkan->Begin("UploadBuffer Staging Copy", &cmd);
 		nosVulkan->Copy(cmd, &InputBuffer, &OutputBuffer, 0);
-		nosCmdEndParams params{.ForceSubmit = false, .OutGPUEventHandle = event};
-		nosVulkan->End(cmd, &params);
+		nosCmdEndParams endParams{.ForceSubmit = false, .OutGPUEventHandle = event};
+		nosVulkan->End(cmd, &endParams);
 		//nosVulkan->End(cmd, &params);
 		//nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
 

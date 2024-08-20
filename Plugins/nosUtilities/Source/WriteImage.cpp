@@ -138,15 +138,16 @@ struct WriteImage : NodeContext {
             return NOS_RESULT_SUCCESS;
 
         *names = NOS_NAME_STATIC("WriteImage_Save");
-        *fns = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+        *fns = [](void* ctx, nosFunctionExecuteParams* params)
         {
             auto writeImage = (WriteImage*)ctx;
-            auto ids = GetPinIds(nodeArgs);
+            auto ids = GetPinIds(params->ParentNodeExecuteParams);
             writeImage->WriteRequested = true;
 			// TODO: PathRunner
 			//nosSchedulePinParams scheduleParams{ids[NSN_In], 1, true};
 			//nosEngine.ScheduleNode(&scheduleParams);
             nosEngine.LogI("WriteImage: Write requested");
+			return NOS_RESULT_SUCCESS;
         };
 
         return NOS_RESULT_SUCCESS;

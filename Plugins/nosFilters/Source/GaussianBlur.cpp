@@ -6,8 +6,6 @@
 #include <nosVulkanSubsystem/Helpers.hpp>
 #include <nosVulkanSubsystem/Types_generated.h>
 
-NOS_VULKAN_INIT();
-
 NOS_REGISTER_NAME(Input);
 NOS_REGISTER_NAME(Output);
 NOS_REGISTER_NAME(Softness);
@@ -60,7 +58,7 @@ struct GaussBlurContext
 		nosVulkan->CreateResource(&IntermediateTexture); // TODO Check result
 	}
 
-	void Run(const nosNodeExecuteArgs* pins)
+	void Run(nosNodeExecuteParams* pins)
 	{
 		auto values = GetPinValues(pins);
 
@@ -119,19 +117,15 @@ void RegisterGaussianBlur(nosNodeFunctions* out)
 	out->OnNodeDeleted = [](void* ctx, nosUUID nodeId) {
 		delete static_cast<nos::utilities::GaussBlurContext*>(ctx);
 	};
-	out->ExecuteNode = [](void* ctx, const nosNodeExecuteArgs* args) {
-		((nos::utilities::GaussBlurContext*)ctx)->Run(args);
+	out->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
+		((nos::utilities::GaussBlurContext*)ctx)->Run(params);
 		return NOS_RESULT_SUCCESS;
 	};
 
-	auto ret = RequestVulkanSubsystem();
-	if (ret != NOS_RESULT_SUCCESS)
-		return;
-
-	fs::path root = nosEngine.Context->RootFolderPath;
+	fs::path root = nosEngine.Module->RootFolderPath;
 	auto shaderPath = (root / "Shaders" / "GaussianBlur.frag").generic_string();
 	nosShaderInfo2 shader =  {.Key = NSN_Gaussian_Blur_Shader, .Source = {.Stage = NOS_SHADER_STAGE_FRAG, .GLSLPath = shaderPath.c_str()}, .AssociatedNodeClassName = out->ClassName};
-	ret = nosVulkan->RegisterShaders2(1, &shader);
+	auto ret = nosVulkan->RegisterShaders2(1, &shader);
 	if (ret != NOS_RESULT_SUCCESS)
 		return;
 	nosPassInfo pass = {

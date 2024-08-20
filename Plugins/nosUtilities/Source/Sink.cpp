@@ -34,7 +34,7 @@ struct SinkNode : NodeContext
 		Thread.join();
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteArgs const* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		auto& lastCopy = LastCopy;
 

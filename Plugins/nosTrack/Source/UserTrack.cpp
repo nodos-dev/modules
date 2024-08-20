@@ -106,10 +106,10 @@ void RegisterController(nosNodeFunctions* functions)
 
     };
 
-    functions->ExecuteNode = [](void* ctx, const nosNodeExecuteArgs* args)
+    functions->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
     {
         auto c = (UserTrack*)ctx;
-    	auto values = GetPinValues(args);
+    	auto values = GetPinValues(params);
 		c->impulse = glm::max(*(f32*)values[NSN_Impulse], 1.f);
 		c->decay = glm::max(*(f32*)values[NSN_Decay], 0.f);
         (glm::vec3&)c->state.location += c->v;

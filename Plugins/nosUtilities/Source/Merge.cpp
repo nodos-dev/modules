@@ -86,9 +86,9 @@ struct MergeContext : NodeContext
 		}
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto values = GetPinValues(args);
+		auto values = GetPinValues(params);
 		const nosResourceShareInfo output = vkss::DeserializeTextureInfo(values[NSN_Out]);
 
 		std::vector<nosShaderBinding> bindings;
@@ -99,19 +99,19 @@ struct MergeContext : NodeContext
 		
 		u32 curr = 0;
 		
-		for (size_t i = 0; i < args->PinCount; ++i)
+		for (size_t i = 0; i < params->PinCount; ++i)
 		{
-			if(NSN_Out == args->Pins[i].Name)
+			if(NSN_Out == params->Pins[i].Name)
 				continue;
 
-			auto val = args->Pins[i].Data;
-			if (NSN_Background_Color == args->Pins[i].Name)
+			auto val = params->Pins[i].Data;
+			if (NSN_Background_Color == params->Pins[i].Name)
 			{
-				bindings.emplace_back(nosShaderBinding{ .Name = Name(args->Pins[i].Name), .Data = val->Data, .Size = val->Size });
+				bindings.emplace_back(nosShaderBinding{ .Name = Name(params->Pins[i].Name), .Data = val->Data, .Size = val->Size });
 				continue;
 			}
 
-			std::string name = Name(args->Pins[i].Name).AsString();
+			std::string name = Name(params->Pins[i].Name).AsString();
 			uint32_t idx = std::stoi(name.substr(name.find_last_of('_') + 1));
 		
 			switch (name[0])
@@ -257,7 +257,7 @@ nosResult RegisterMerge(nosNodeFunctions* out)
 {
 	NOS_BIND_NODE_CLASS(NSN_Merge, MergeContext, out);
 
-	fs::path root = nosEngine.Context->RootFolderPath;
+	fs::path root = nosEngine.Module->RootFolderPath;
 	auto mergePath = (root / "Shaders" / "Merge.frag").generic_string();
 
 	// Register shaders

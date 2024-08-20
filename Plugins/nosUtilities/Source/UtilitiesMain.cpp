@@ -7,8 +7,13 @@
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
-NOS_INIT();
-NOS_VULKAN_INIT();
+NOS_INIT()
+NOS_VULKAN_INIT()
+
+NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_IMPORT()
+NOS_END_IMPORT_DEPS()
+
 NOS_REGISTER_NAME(Input);
 NOS_REGISTER_NAME(Output);
 NOS_REGISTER_NAME(In);
@@ -51,18 +56,15 @@ nosResult RegisterIsSameStringNode(nosNodeFunctions*);
 nosResult RegisterShowStatusNode(nosNodeFunctions*);
 nosResult RegisterSink(nosNodeFunctions*);
 
-extern "C"
+nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
-
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
-{
-    *outSize = Utilities::Count;
+	*outSize = Utilities::Count;
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
-
-	auto ret = RequestVulkanSubsystem();
-	if (ret != NOS_RESULT_SUCCESS)
-		return ret;
+	//
+	// auto ret = RequestVulkanSubsystem();
+	// if (ret != NOS_RESULT_SUCCESS)
+	// 	return ret;
 
 #define GEN_CASE_NODE(name)				\
 	case Utilities::name: {					\
@@ -76,8 +78,8 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	{
 		auto node = outList[i];
 		switch ((Utilities)i) {
-			default:
-				break;
+		default:
+			break;
 			GEN_CASE_NODE(Merge)
 			GEN_CASE_NODE(Time)
 			GEN_CASE_NODE(ReadImage)
@@ -95,5 +97,13 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	}
 	return NOS_RESULT_SUCCESS;
 }
+
+extern "C"
+{
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* out)
+{
+	out->ExportNodeFunctions = ExportNodeFunctions;
+	return NOS_RESULT_SUCCESS;
 }
 }
+}	

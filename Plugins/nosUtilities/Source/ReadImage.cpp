@@ -87,19 +87,19 @@ static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionE
     
     *names = NOS_NAME_STATIC("ReadImage_Load");
     
-	*fns = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+	*fns = [](void* ctx, nosFunctionExecuteParams* params)
     {
         auto c = (ReadImageContext*)ctx;
         if(c->state == State::Loading)
         {
             nosEngine.LogE("Read Image is already loading an image.");
-            return;
+            return NOS_RESULT_FAILED;
         }
 
         c->UpdateStatus(State::Loading);
 
-		nos::NodeExecuteArgs args(nodeArgs);
-		std::filesystem::path path = InterpretPinValue<const char>(args[NSN_Path].Data->Data);
+		nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
+		std::filesystem::path path = InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data);
 		c->load_path = path.string();
 		try
 		{
@@ -107,7 +107,7 @@ static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionE
 			{
 				nosEngine.LogE("Read Image cannot load file %s", path.string().c_str());
 				c->UpdateStatus(State::Failed);
-				return;
+				return NOS_RESULT_FAILED;
 			}
 
 			int w, h, n;
@@ -118,14 +118,13 @@ static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionE
 						 .Texture = {.Width = (u32)w, .Height = (u32)h, .Format = NOS_FORMAT_R8G8B8A8_UNORM, .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE}}};
 
 			// unless reading raw bytes, this is useless since samplers convert to linear space automatically
-			if (*InterpretPinValue<bool>(args[NSN_sRGB].Data->Data))
+			if (*InterpretPinValue<bool>(nodeParams[NSN_sRGB].Data->Data))
 				outRes.Info.Texture.Format = NOS_FORMAT_R8G8B8A8_SRGB;
 
-			nosEngine.SetPinValue(args[NSN_Out].Id, nos::Buffer::From(nos::vkss::ConvertTextureInfo(outRes)));
-
-			std::thread([c, nodeArgs = vkss::OwnedNodeExecuteArgs(*nodeArgs), &outRes] {
-				nos::NodeExecuteArgs args(&nodeArgs);
-				std::filesystem::path path = InterpretPinValue<const char>(args[NSN_Path].Data->Data);
+			nosEngine.SetPinValue(nodeParams[NSN_Out].Id, nos::Buffer::From(nos::vkss::ConvertTextureInfo(outRes)));
+			std::thread([c, nodeParams = vkss::OwnedNodeExecuteParams(*params->ParentNodeExecuteParams), &outRes]() mutable  {
+				nos::NodeExecuteParams params(&nodeParams);
+				std::filesystem::path path = InterpretPinValue<const char>(params[NSN_Path].Data->Data);
 				try
 				{
 					if (!std::filesystem::exists(path))
@@ -142,7 +141,7 @@ static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionE
 						return;
 					}
 
-					auto res = vkss::DeserializeTextureInfo(args[NSN_Out].Data->Data);
+					auto res = vkss::DeserializeTextureInfo(params[NSN_Out].Data->Data);
 
 					nosCmd cmd{};
 					nosVulkan->Begin("ReadImage: Load", &cmd);
@@ -152,7 +151,7 @@ static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionE
 
 					free(img);
 					flatbuffers::FlatBufferBuilder fbb;
-					HandleEvent(CreateAppEvent(fbb, app::CreatePinDirtied(fbb, &args[NSN_Out].Id)));
+					HandleEvent(CreateAppEvent(fbb, app::CreatePinDirtied(fbb, &params[NSN_Out].Id)));
 				}
 				catch (const std::exception& e)
 				{
@@ -167,6 +166,7 @@ static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionE
 			nosEngine.LogE("Error while loading image: %s", e.what());
             c->UpdateStatus(State::Failed);
 		}
+		return NOS_RESULT_SUCCESS;
     };
     
     return NOS_RESULT_SUCCESS;

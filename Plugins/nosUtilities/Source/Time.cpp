@@ -10,12 +10,12 @@ struct TimeNodeContext : NodeContext
 {
 	TimeNodeContext(nosFbNode const* node) : NodeContext(node) {}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto pin = GetPinValues(args);
+		auto pin = GetPinValues(params);
 		auto sec = GetPinValue<float>(pin, NSN_Seconds);
-		float time = (args->DeltaSeconds.x * frameCount++) / (double)args->DeltaSeconds.y;
-		nosEngine.SetPinValue(args->Pins[0].Id, { .Data = &time, .Size = sizeof(float) });
+		float time = (params->DeltaSeconds.x * frameCount++) / (double)params->DeltaSeconds.y;
+		nosEngine.SetPinValue(params->Pins[0].Id, { .Data = &time, .Size = sizeof(float) });
 		return NOS_RESULT_SUCCESS;
 	}
 

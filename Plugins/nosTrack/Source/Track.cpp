@@ -2,7 +2,9 @@
 #include "Track.h"
 #include <glm/gtx/euler_angles.hpp>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(10);
+NOS_INIT()
+NOS_BEGIN_IMPORT_DEPS()
+NOS_END_IMPORT_DEPS()
 
 namespace nos::track
 {
@@ -51,7 +53,7 @@ void TrackNodeContext::OnPathCommand(const nosPathCommand* command)
 		{
 			if(!AutoSpare)
 				return;
-			PerformAutoSpare(command->VBLNanoseconds);
+			PerformAutoSpare(command->VBLTimestampNs);
 			break;
 		}
 	}
@@ -143,9 +145,9 @@ void TrackNodeContext::OnPathStart()
 	FramesSinceStart = 0;
 }
 
-nosResult TrackNodeContext::ExecuteNode(nosNodeExecuteArgs const* args)
+nosResult TrackNodeContext::ExecuteNode(nosNodeExecuteParams* params)
 {
-	DeltaSeconds = args->DeltaSeconds;
+	DeltaSeconds = params->DeltaSeconds;
 	FramesSinceStart++;
 	if (EffectiveAutoSpare && !VBLReceived)
 	{
