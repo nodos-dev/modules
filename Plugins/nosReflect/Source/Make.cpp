@@ -22,8 +22,7 @@ struct MakeNode : NodeContext
         {
             auto p = node->template_parameters()->Get(0);
 			nos::Name typeName = nos::Name((const char*)p->value()->Data());
-			Type = nosTypeInfo{};
-			nosEngine.GetTypeInfo(typeName, &*Type);
+			Type = nos::TypeInfo(typeName);
 			std::optional<std::string> updateDisplayName = std::nullopt;
 			
             if(flatbuffers::IsFieldPresent(node, fb::Node::VT_DISPLAY_NAME) && node->display_name()->str().empty())
@@ -45,13 +44,13 @@ struct MakeNode : NodeContext
 		}
     }
 
-    nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+    nosResult ExecuteNode(nosNodeExecuteParams* params) override
     {
 		if (!Type)
 			return NOS_RESULT_SUCCESS;
 
 		flatbuffers::FlatBufferBuilder fbb;
-		NodeExecuteArgs pins(args);
+		NodeExecuteParams pins(params);
 
 		switch (Type->BaseType)
 		{
@@ -104,9 +103,8 @@ struct MakeNode : NodeContext
     	if (cmd >= AllTypeNames.size())
 			return;
     	auto tyName = AllTypeNames[cmd];
-    	nosTypeInfo typeInfo{};
-    	nosEngine.GetTypeInfo(tyName, &typeInfo);
-    	SetType(&typeInfo);
+    	auto typeInfo = nos::TypeInfo(tyName);
+    	SetType(typeInfo);
 	}
 
     // Set the template parameter, update pin type
@@ -135,17 +133,15 @@ struct MakeNode : NodeContext
         {
 			if (update->PinName != NSN_Output)
 				return;
-			Type = nosTypeInfo{};
-            nosEngine.GetTypeInfo(update->TypeName, &*Type);
+			Type = nos::TypeInfo(update->TypeName);
             LoadPins();
 		}
 	}
 
     nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
     { 
-        nosTypeInfo incomingType{};
-        nosEngine.GetTypeInfo(params->IncomingTypeName, &incomingType);
-        if (incomingType.BaseType == NOS_BASE_TYPE_NONE)
+        nos::TypeInfo incomingType(params->IncomingTypeName);
+        if (incomingType->BaseType == NOS_BASE_TYPE_NONE)
         {
             strcpy(params->OutErrorMessage, "Type not supported for make.");
             return NOS_RESULT_FAILED;
@@ -183,8 +179,7 @@ struct MakeNode : NodeContext
 		}
 		else
 		{
-			nosUUID id;
-			nosEngine.GenerateID(&id);
+			nosUUID id = nosEngine.GenerateID();
 			nos::fb::TPin outPin{};
             outPin.id = id;
             outPin.name = nos::Name(NSN_Output).AsCStr();
@@ -225,8 +220,7 @@ struct MakeNode : NodeContext
             }
             else
             {
-                nosUUID id;
-            	nosEngine.GenerateID(&id);
+                nosUUID id = nosEngine.GenerateID();
                 std::vector<u8> data(Type->ByteSize);
                 if (Type->BaseType == NOS_BASE_TYPE_STRING)
                 {
@@ -258,8 +252,7 @@ struct MakeNode : NodeContext
                 }
                 else
                 {
-                    nosUUID id;
-                	nosEngine.GenerateID(&id);
+                    nosUUID id = nosEngine.GenerateID();
 					std::vector<u8> data;
 					if (Type->ByteSize)
 					{
@@ -348,21 +341,20 @@ nosResult RegisterMake(nosNodeFunctions* fn)
 	std::vector<nos::Buffer> nodeInfos;
 	for (auto& typeName : typeNames)
 	{
-		nosTypeInfo typeInfo{};
-		nosEngine.GetTypeInfo(typeName, &typeInfo);
-		if (typeInfo.BaseType == NOS_BASE_TYPE_NONE)
+		nos::TypeInfo typeInfo(typeName);
+		if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
 			continue;
 		// If has 'skip_make' attribute
-		if (typeInfo.BaseType == NOS_BASE_TYPE_STRUCT || typeInfo.BaseType == NOS_BASE_TYPE_UNION
-			|| typeInfo.BaseType == NOS_BASE_TYPE_ARRAY)
+		if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT || typeInfo->BaseType == NOS_BASE_TYPE_UNION
+			|| typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
 		{
 
 			bool skip = true;
-			for (int i = 0; i < typeInfo.AttributeCount; ++i)
+			for (int i = 0; i < typeInfo->AttributeCount; ++i)
 			{
-				if (typeInfo.Attributes[i].Name == NOS_NAME_STATIC("builtin"))
+				if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
 					skip = false;
-				else if (typeInfo.Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
+				else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
 				{
 					skip = true;
 					break;
@@ -389,7 +381,7 @@ nosResult RegisterMake(nosNodeFunctions* fn)
 	std::vector<const nosFbNodeInfo*> fbNodeInfos;
 	for (auto& buf : nodeInfos)
 		fbNodeInfos.push_back(flatbuffers::GetMutableRoot<nosFbNodeInfo>(buf.Data()));
-	nosEngine.RegisterNodeInfos(nosEngine.Context->Id, fbNodeInfos.size(), fbNodeInfos.data());
+	nosEngine.RegisterNodeInfos(nosEngine.Module->Id, fbNodeInfos.size(), fbNodeInfos.data());
 	return NOS_RESULT_SUCCESS;
 }
 

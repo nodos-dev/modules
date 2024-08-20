@@ -113,7 +113,7 @@ const char* BinaryOpToDisplayName(fb::BinaryOperator op)
 
 struct ArithmeticNodeContext : NodeContext
 {
-    nosTypeInfo* Type = nullptr;
+    std::optional<nos::TypeInfo> Type = std::nullopt;
     std::optional<fb::BinaryOperator> Operator;
 
     ArithmeticNodeContext(const fb::Node* node) : NodeContext(node)
@@ -137,18 +137,10 @@ struct ArithmeticNodeContext : NodeContext
 			}
 		}
 		if (newTypeName) {
-			if (Type)
-				nosEngine.FreeTypeInfo(Type);
-			nosEngine.GetTypeInfo(*newTypeName, &Type);
+			Type = nos::TypeInfo(*newTypeName);
 		}
 		if (Operator)
 			SetOperator(*Operator, false);
-	}
-
-	~ArithmeticNodeContext()
-	{
-		if (Type)
-			nosEngine.FreeTypeInfo(Type);
 	}
 
 	void SetOperator(fb::BinaryOperator op, bool addTemplateParams)
@@ -171,7 +163,7 @@ struct ArithmeticNodeContext : NodeContext
 
 	void SetType(nosName typeName)
 	{
-		nosEngine.GetTypeInfo(typeName, &Type);
+		Type = nos::TypeInfo(typeName);
 		flatbuffers::FlatBufferBuilder fbb;
 		std::vector<u8> typeData = nos::Buffer(nos::Name(Type->TypeName).AsCStr(), 1 + nos::Name(Type->TypeName).AsString().size());
 		std::vector params = {

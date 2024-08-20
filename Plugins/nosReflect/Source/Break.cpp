@@ -8,7 +8,7 @@ NOS_REGISTER_NAME(Break)
 
 struct BreakNode : NodeContext
 {
-	std::optional<nosTypeInfo> Type = std::nullopt;
+	std::optional<nos::TypeInfo> Type = std::nullopt;
 	size_t ArraySize = 0;
 
 	BreakNode(const nosFbNode* node) : NodeContext(node)
@@ -20,8 +20,7 @@ struct BreakNode : NodeContext
             auto typeName = nos::Name(pin->type_name()->string_view());
 			if (NSN_VOID == typeName)
 				break;
-			Type = nosTypeInfo{};
-            nosEngine.GetTypeInfo(typeName, &*Type);
+			Type = nos::TypeInfo(typeName);
 			LoadPins(false);
             break;
         }
@@ -29,7 +28,7 @@ struct BreakNode : NodeContext
 
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
 	{ 
-		if (!Type || Type->BaseType != NOS_BASE_TYPE_ARRAY || pinName != NSN_Input)
+		if (!Type || (*Type)->BaseType != NOS_BASE_TYPE_ARRAY || pinName != NSN_Input)
 			return;
 		auto pin = GetPin(pinName);
 		flatbuffers::Vector<u8>* vec = (flatbuffers::Vector<u8>*)value.Data;
@@ -48,17 +47,15 @@ struct BreakNode : NodeContext
 		{
 			if (update->PinName != NSN_Input)
 				return;
-			Type = nosTypeInfo{};
-			nosEngine.GetTypeInfo(update->TypeName, &*Type);
+			Type = nos::TypeInfo(update->TypeName);
 			LoadPins(true);
 		}
 	}
 
     nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
 	{
-		nosTypeInfo info = {};
-		nosEngine.GetTypeInfo(params->IncomingTypeName, &info);
-		switch (info.BaseType)
+		auto info = nos::TypeInfo(params->IncomingTypeName);
+		switch (info->BaseType)
 		{
 		case NOS_BASE_TYPE_ARRAY:
 		case NOS_BASE_TYPE_STRUCT: return NOS_RESULT_SUCCESS;
@@ -80,12 +77,12 @@ struct BreakNode : NodeContext
 			pinsToUpdate.push_back(CreatePartialPinUpdate(fbb, &in->Id, 0, fb::CreateOrphanState(fbb, false)));
 			acceptedPins.insert(in->Name);
 		}
-
-        if (Type->BaseType == NOS_BASE_TYPE_STRUCT)
+		auto& type = *Type;
+        if (type->BaseType == NOS_BASE_TYPE_STRUCT)
 		{
-			for (int i = 0; i < Type->FieldCount; ++i)
+			for (int i = 0; i < type->FieldCount; ++i)
 			{
-				auto& field = Type->Fields[i];
+				auto& field = type->Fields[i];
 				acceptedPins.insert(field.Name);
 				if (auto pin = GetPin(field.Name))
 				{
@@ -99,12 +96,11 @@ struct BreakNode : NodeContext
 				}
 				else
 				{
-					nosUUID newPinId;
-					nosEngine.GenerateID(&newPinId);
+					nosUUID newPinId = nosEngine.GenerateID();
 
 					std::vector<uint8_t> data =
-						std::vector((const uint8_t*)Type->DefaultVals[i].Data,
-									(const uint8_t*)Type->DefaultVals[i].Data + Type->DefaultVals[i].Size);
+						std::vector((const uint8_t*)field.DefaultValue.Data,
+									(const uint8_t*)field.DefaultValue.Data + field.DefaultValue.Size);
 
 					pinsToCreate.push_back(fb::CreatePinDirect(fbb,
 															   &newPinId,
@@ -122,7 +118,7 @@ struct BreakNode : NodeContext
 				}
 			}
 		}
-        else if (Type->BaseType == NOS_BASE_TYPE_ARRAY)
+        else if (type->BaseType == NOS_BASE_TYPE_ARRAY)
         {
         	size_t i = 0;
         	while (auto pin = GetPin(nos::Name("Output " + std::to_string(i))))
@@ -136,13 +132,13 @@ struct BreakNode : NodeContext
         	}
         	ArraySize = i;
         }
-		auto type = "Break " + nos::Name(Type->TypeName).AsString();
+		auto typeName = "Break " + nos::Name(Type->TypeName).AsString();
 		for (auto& [id, pin] : Pins)
 			if (!acceptedPins.contains(pin.Name))
 				pinsToDelete.push_back(id);
 
         HandleEvent(CreateAppEvent(
-			fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &pinsToDelete, &pinsToCreate, 0, 0, 0, 0, 0, &pinsToUpdate, 0, 0, 0, setDisplayName ? type.c_str() : 0)));
+			fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &pinsToDelete, &pinsToCreate, 0, 0, 0, 0, 0, &pinsToUpdate, 0, 0, 0, setDisplayName ? typeName.c_str() : 0)));
     }
 
 	void SetOutputCount()
@@ -165,20 +161,20 @@ struct BreakNode : NodeContext
     	{
     		for (size_t a = 0; a < ArraySize - i; a++)
     		{
-    			nosUUID newPinId;
-    			nosEngine.GenerateID(&newPinId);
+    			nosUUID newPinId = nosEngine.GenerateID();
     			std::vector<u8> vec{};
     			nosBuffer defVal{};
-    			if (nosEngine.GetDefaultValueOfType(Type->ElementType->TypeName, &defVal) == NOS_RESULT_SUCCESS)
+				auto& type = *Type;
+    			if (nosEngine.GetDefaultValueOfType(type->ElementType->TypeName, &defVal) == NOS_RESULT_SUCCESS)
     			{
     				vec = std::vector((const u8*)defVal.Data, (const u8*)defVal.Data + defVal.Size);
     			}
 
-    			std::vector<uint8_t> data = std::vector<uint8_t>(Type->ByteSize);
+    			std::vector<uint8_t> data = std::vector<uint8_t>(type->ByteSize);
     			pinsToCreate.push_back(fb::CreatePinDirect(fbb,
 															&newPinId,
 															nos::Name("Output " + std::to_string(i + a)).AsCStr(),
-															nos::Name(Type->ElementType->TypeName).AsCStr(),
+															nos::Name(type->ElementType->TypeName).AsCStr(),
 															fb::ShowAs::OUTPUT_PIN,
 															fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY,
 															0,
@@ -213,8 +209,8 @@ struct BreakNode : NodeContext
 			return;
 
 		auto data = (const u8*)buf->Data;
-        
-        switch (Type->BaseType)
+        auto& type = *Type;
+        switch (type->BaseType)
         {
         case NOS_BASE_TYPE_ARRAY: {
         	const flatbuffers::Vector<u8>* vec = (flatbuffers::Vector<u8>*)(data);
@@ -224,17 +220,17 @@ struct BreakNode : NodeContext
         		auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
         		if (!pinId)
         			continue;
-        		if (Type->ElementType->ByteSize)
+        		if (type->ElementType->ByteSize)
         		{
-        			auto data = vec->data() + i * Type->ElementType->ByteSize;
-        			SetPinValueCached(*pinId, {(void*)data, Type->ElementType->ByteSize});
+        			auto data = vec->data() + i * type->ElementType->ByteSize;
+        			SetPinValueCached(*pinId, {(void*)data, type->ElementType->ByteSize});
         		}
         		else
         		{
         			// TODO: Strings
         			flatbuffers::FlatBufferBuilder fbb;
         			fbb.Finish(
-						flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, Type->ElementType, tableVec->Get(i))));
+						flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, type->ElementType, tableVec->Get(i))));
         			nos::Buffer buf = fbb.Release();
         			SetPinValueCached(*pinId, {(void*)buf.Data(), buf.Size()});
         		}
@@ -243,23 +239,23 @@ struct BreakNode : NodeContext
         }
         case NOS_BASE_TYPE_STRUCT:
         {
-            auto root = Type->ByteSize ? (flatbuffers::Table*)data : flatbuffers::GetRoot<flatbuffers::Table>(data);
-            for (int i = 0; i < Type->FieldCount; ++i)
+            auto root = type->ByteSize ? (flatbuffers::Table*)data : flatbuffers::GetRoot<flatbuffers::Table>(data);
+            for (int i = 0; i < type->FieldCount; ++i)
             {
-				auto& field = Type->Fields[i];
+				auto& field = type->Fields[i];
 				auto pin = GetPin(field.Name);
 				if (!pin)
 					continue;
-				if (!Type->ByteSize && !root->CheckField(field.Offset)) 
+				if (!type->ByteSize && !root->CheckField(field.Offset)) 
 				{
-					if (Type->DefaultVals[i].Size)
-						SetPinValueCached(pin->Id, Type->DefaultVals[i]);
+					if (field.DefaultValue.Size)
+						SetPinValueCached(pin->Id, field.DefaultValue);
 					continue;
 				}
 				
 				if (field.Type->ByteSize)
 				{
-					auto data = !Type->ByteSize ? root->GetStruct<u8*>(field.Offset) : ((u8*)root + field.Offset);
+					auto data = !type->ByteSize ? root->GetStruct<u8*>(field.Offset) : ((u8*)root + field.Offset);
 					SetPinValueCached(pin->Id, { (void*)data, field.Type->ByteSize });
 				}
                 else
@@ -283,26 +279,13 @@ struct BreakNode : NodeContext
         }
     }
 
-    nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+    nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		if(!Type)
 			return NOS_RESULT_SUCCESS;
-		auto pins = NodeExecuteArgs(args);
+		auto pins = NodeExecuteParams(params);
 		SetOutputValues(pins[NSN_Input].Data);
 		return NOS_RESULT_SUCCESS;
-	}
-
-    void OnPathCommand(const nosPathCommand* command) override
-	{
-		switch (command->Event)
-		{
-		case NOS_ARRAY_RESIZE:
-			if (auto pin = GetPin(NSN_Input))
-			{
-				//SetOutputs(command->ArrayPathCommandArgs.ArraySize);
-			}
-			break;
-		}
 	}
 };
 

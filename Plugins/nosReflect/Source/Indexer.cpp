@@ -9,7 +9,7 @@ NOS_REGISTER_NAME(Indexer)
 
 struct Indexer : NodeContext
 {
-	std::optional<nosTypeInfo> Type = std::nullopt;
+	std::optional<nos::TypeInfo> Type = std::nullopt;
 
     u32 Index = 0;
     u32 ArraySize = 0;
@@ -32,8 +32,7 @@ struct Indexer : NodeContext
             {
                 if (pin->type_name()->string_view() != NSN_VOID)
                 {
-					Type = nosTypeInfo{};
-					nosEngine.GetTypeInfo(nos::Name(pin->type_name()->string_view()), &*Type);
+					Type = nos::TypeInfo(nos::Name(pin->type_name()->string_view()));
                 }
             }
 			else if (pin->name()->string_view() == NSN_Index) 
@@ -53,15 +52,14 @@ struct Indexer : NodeContext
     {
 		if (params->InstigatorPinName == NSN_Input)
 		{
-            nosTypeInfo info = {};
-			nosEngine.GetTypeInfo(params->IncomingTypeName, &info);
-			if (info.BaseType != NOS_BASE_TYPE_ARRAY)
+            nos::TypeInfo info(params->IncomingTypeName);
+			if (info->BaseType != NOS_BASE_TYPE_ARRAY)
 			{
                 strcpy(params->OutErrorMessage, "Input pin must be an array type");
 				return NOS_RESULT_FAILED;
 			}
             
-            nos::Name elementName = info.ElementType->TypeName;
+            nos::Name elementName = info->ElementType->TypeName;
 
             for (size_t i = 0; i < params->PinCount; i++)
             {
@@ -77,9 +75,8 @@ struct Indexer : NodeContext
         }
         else if (params->InstigatorPinName == NSN_Output)
         {
-            nosTypeInfo info = {};
-			nosEngine.GetTypeInfo(params->IncomingTypeName, &info);
-            if (info.BaseType == NOS_BASE_TYPE_ARRAY)
+            nos::TypeInfo info(params->IncomingTypeName);
+            if (info->BaseType == NOS_BASE_TYPE_ARRAY)
             {
 				strcpy(params->OutErrorMessage, "Output pin must not be an array type");
 				return NOS_RESULT_FAILED;
@@ -106,35 +103,35 @@ struct Indexer : NodeContext
 			return;
 		if (update->PinName == NSN_Output)
 		{
-			Type = nosTypeInfo{};
-			nosEngine.GetTypeInfo(update->TypeName, &*Type);
+			Type = nos::TypeInfo(update->TypeName);
 			ManageOrphan();
 		}
 	}
 
-    nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+    nosResult ExecuteNode(nosNodeExecuteParams* params) override
     {
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
-		auto pins = NodeExecuteArgs(args);
+		auto pins = NodeExecuteParams(params);
 		auto vec = (flatbuffers::Vector<u8>*)(pins[NSN_Input].Data->Data);
 		Index = *(u32*)pins[NSN_Index].Data->Data;
 		ArraySize = vec->size();
 		if (Index < ArraySize)
 		{
 			auto ID = pins[NSN_Output].Id;
-			if (Type->ByteSize)
+			auto& type = *Type;
+			if (type->ByteSize)
 			{
-				auto data = vec->data() + Index * Type->ByteSize;
-				nosEngine.SetPinValue(ID, {(void*)data, Type->ByteSize});
+				auto data = vec->data() + Index * type->ByteSize;
+				nosEngine.SetPinValue(ID, {(void*)data, type->ByteSize});
 			}
 			else
 			{
 				flatbuffers::FlatBufferBuilder fbb;
 				auto vect = (flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>>*)(pins[NSN_Input].Data->Data);
 				auto elem = vect->Get(Index);
-				fbb.Finish(flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, &*Type, elem)));
+				fbb.Finish(flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, type, elem)));
 				nos::Buffer buf = fbb.Release();
 				nosEngine.SetPinValueDirect(ID, buf);
 			}

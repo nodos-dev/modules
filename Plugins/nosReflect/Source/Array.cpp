@@ -8,7 +8,7 @@ NOS_REGISTER_NAME(Array)
 
 struct ArrayNode : NodeContext
 {
-	nosTypeInfo* Type = nullptr;
+	std::optional<nos::TypeInfo> Type = std::nullopt;
 	size_t PinCount = 0;
 	ArrayNode(const nosFbNode* inNode) : NodeContext(inNode)
 	{
@@ -20,23 +20,12 @@ struct ArrayNode : NodeContext
 			}
 			if (pin.ShowAs == fb::ShowAs::OUTPUT_PIN)
 			{
-				if (Type) {
-					nosEngine.FreeTypeInfo(Type);
-				}
-				Type = nullptr;
-				nosEngine.GetTypeInfo(pin.TypeName, &Type);
-				auto elementTypeName = Type->ElementType->TypeName;
-				nosEngine.FreeTypeInfo(Type);
-				nosEngine.GetTypeInfo(elementTypeName, &Type);
+				nos::TypeInfo arrayType = nos::TypeInfo(pin.TypeName);
+				auto elementTypeName = arrayType->ElementType->TypeName;
+				Type = nos::TypeInfo(elementTypeName);
 				LoadPins();
 			}
 		}
-	}
-
-	~ArrayNode()
-	{
-		if (Type)
-			nosEngine.FreeTypeInfo(Type);
 	}
 
 	void OnNodeUpdated(const nosFbNode* inNode) override
@@ -69,10 +58,7 @@ struct ArrayNode : NodeContext
 		if (Type || update->UpdatedField != NOS_PIN_FIELD_TYPE_NAME)
 			return;
 		auto newTypeName = Name(update->TypeName);
-		if (Type)
-			nosEngine.FreeTypeInfo(Type);
-		Type = nullptr;
-		nosEngine.GetTypeInfo(newTypeName, &Type);
+		Type = nos::TypeInfo(newTypeName);
 		CreateOutput();
 	}
 
@@ -97,7 +83,7 @@ struct ArrayNode : NodeContext
 		if (!outPin)
 			return false;
 		
-		auto outval = GenerateVector(&*Type, values);
+		auto outval = GenerateVector(*Type, values);
 
 		auto vec = (flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>>*)(outval.data());
 		assert(GetInputs().size() == vec->size());
@@ -136,7 +122,7 @@ struct ArrayNode : NodeContext
 		if (NOS_RESULT_SUCCESS == nosEngine.GetDefaultValueOfType(Type->TypeName, &value))
 		{
 			data = std::vector<u8>{(u8*)value.Data, (u8*)value.Data + value.Size};
-			outData = GenerateVector(&*Type, {data.data()});
+			outData = GenerateVector(*Type, {data.data()});
 		}
 
 		flatbuffers::FlatBufferBuilder fbb;

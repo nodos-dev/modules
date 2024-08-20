@@ -31,8 +31,6 @@ nosResult RegisterArray(nosNodeFunctions* node);
 nosResult RegisterDelay(nosNodeFunctions* node);
 nosResult RegisterArithmetic(nosNodeFunctions* node);
 
-NOS_REGISTER_NAME_SPACED(VulkanSubsystemName, "nos.sys.vulkan")
-
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
 	*outCount = (size_t)(Nodes::Count);
