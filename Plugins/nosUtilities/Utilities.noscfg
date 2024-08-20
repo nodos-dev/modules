@@ -2,14 +2,14 @@
     "info": {
         "id": {
             "name": "nos.utilities",
-            "version": "2.4.0"
+            "version": "2.5.0"
         },
         "description": "Various utility nodes.",
         "display_name": "Utilities",
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "5.6.0"
+                "version": "5.8.0"
             }
         ],
         "category": "Utilities"

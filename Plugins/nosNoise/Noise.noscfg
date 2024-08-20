@@ -2,14 +2,14 @@
     "info": {
         "id": {
             "name": "nos.noise",
-            "version": "0.1.0"
+            "version": "0.2.0"
         },
         "display_name": "nos.noise",
         "description": "Noise utilities for Nodos.",
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "5.6"
+                "version": "5.8"
             }
         ],
         "category": "Procedural Generation"
