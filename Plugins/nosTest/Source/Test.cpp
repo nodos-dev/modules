@@ -119,13 +119,11 @@ public:
 
 nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions);
 
-extern "C"
+struct TestPluginFunctions : PluginFunctions
 {
-
-
-	NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
+	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		*outCount = (size_t)(11);
+		outCount = 11;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -141,60 +139,60 @@ extern "C"
 		outFunctions[2]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithFunctions");
 		outFunctions[2]->GetFunctions = [](size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* fns)
 			{
-			*outCount = 1;
-			if (!pName || !fns)
-				return NOS_RESULT_SUCCESS;
-
-			fns[0] = [](void* ctx, nosFunctionExecuteParams* params)
-				{
-					NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
-
-					nosEngine.LogI("NodeWithFunctions: TestFunction executed");
-
-					double res = *InterpretPinValue<double>(execParams[NOS_NAME("in1")].Data->Data) + *InterpretPinValue<double>(execParams[NOS_NAME("in2")].Data->Data);
-
-					nosEngine.SetPinValue(execParams[NOS_NAME("out")].Id, nos::Buffer::From(res));
-					nosEngine.SetPinDirty(execParams[NOS_NAME("OutTrigger")].Id);
+				*outCount = 1;
+				if (!pName || !fns)
 					return NOS_RESULT_SUCCESS;
-				};
-			pName[0] = NOS_NAME_STATIC("TestFunction");
-			return NOS_RESULT_SUCCESS;
-		};
+
+				fns[0] = [](void* ctx, nosFunctionExecuteParams* params)
+					{
+						NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
+
+						nosEngine.LogI("NodeWithFunctions: TestFunction executed");
+
+						double res = *InterpretPinValue<double>(execParams[NOS_NAME("in1")].Data->Data) + *InterpretPinValue<double>(execParams[NOS_NAME("in2")].Data->Data);
+
+						nosEngine.SetPinValue(execParams[NOS_NAME("out")].Id, nos::Buffer::From(res));
+						nosEngine.SetPinDirty(execParams[NOS_NAME("OutTrigger")].Id);
+						return NOS_RESULT_SUCCESS;
+					};
+				pName[0] = NOS_NAME_STATIC("TestFunction");
+				return NOS_RESULT_SUCCESS;
+			};
 
 
 
 		outFunctions[3]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCustomTypes");
 		outFunctions[4]->ClassName = NOS_NAME_STATIC("nos.test.CopyTest");
 		outFunctions[4]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
-		{
-			nosCmd cmd;
-			nosVulkan->Begin("(nos.test.CopyTest) Copy", &cmd);
-			auto values = nos::GetPinValues(params);
-			nosResourceShareInfo input = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Input")]);
-			nosResourceShareInfo output = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Output")]);
-			nosVulkan->Copy(cmd, &input, &output, 0);
-			nosVulkan->End(cmd, NOS_FALSE);
-			return NOS_RESULT_SUCCESS;
-		};
-		
+			{
+				nosCmd cmd;
+				nosVulkan->Begin("(nos.test.CopyTest) Copy", &cmd);
+				auto values = nos::GetPinValues(params);
+				nosResourceShareInfo input = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Input")]);
+				nosResourceShareInfo output = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Output")]);
+				nosVulkan->Copy(cmd, &input, &output, 0);
+				nosVulkan->End(cmd, NOS_FALSE);
+				return NOS_RESULT_SUCCESS;
+			};
+
 		outFunctions[5]->ClassName = NOS_NAME_STATIC("nos.test.CopyTestLicensed");
-		outFunctions[5]->OnNodeCreated = [] (const nosFbNode* node, void** outCtxPtr) {
-			nosEngine.RegisterFeature(*node->id(), "Nodos.CopyTestLicensed", 1, "Nodos.CopyTestLicensed required");	
-		};
-		outFunctions[5]->OnNodeDeleted = [] (void* ctx, nosUUID nodeId) {
+		outFunctions[5]->OnNodeCreated = [](const nosFbNode* node, void** outCtxPtr) {
+			nosEngine.RegisterFeature(*node->id(), "Nodos.CopyTestLicensed", 1, "Nodos.CopyTestLicensed required");
+			};
+		outFunctions[5]->OnNodeDeleted = [](void* ctx, nosUUID nodeId) {
 			nosEngine.UnregisterFeature(nodeId, "Nodos.CopyTestLicensed");
-		};
+			};
 		outFunctions[5]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
-		{
-			nosCmd cmd;
-			nosVulkan->Begin("(nos.test.CopyTest) Copy", &cmd);
-			auto values = nos::GetPinValues(params);
-			nosResourceShareInfo input = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Input")]);
-			nosResourceShareInfo output = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Output")]);
-			nosVulkan->Copy(cmd, &input, &output, 0);
-			nosVulkan->End(cmd, nullptr);
-			return NOS_RESULT_SUCCESS;
-		};
+			{
+				nosCmd cmd;
+				nosVulkan->Begin("(nos.test.CopyTest) Copy", &cmd);
+				auto values = nos::GetPinValues(params);
+				nosResourceShareInfo input = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Input")]);
+				nosResourceShareInfo output = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Output")]);
+				nosVulkan->Copy(cmd, &input, &output, 0);
+				nosVulkan->End(cmd, nullptr);
+				return NOS_RESULT_SUCCESS;
+			};
 		outFunctions[6]->ClassName = NOS_NAME_STATIC("nos.test.CopyBuffer");
 		outFunctions[6]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			auto inBuf = nos::GetPinValue<sys::vulkan::Buffer>(nos::GetPinValues(params), NOS_NAME_STATIC("Input"));
@@ -216,22 +214,22 @@ extern "C"
 			nosVulkan->Copy(cmd, &in, &out, 0);
 			nosVulkan->End(cmd, nullptr);
 			return NOS_RESULT_SUCCESS;
-		};
+			};
 		RegisterFrameInterpolator(outFunctions[7]);
 		nos::test::RegisterWindowNode(outFunctions[8]);
 		outFunctions[9]->ClassName = NOS_NAME_STATIC("nos.test.BypassTexture");
 		outFunctions[9]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
-		{
-			auto values = nos::GetPinValues(params);
-			nos::sys::vulkan::TTexture in, out;
-			auto intex = flatbuffers::GetRoot<nos::sys::vulkan::Texture>(values[NOS_NAME_STATIC("Input")]);
-			intex->UnPackTo(&in);
-			out = in;
-			out.unmanaged = true;
-			auto ids = nos::GetPinIds(params);
-			nosEngine.SetPinValue(ids[NOS_NAME_STATIC("Output")], nos::Buffer::From(out));
-			return NOS_RESULT_SUCCESS;
-		};
+			{
+				auto values = nos::GetPinValues(params);
+				nos::sys::vulkan::TTexture in, out;
+				auto intex = flatbuffers::GetRoot<nos::sys::vulkan::Texture>(values[NOS_NAME_STATIC("Input")]);
+				intex->UnPackTo(&in);
+				out = in;
+				out.unmanaged = true;
+				auto ids = nos::GetPinIds(params);
+				nosEngine.SetPinValue(ids[NOS_NAME_STATIC("Output")], nos::Buffer::From(out));
+				return NOS_RESULT_SUCCESS;
+			};
 		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.test.LiveOutWithInput");
 		outFunctions[10]->CopyFrom = [](void* ctx, nosCopyInfo* copyInfo)
 			{
@@ -240,6 +238,8 @@ extern "C"
 			};
 		return NOS_RESULT_SUCCESS;
 	}
+};
 
-}
+NOS_EXPORT_PLUGIN_FUNCTIONS(TestPluginFunctions)
+
 } // namespace nos::test
