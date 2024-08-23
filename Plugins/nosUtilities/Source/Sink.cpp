@@ -6,6 +6,7 @@
 // stl
 #include <chrono>
 #include <nosUtil/Stopwatch.hpp>
+#include <thread>
 
 #include "Sink_generated.h"
 

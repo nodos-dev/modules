@@ -2,6 +2,7 @@
 
 #include <Nodos/PluginHelpers.hpp>
 #include <tinyexpr.h>
+#include <list>
 
 namespace nos::math
 {

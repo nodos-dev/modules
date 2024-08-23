@@ -1,5 +1,5 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-
+#if defined(_WIN32)
 #include "WindowNode.h"
 #include "GLFW/glfw3.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -189,3 +189,4 @@ void WindowNode::OnPathStart()
 }
 
 }
+#endif

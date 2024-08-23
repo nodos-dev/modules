@@ -2,6 +2,7 @@
  * Copyright MediaZ Teknoloji A.S. All Rights Reserved.
  */
 
+#if defined(_WIN32)
 #pragma once
 
 #include "Nodos/PluginHelpers.hpp"
@@ -44,3 +45,4 @@ private:
 	nosSwapchainHandle Swapchain{};
 };
 }
+#endif

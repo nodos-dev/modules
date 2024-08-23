@@ -5,7 +5,11 @@ project("NOSModules")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 20)
-
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message("Adding -fPIC to CMAKE_CXX_FLAGS and CMAKE_C_FLAGS for position independent code")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+endif()
 if (NOT WITH_NODOS_WORKSPACE)
     message(FATAL_ERROR "This repo currently does not support builds without Nodos workspace. "
     "Place this repo under nodos-workspace/Module folder and run cmake -S ./Toolchain/CMake -B Build from workspace root.")

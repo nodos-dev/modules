@@ -6,7 +6,7 @@
             "contents": {
                 "type": "nos.sys.vulkan.GPUNode",
                 "options": {
-                    "shader": "Shaders/ColorCorrect.hlsl",
+                    "shader": "Shaders/ColorCorrect.frag",
                     "stage": "FRAGMENT"
                 }
             },

@@ -18,6 +18,7 @@
 #include <atomic>
 #include <chrono>
 #include <sstream>
+#include <thread>
 
 using Clock = std::chrono::high_resolution_clock;
 

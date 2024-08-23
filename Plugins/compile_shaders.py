@@ -13,7 +13,13 @@ from loguru import logger
 path = str(os.path.dirname(__file__))
 
 def embed_binary(filepath):
-    result = run([f"{path}/../Subsystems/nosShaderCompiler/Binaries/tools/{platform.system()}/bin2header.exe", filepath], stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    exe_ext = ""
+    if sys.platform == "win32":
+        exe_ext = ".exe"
+    elif sys.platform == "linux":
+        exe_ext = ""
+
+    result = run([f"{path}/../Subsystems/nosShaderCompiler/Binaries/tools/{platform.system()}/bin2header{exe_ext}", filepath], stdout=PIPE, stderr=PIPE, universal_newlines=True)
     if result.returncode != 0:
         logger.warning(f"Failed to embed {filepath}")
         exit(result.returncode)

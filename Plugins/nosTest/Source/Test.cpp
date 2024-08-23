@@ -9,8 +9,9 @@
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include <nosVulkanSubsystem/Helpers.hpp>
 
+#if defined(_WIN32)
 #include "Window/WindowNode.h"
-
+#endif
 NOS_INIT()
 
 NOS_REGISTER_NAME(in1)
@@ -31,68 +32,106 @@ namespace nos::test
 class TestNode : public nos::NodeContext
 {
 public:
-	TestNode(const nosFbNode* node) : nos::NodeContext(node)
-	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
-		AddPinValueWatcher(NOS_NAME_STATIC("double_prop"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
-			double optOldVal = 0.0f;
-			if (oldVal)
-				optOldVal = *oldVal->As<double>();
-			nosEngine.LogI("TestNode: double_prop changed to %f from %f", *newVal.As<double>(), optOldVal);
-			});
-	}
-	~TestNode()
-	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
-	}
-	void OnNodeUpdated(const nosFbNode* updatedNode) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
-	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
-	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
-	}
-	virtual void OnPinConnected(nos::Name pinName, nosUUID connectedPin) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
-	virtual void OnPinDisconnected(nos::Name pinName) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
-	virtual void OnPinShowAsChanged(nos::Name pinName, nos::fb::ShowAs showAs) override
-	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
-	}
-	virtual void OnPathCommand(const nosPathCommand* command) override { nosEngine.LogI("TestNode: OnNodeUpdated"); }
-	virtual nosResult CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId) override
-	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
-		return NOS_RESULT_SUCCESS;
-	}
-	virtual nosResult OnOrphanPinRemoved(nos::Name pinName, nosUUID pinId) override
-	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
-		return NOS_RESULT_SUCCESS;
-	}
+    TestNode(const nosFbNode* node) : nos::NodeContext(node)
+    {
+        nosEngine.LogI("TestNode: Constructor");
+        AddPinValueWatcher(NOS_NAME_STATIC("double_prop"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
+            double optOldVal = 0.0f;
+            if (oldVal)
+                optOldVal = *oldVal->As<double>();
+            nosEngine.LogI("TestNode: double_prop changed to %f from %f", *newVal.As<double>(), optOldVal);
+        });
+    }
+
+    ~TestNode()
+    {
+        nosEngine.LogI("TestNode: Destructor");
+    }
+
+    void OnNodeUpdated(const nosFbNode* updatedNode) override
+    {
+        nosEngine.LogI("TestNode: OnNodeUpdated");
+    }
+
+    void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
+    {
+        nosEngine.LogI("TestNode: OnPinValueChanged");
+    }
+
+    virtual void OnPinConnected(nos::Name pinName, nosUUID connectedPin) override
+    {
+        nosEngine.LogI("TestNode: OnPinConnected");
+    }
+
+    virtual void OnPinDisconnected(nos::Name pinName) override
+    {
+        nosEngine.LogI("TestNode: OnPinDisconnected");
+    }
+
+    virtual void OnPinShowAsChanged(nos::Name pinName, nos::fb::ShowAs showAs) override
+    {
+        nosEngine.LogI("TestNode: OnPinShowAsChanged");
+    }
+
+    virtual void OnPathCommand(const nosPathCommand* command) override
+    {
+        nosEngine.LogI("TestNode: OnPathCommand");
+    }
+
+    virtual nosResult CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId) override
+    {
+        nosEngine.LogI("TestNode: CanRemoveOrphanPin");
+        return NOS_RESULT_SUCCESS;
+    }
+
+    virtual nosResult OnOrphanPinRemoved(nos::Name pinName, nosUUID pinId) override
+    {
+        nosEngine.LogI("TestNode: OnOrphanPinRemoved");
+        return NOS_RESULT_SUCCESS;
+    }
 
 	// Execution
 	virtual nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
+		nosEngine.LogI("TestNode: ExecuteNode");
 		return NOS_RESULT_SUCCESS;
 	}
 	virtual nosResult CopyFrom(nosCopyInfo* copyInfo) override
 	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
+		nosEngine.LogI("TestNode:  CopyFrom");
 		return NOS_RESULT_SUCCESS;
 	}
 	virtual nosResult CopyTo(nosCopyInfo* copyInfo) override
 	{
-		nosEngine.LogI("TestNode: " __FUNCTION__);
+		nosEngine.LogI("TestNode:  CopyTo");
 		return NOS_RESULT_SUCCESS;
 	}
 
-	// Menu & key events
-	virtual void OnMenuRequested(const nosContextMenuRequest* request) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
-	virtual void OnMenuCommand(nosUUID itemID, uint32_t cmd) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
-	virtual void OnKeyEvent(const nosKeyEvent* keyEvent) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
+    // Menu & key events
+    virtual void OnMenuRequested(const nosContextMenuRequest* request) override
+    {
+        nosEngine.LogI("TestNode: OnMenuRequested");
+    }
 
-	virtual void OnPinDirtied(nosUUID pinID, uint64_t frameCount) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
-	virtual void OnPathStateChanged(nosPathState pathState) override { nosEngine.LogI("TestNode: " __FUNCTION__); }
+    virtual void OnMenuCommand(nosUUID itemID, uint32_t cmd) override
+    {
+        nosEngine.LogI("TestNode: OnMenuCommand");
+    }
 
+    virtual void OnKeyEvent(const nosKeyEvent* keyEvent) override
+    {
+        nosEngine.LogI("TestNode: OnKeyEvent");
+    }
+
+    virtual void OnPinDirtied(nosUUID pinID, uint64_t frameCount) override
+    {
+        nosEngine.LogI("TestNode: OnPinDirtied");
+    }
+
+    virtual void OnPathStateChanged(nosPathState pathState) override
+    {
+        nosEngine.LogI("TestNode: OnPathStateChanged");
+    }
 
 	static nosResult TestFunction(void* ctx, nosFunctionExecuteParams* params)
 	{
@@ -105,17 +144,18 @@ public:
 		return NOS_RESULT_SUCCESS;
 	}
 
-	static nosResult GetFunctions(size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* fns)
-	{
-		*outCount = 1;
-		if (!pName || !fns)
-			return NOS_RESULT_SUCCESS;
+    static nosResult GetFunctions(size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* fns)
+    {
+        *outCount = 1;
+        if (!pName || !fns)
+            return NOS_RESULT_SUCCESS;
 
-		*fns = TestFunction;
-		*pName = NOS_NAME_STATIC("TestFunction");
-		return NOS_RESULT_SUCCESS;
-	}
+        *fns = TestFunction;
+        *pName = NOS_NAME_STATIC("TestFunction");
+        return NOS_RESULT_SUCCESS;
+    }
 };
+
 
 nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions);
 
@@ -123,7 +163,11 @@ struct TestPluginFunctions : PluginFunctions
 {
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
+		#ifdef _WIN32
 		outCount = 11;
+		#else
+		outCount = 10;
+		#endif
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -133,11 +177,11 @@ struct TestPluginFunctions : PluginFunctions
 		msg.MessageType = NOS_MODULE_STATUS_MESSAGE_TYPE_INFO;
 		msg.UpdateType = NOS_MODULE_STATUS_MESSAGE_UPDATE_TYPE_REPLACE;
 		nosEngine.SendModuleStatusMessageUpdate(&msg);
-
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.NodeTest"), TestNode, outFunctions[0]);
-		outFunctions[1]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCategories");
-		outFunctions[2]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithFunctions");
-		outFunctions[2]->GetFunctions = [](size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* fns)
+		int index = 0;
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.NodeTest"), TestNode, outFunctions[index++]);
+		outFunctions[index++]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCategories");
+		outFunctions[index]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithFunctions");
+		outFunctions[index++]->GetFunctions = [](size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* fns)
 			{
 				*outCount = 1;
 				if (!pName || !fns)
@@ -161,9 +205,9 @@ struct TestPluginFunctions : PluginFunctions
 
 
 
-		outFunctions[3]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCustomTypes");
-		outFunctions[4]->ClassName = NOS_NAME_STATIC("nos.test.CopyTest");
-		outFunctions[4]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
+		outFunctions[index++]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCustomTypes");
+		outFunctions[index]->ClassName = NOS_NAME_STATIC("nos.test.CopyTest");
+		outFunctions[index++]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 			{
 				nosCmd cmd;
 				nosVulkan->Begin("(nos.test.CopyTest) Copy", &cmd);
@@ -175,14 +219,14 @@ struct TestPluginFunctions : PluginFunctions
 				return NOS_RESULT_SUCCESS;
 			};
 
-		outFunctions[5]->ClassName = NOS_NAME_STATIC("nos.test.CopyTestLicensed");
-		outFunctions[5]->OnNodeCreated = [](const nosFbNode* node, void** outCtxPtr) {
+		outFunctions[index]->ClassName = NOS_NAME_STATIC("nos.test.CopyTestLicensed");
+		outFunctions[index]->OnNodeCreated = [](const nosFbNode* node, void** outCtxPtr) {
 			nosEngine.RegisterFeature(*node->id(), "Nodos.CopyTestLicensed", 1, "Nodos.CopyTestLicensed required");
 			};
-		outFunctions[5]->OnNodeDeleted = [](void* ctx, nosUUID nodeId) {
+		outFunctions[index]->OnNodeDeleted = [](void* ctx, nosUUID nodeId) {
 			nosEngine.UnregisterFeature(nodeId, "Nodos.CopyTestLicensed");
 			};
-		outFunctions[5]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
+		outFunctions[index++]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 			{
 				nosCmd cmd;
 				nosVulkan->Begin("(nos.test.CopyTest) Copy", &cmd);
@@ -193,8 +237,8 @@ struct TestPluginFunctions : PluginFunctions
 				nosVulkan->End(cmd, nullptr);
 				return NOS_RESULT_SUCCESS;
 			};
-		outFunctions[6]->ClassName = NOS_NAME_STATIC("nos.test.CopyBuffer");
-		outFunctions[6]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
+		outFunctions[index]->ClassName = NOS_NAME_STATIC("nos.test.CopyBuffer");
+		outFunctions[index++]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			auto inBuf = nos::GetPinValue<sys::vulkan::Buffer>(nos::GetPinValues(params), NOS_NAME_STATIC("Input"));
 			auto outBuf = nos::GetPinValue<sys::vulkan::Buffer>(nos::GetPinValues(params), NOS_NAME_STATIC("Output"));
 			auto in = vkss::ConvertToResourceInfo(*inBuf);
@@ -215,10 +259,12 @@ struct TestPluginFunctions : PluginFunctions
 			nosVulkan->End(cmd, nullptr);
 			return NOS_RESULT_SUCCESS;
 			};
-		RegisterFrameInterpolator(outFunctions[7]);
-		nos::test::RegisterWindowNode(outFunctions[8]);
-		outFunctions[9]->ClassName = NOS_NAME_STATIC("nos.test.BypassTexture");
-		outFunctions[9]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
+		RegisterFrameInterpolator(outFunctions[index++]);
+		#ifdef _WIN32
+		nos::test::RegisterWindowNode(outFunctions[index++]);
+		#endif
+		outFunctions[index]->ClassName = NOS_NAME_STATIC("nos.test.BypassTexture");
+		outFunctions[index++]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 			{
 				auto values = nos::GetPinValues(params);
 				nos::sys::vulkan::TTexture in, out;
@@ -230,8 +276,8 @@ struct TestPluginFunctions : PluginFunctions
 				nosEngine.SetPinValue(ids[NOS_NAME_STATIC("Output")], nos::Buffer::From(out));
 				return NOS_RESULT_SUCCESS;
 			};
-		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.test.LiveOutWithInput");
-		outFunctions[10]->CopyFrom = [](void* ctx, nosCopyInfo* copyInfo)
+		outFunctions[index]->ClassName = NOS_NAME_STATIC("nos.test.LiveOutWithInput");
+		outFunctions[index++]->CopyFrom = [](void* ctx, nosCopyInfo* copyInfo)
 			{
 				nosEngine.LogD("LiveOutWithInput: CopyFrom");
 				return NOS_RESULT_SUCCESS;

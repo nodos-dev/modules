@@ -6,6 +6,7 @@
 
 #include <shared_mutex>
 #include "FrameInterpolator_generated.h"
+#include <thread>
 
 namespace nos::test
 {
