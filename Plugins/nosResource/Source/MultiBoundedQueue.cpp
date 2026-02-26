@@ -337,7 +337,7 @@ struct MultiBoundedQueueNodeContext : NodeContext
 			ObjectRef input = ch->RingChannel->ResInterface->ValidateAndGetPinObject(it->second, false);
 			if (!input.IsValid())
 				continue;
-			uint32_t required = ch->RingChannel->ResInterface->GetRequiredRingSize(input, requestedSize);
+			auto [required, _2] = ch->RingChannel->ResInterface->GetRequiredRingSize(input, requestedSize);
 			if (required > maxRequired)
 				maxRequired = required;
 			gathered.push_back({ch.get(), ch->RingChannel, input});

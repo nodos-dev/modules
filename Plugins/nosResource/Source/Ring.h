@@ -55,9 +55,23 @@ struct ResourceInterface {
 	virtual bool CheckNewResource(nos::Name updateName, nosObjectId inObj) = 0;
 	virtual bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) = 0;
 	virtual void OnRepeatPinValue(nosCopyFromInfo* cpy) {}
-	virtual uint32_t GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const { return ringSize; }
+	virtual std::pair<uint32_t, std::string> GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const { return {ringSize, ""}; }
 	virtual void OnPathStart() {}
 };
+
+inline std::pair<uint32_t, std::string> GetRequiredRingSizeForFieldType(nosTextureFieldType fieldType, uint32_t ringSize)
+{
+	std::stringstream message;
+	if (sys::vulkan::IsTextureFieldTypeInterlaced(fieldType))
+	{
+		// Because ring delays by "size - 1" and what comes in should come out from the ring
+		auto preAdjustedSize = ringSize;
+		ringSize = ringSize | 0b1;
+		if (preAdjustedSize != ringSize)
+			message << "Effective ring size was adjusted from " << preAdjustedSize << " to " << ringSize << "\nto maintain full-frame interlaced output delays"; 
+	}
+	return {ringSize, message.str()};
+}
 
 struct GPUTextureResource : ResourceInterface
 {
@@ -247,14 +261,12 @@ struct GPUTextureResource : ResourceInterface
 		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
+	std::pair<uint32_t, std::string> GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
 	{
+		std::stringstream message;
 		if (inputPinObj == 0)
-			return ringSize;
-		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceFieldType(inputPinObj)))
-			ringSize =
-				ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
-		return ringSize;
+			return {ringSize, message.str()};
+		return GetRequiredRingSizeForFieldType(sys::vulkan::GetResourceFieldType(inputPinObj), ringSize);
 	}
 
 	nosResult SkipExecute(NodeExecuteParams const& executeParams) override
@@ -454,14 +466,12 @@ struct GPUBufferResource : ResourceInterface {
 		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
+	std::pair<uint32_t, std::string> GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
 	{
+		std::stringstream message;
 		if (!inputPinObj)
-			return ringSize;
-		auto inBufInfo = sys::vulkan::GetResourceInfo(inputPinObj)->Buffer;
-		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceFieldType(inputPinObj)))
-			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
-		return ringSize;
+			return {ringSize, message.str()};
+		return GetRequiredRingSizeForFieldType(sys::vulkan::GetResourceFieldType(inputPinObj), ringSize);
 	}
 	nosResult SkipExecute(NodeExecuteParams const& executeParams) override
 	{
@@ -757,6 +767,45 @@ struct RingNodeBase : NodeContext
 	std::atomic_bool RepeatWhenFilling = false;
 	TypeInfo TypeInfo;
 
+	enum class Status
+	{
+		Ok,
+		EffectiveRingSizeAdjusted,
+	} CurrentStatus = Status::Ok;
+	std::string CurrentStatusMessage;
+
+	void SetStatus(Status newStatus, std::string message = "")
+	{
+		if (CurrentStatus == newStatus)
+		{
+			if (newStatus == Status::EffectiveRingSizeAdjusted && CurrentStatusMessage != message)
+			{
+				CurrentStatusMessage = std::move(message);
+				ClearNodeStatusMessages();
+				SetNodeStatusMessage(CurrentStatusMessage, fb::NodeStatusMessageType::WARNING);
+			}
+			return;
+		}
+
+		CurrentStatus = newStatus;
+		CurrentStatusMessage = std::move(message);
+		switch (CurrentStatus)
+		{
+		case Status::Ok: {
+			CurrentStatusMessage.clear();
+			ClearNodeStatusMessages();
+			return;
+		}
+		case Status::EffectiveRingSizeAdjusted: {
+			ClearNodeStatusMessages();
+			SetNodeStatusMessage(CurrentStatusMessage,
+				fb::NodeStatusMessageType::WARNING);
+			return;
+		}
+		default: return;
+		}
+	}
+
 	void RequestRingResize(uint32_t size)
 	{
 		if (size == 0)
@@ -889,11 +938,20 @@ struct RingNodeBase : NodeContext
 			return NOS_RESULT_FAILED;
 		}
 		
-		auto requiredSize = Ring->ResInterface->GetRequiredRingSize(inputObj, Ring->Size);
+		uint32_t requestedSize = *params.GetPinValue<uint32_t>(NSN_Size);
+
+		auto [requiredSize, message] = Ring->ResInterface->GetRequiredRingSize(inputObj, requestedSize);
+		bool effectiveSizeAdjusted = requiredSize != requestedSize;
+		if (effectiveSizeAdjusted)
+			SetStatus(Status::EffectiveRingSizeAdjusted, message);
+		else
+			SetStatus(Status::Ok);
+
 		if (Ring->Size != requiredSize)
 		{
-			nosEngine.LogW("Required ring size for this data type is %lu, will resize it", requiredSize);
 			RequestRingResize(requiredSize);
+			if (effectiveSizeAdjusted)
+				nosEngine.LogW("%s", message.c_str());
 			return NOS_RESULT_FAILED;
 		}
 

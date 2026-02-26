@@ -366,6 +366,7 @@ struct MultiRingBufferNodeContext : NodeContext
 		wantedRings.reserve(Channels.size());
 
 		uint32_t maxRequired = requestedSize;
+		std::string adjustMessage;
 		for (auto& [_, ch] : Channels)
 		{
 			if (!ch->RingChannel || ch->RingChannel->Resources.empty() || !ch->TypeInfo)
@@ -376,9 +377,12 @@ struct MultiRingBufferNodeContext : NodeContext
 			ObjectRef input = ch->RingChannel->ResInterface->ValidateAndGetPinObject(it->second, true);
 			if (!input.IsValid())
 				continue;
-			uint32_t required = ch->RingChannel->ResInterface->GetRequiredRingSize(input, requestedSize);
+			auto [required, message] = ch->RingChannel->ResInterface->GetRequiredRingSize(input, requestedSize);
 			if (required > maxRequired)
+			{
 				maxRequired = required;
+				adjustMessage = message;
+			}
 			gathered.push_back({ch.get(), ch->RingChannel, input});
 			wantedRings.push_back(ch->RingChannel);
 		}
@@ -390,12 +394,14 @@ struct MultiRingBufferNodeContext : NodeContext
 
 		bool effectiveSizeAdjusted = maxRequired != requestedSize;
 		ClearNodeStatusMessages();
+		if (effectiveSizeAdjusted)
+			SetNodeStatusMessage(adjustMessage, fb::NodeStatusMessageType::WARNING);
 
 		if (Ring.Size != maxRequired)
 		{
-			if (effectiveSizeAdjusted)
-				nosEngine.LogW("Required ring size for this data type is %lu, will resize it", maxRequired);
 			RequestRingResize(maxRequired);
+			if (effectiveSizeAdjusted)
+				nosEngine.LogW("%s", adjustMessage.c_str());
 			return NOS_RESULT_FAILED;
 		}
 
