@@ -15,7 +15,7 @@
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
 					"options": {
-						"shader": "Shaders/Thresholder.frag"
+						"shader": "Shaders/Thresholder.frag.spv"
 					}
 				},
 				"pins": [

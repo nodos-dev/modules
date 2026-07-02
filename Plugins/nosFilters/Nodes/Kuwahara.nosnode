@@ -12,7 +12,7 @@
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
 					"options": {
-						"shader": "Shaders/Kuwahara.frag"
+						"shader": "Shaders/Kuwahara.frag.spv"
 					}
 				},
 				"pins": [
