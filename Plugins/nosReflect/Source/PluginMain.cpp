@@ -24,8 +24,6 @@ enum Nodes : size_t
 	Array,
 	Delay,
 	Arithmetic,
-	ArithmeticDynamic,
-	ScalarArithmetic,
 	IndexOf,
 	IsEqual,
 	GreaterThan,
@@ -49,8 +47,6 @@ nosResult RegisterIndexer(nosNodeFunctions* node);
 nosResult RegisterArray(nosNodeFunctions* node);
 nosResult RegisterDelay(nosNodeFunctions* node);
 nosResult RegisterArithmetic(nosNodeFunctions* node);
-nosResult RegisterArithmeticDynamic(nosNodeFunctions* node);
-nosResult RegisterScalarArithmetic(nosNodeFunctions* node);
 nosResult RegisterIndexOf(nosNodeFunctions* node);
 nosResult RegisterIsEqual(nosNodeFunctions* node);
 nosResult RegisterGreaterThan(nosNodeFunctions* node);
@@ -91,14 +87,12 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(Array)
 			GEN_CASE_NODE(Delay)
 			GEN_CASE_NODE(Arithmetic)
-			GEN_CASE_NODE(ScalarArithmetic)
 			GEN_CASE_NODE(IndexOf)
 			GEN_CASE_NODE(IsEqual)
 			GEN_CASE_NODE(GreaterThan)
 			GEN_CASE_NODE(LessThan)
 			GEN_CASE_NODE(SetVariable)
 			GEN_CASE_NODE(GetVariable)
-			GEN_CASE_NODE(ArithmeticDynamic)
 			GEN_CASE_NODE(EnumToUnderlyingValue)
 			GEN_CASE_NODE(EnumFromUnderlyingValue)
 			GEN_CASE_NODE(CopyingRingBuffer)
@@ -131,7 +125,9 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outPluginF
 		constexpr auto types = std::array{"f32",	"f64",	 "i8",	 "i16",	  "i32",   "i64",	"u8",	"u16",
 							   "u32",	"u64",	 "vec2", "vec2i", "vec2u", "vec2d", "vec3", "vec3i",
 							   "vec3u", "vec3d", "vec4", "vec4i", "vec4u", "vec4d"};
-		*outCount = ops.size() * types.size(); 
+		// The scalar-broadcast and generic arithmetic nodes are folded into nos.reflect.Arithmetic; route
+		// their saved instances there too. Arithmetic::MigrateNode fixes up pins/params afterwards.
+		*outCount = ops.size() * types.size() + 2;
 		if (!outRenamedFrom)
 			return;
 		auto idx = 0;
@@ -142,6 +138,12 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outPluginF
 				outRenamedTo[idx] = NOS_NAME("nos.reflect.Arithmetic");
 				idx++;
 			}
+		outRenamedFrom[idx] = NOS_NAME("nos.reflect.ScalarArithmetic");
+		outRenamedTo[idx] = NOS_NAME("nos.reflect.Arithmetic");
+		idx++;
+		outRenamedFrom[idx] = NOS_NAME("nos.reflect.ArithmeticDynamic");
+		outRenamedTo[idx] = NOS_NAME("nos.reflect.Arithmetic");
+		idx++;
 	};
 	return NOS_RESULT_SUCCESS;
 }

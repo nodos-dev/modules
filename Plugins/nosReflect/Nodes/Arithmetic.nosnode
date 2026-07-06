@@ -2,7 +2,18 @@
 	"nodes": [
 		{
 			"class_name": "Arithmetic",
-			"hide_in_context_menu": true,
+			"menu_info": {
+				"category": "Math",
+				"display_name": "Arithmetic",
+				"name_aliases": [
+					"math",
+					"operator",
+					"add",
+					"sub",
+					"mul",
+					"div"
+				]
+			},
 			"presets": [
 				{
 					"menu_info": {
@@ -115,13 +126,6 @@
 						"connection_conditions": "!resource"
 					}
 				]
-			}
-		},
-		{
-			"class_name": "ArithmeticDynamic",
-			"hide_in_context_menu": true,
-			"node": {
-				"contents_type": "Job"
 			}
 		}
 	],
