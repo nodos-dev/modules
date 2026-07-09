@@ -1,0 +1,8 @@
+namespace nos.utilities;
+
+enum ListDirectorySortBy: uint
+{
+    Name = 0,
+    ModifiedTime = 1,
+    Size = 2,
+}

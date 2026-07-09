@@ -1,0 +1,67 @@
+{
+	"nodes": [
+		{
+			"class_name": "ListDirectory",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "List Directory",
+				"aliases": [ "directory", "folder", "files", "ls", "dir" ]
+			},
+			"node": {
+				"class_name": "ListDirectory",
+				"display_name": "List Directory",
+				"contents_type": "Job",
+				"description": "Lists the files directly inside a directory.\nOutputs their full paths and how many there are, sorted by SortBy. Subdirectories\nare not listed and not recursed into.",
+				"pins": [
+					{
+						"name": "Directory",
+						"description": "Directory to list the files of.",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "FOLDER_PICKER" }
+					},
+					{
+						"name": "Pattern",
+						"description": "Wildcard pattern matched against each file's name (* matches any run of\ncharacters, ? matches a single character). Files that don't match are excluded\nfrom Paths and Count. Empty matches everything.",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": ""
+					},
+					{
+						"name": "SortBy",
+						"description": "Field the output Paths are sorted by.",
+						"type_name": "nos.utilities.ListDirectorySortBy",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_OUTPUT_PROPERTY",
+						"data": "Name"
+					},
+					{
+						"name": "SortDescending",
+						"description": "Reverses the sort order of Paths.",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false
+					},
+					{
+						"name": "Count",
+						"description": "Number of files found directly inside Directory.",
+						"type_name": "uint",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": 0
+					},
+					{
+						"name": "Paths",
+						"description": "Full paths of the files found directly inside Directory.",
+						"type_name": "[string]",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	]
+}

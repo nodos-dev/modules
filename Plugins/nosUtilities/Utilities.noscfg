@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.15.0"
+			"version": "3.16.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -69,9 +69,12 @@
 		"Config/MultiLiveOut.nosdef",
 		"Config/TextRender.nosdef",
 		"Config/ScheduleRequest.nosdef",
-		"Config/Counter.nosdef"
+		"Config/Counter.nosdef",
+		"Config/ListDirectory.nosdef",
+		"Config/ReadFile.nosdef"
 	],
 	"custom_types": [
+		"Config/ListDirectory.fbs",
 		"Config/Merge.fbs",
 		"Config/Gradient.fbs",
 		"Config/Resize.fbs",

@@ -1,0 +1,37 @@
+{
+    "nodes": [
+        {
+            "class_name": "ReadFile",
+            "menu_info": {
+                "category": "Utilities|IO",
+                "display_name": "Read File",
+                "name_aliases": [ "load file", "file to buffer", "read bytes" ]
+            },
+            "node": {
+                "class_name": "ReadFile",
+                "display_name": "Read File",
+                "contents_type": "Job",
+                "description": "Reads a file from disk into a host-visible buffer on Data - raw bytes, no decoding. Splits\nfile I/O from downstream processing (e.g. a Decode node) so the two can be pipelined and\nbuffered separately. Re-reads only when Path changes.",
+                "pins": [
+                    {
+                        "name": "Path",
+                        "display_name": "Path",
+                        "description": "Path to the file to read. Usually driven by a node that produces file paths.",
+                        "type_name": "string",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizer": { "type": "FILE_PICKER" }
+                    },
+                    {
+                        "name": "Data",
+                        "display_name": "Data",
+                        "description": "Host-visible buffer holding the file's raw bytes.",
+                        "type_name": "nos.sys.vulkan.Buffer",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY"
+                    }
+                ]
+            }
+        }
+    ]
+}

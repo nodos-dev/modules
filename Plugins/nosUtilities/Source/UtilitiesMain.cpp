@@ -63,6 +63,8 @@ enum Utilities : int
 	TextRender,
 	ScheduleRequest,
 	Counter,
+	ListDirectory,
+	ReadFile,
 	Count
 };
 
@@ -105,6 +107,8 @@ nosResult RegisterMultiLiveOut(nosNodeFunctions*);
 nosResult RegisterTextRender(nosNodeFunctions*);
 nosResult RegisterScheduleRequest(nosNodeFunctions*);
 nosResult RegisterCounter(nosNodeFunctions*);
+nosResult RegisterListDirectory(nosNodeFunctions*);
+nosResult RegisterReadFile(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -163,6 +167,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(TextRender)
 			GEN_CASE_NODE(ScheduleRequest)
 			GEN_CASE_NODE(Counter)
+			GEN_CASE_NODE(ListDirectory)
+			GEN_CASE_NODE(ReadFile)
 		}
 	}
 	return NOS_RESULT_SUCCESS;
