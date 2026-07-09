@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.graphics",
-      "version": "0.5.0"
+      "version": "0.6.0"
     },
     "description": "Types & Nodes for graphics operations.",
     "display_name": "Graphics",
@@ -35,7 +35,8 @@
     "Config/HomographySolver.nosdef",
     "Config/ConvertCoordinateFrame.nosdef",
     "Config/CameraGuide.nosdef",
-    "Config/TrackToTransformQ.nosdef"
+    "Config/TrackToTransformQ.nosdef",
+    "Config/SphereProject.nosdef"
   ],
   "binary_path": "Binaries/nosGraphics",
   "associated_nodes": []

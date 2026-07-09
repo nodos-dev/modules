@@ -23,6 +23,7 @@ enum Nodes : int
 	ConvertCoordinateFrame,
 	CameraGuide,
 	TrackToTransformQ,
+	SphereProject,
 	Count
 };
 
@@ -34,6 +35,7 @@ nosResult RegisterHomographySolver(nosNodeFunctions*);
 nosResult RegisterConvertCoordinateFrame(nosNodeFunctions*);
 nosResult RegisterCameraGuide(nosNodeFunctions*);
 nosResult RegisterTrackToTransformQ(nosNodeFunctions*);
+nosResult RegisterSphereProject(nosNodeFunctions*);
 
 struct PluginFunctions : nos::PluginFunctions
 {
@@ -62,6 +64,7 @@ struct PluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(ConvertCoordinateFrame)
 				GEN_CASE_NODE(CameraGuide)
 				GEN_CASE_NODE(TrackToTransformQ)
+				GEN_CASE_NODE(SphereProject)
 			default: break;
 			}
 		}
