@@ -21,6 +21,7 @@ enum Nodes : int
 	TrackToTransformQ,
 	NormalizedDepthToDepthBuffer,
 	BillboardMask,
+	SphereProject,
 	Count
 };
 
@@ -30,6 +31,7 @@ nosResult RegisterHomographySolver(nosNodeFunctions*);
 nosResult RegisterTrackToTransformQ(nosNodeFunctions*);
 nosResult RegisterNormalizedDepthToDepthBuffer(nosNodeFunctions*);
 nosResult RegisterBillboardMask(nosNodeFunctions*);
+nosResult RegisterSphereProject(nosNodeFunctions*);
 
 struct PluginFunctions : nos::PluginFunctions
 {
@@ -56,6 +58,7 @@ struct PluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(TrackToTransformQ)
 				GEN_CASE_NODE(NormalizedDepthToDepthBuffer)
 				GEN_CASE_NODE(BillboardMask)
+				GEN_CASE_NODE(SphereProject)
 			default: break;
 			}
 		}

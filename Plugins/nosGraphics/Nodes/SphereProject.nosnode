@@ -1,0 +1,131 @@
+{
+	"nodes": [
+		{
+			"class_name": "SphereProject",
+			"menu_info": {
+				"category": "Rendering",
+				"display_name": "Sphere Project"
+			},
+			"node": {
+				"description": "Projects a perspective plate onto a sphere and re-photographs it from the sphere centre\nwith a pan/tilt/roll virtual camera. A nodal (rotation-only) reprojection: projector and viewer\nshare one optical centre, so no parallax and no depth are needed.",
+				"contents_type": "Job",
+				"contents": {
+					"type": "nos.sys.vulkan.GPUNode",
+					"options": {
+						"shader": "Shaders/SphereProject.frag"
+					}
+				},
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Source perspective plate to project onto the sphere.",
+						"data": {
+							"filtering": "LINEAR"
+						}
+					},
+					{
+						"name": "PlateFocal",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Focal length (mm) of the camera that shot the plate (the projector).",
+						"data": 21.333,
+						"min": 1.0,
+						"max": 500.0
+					},
+					{
+						"name": "SensorWidth",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Horizontal sensor width (mm), shared by the plate and the virtual camera.",
+						"data": 33.7,
+						"min": 1.0,
+						"max": 100.0
+					},
+					{
+						"name": "CameraFocal",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Focal length (mm) of the virtual viewer camera. Higher = more zoom.",
+						"data": 32.0,
+						"min": 1.0,
+						"max": 500.0
+					},
+					{
+						"name": "Pan",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Virtual camera yaw about world up (degrees).",
+						"data": 0.0,
+						"min": -180.0,
+						"max": 180.0
+					},
+					{
+						"name": "Tilt",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Virtual camera pitch (degrees).",
+						"data": 0.0,
+						"min": -90.0,
+						"max": 90.0
+					},
+					{
+						"name": "Roll",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Virtual camera roll about the view axis (degrees).",
+						"data": 0.0,
+						"min": -180.0,
+						"max": 180.0
+					},
+					{
+						"name": "Background",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Fill colour for view directions that fall outside the plate.",
+						"visualizer": {
+							"type": "COLOR_PICKER"
+						},
+						"data": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 1.0
+						}
+					},
+					{
+						"name": "Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": {
+							"type": "NAMED_VALUE",
+							"name": "nos.mediaio.ResolutionVisualizer"
+						},
+						"description": "Output render resolution. Also sets the virtual camera aspect ratio.",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Re-photographed image from the virtual camera, sized to Resolution."
+					}
+				]
+			}
+		}
+	]
+}
