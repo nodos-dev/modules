@@ -20,99 +20,121 @@
 				"pins": [
 					{
 						"name": "Input",
+						"display_name": "Input",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Source colour texture the depth-of-field is applied to.",
 						"data": {
 							"filtering": "LINEAR"
 						}
 					},
 					{
 						"name": "Depth",
+						"display_name": "Depth",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Linear view-space Z per pixel, read from the red channel. Drives the circle of confusion.",
 						"data": {
 							"filtering": "NEAREST"
 						}
 					},
 					{
 						"name": "BokehShape",
+						"display_name": "Bokeh Shape",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Kernel texture sampled across the unit disc; the shape painted into it becomes the bokeh.",
 						"data": {
 							"filtering": "LINEAR"
 						}
 					},
 					{
 						"name": "FocusDistance",
+						"display_name": "Focus Distance",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Depth that stays perfectly sharp, in the same units as the Depth input.",
 						"data": 5.0,
 						"min": 0.0,
 						"max": 1000.0
 					},
 					{
 						"name": "FocusRange",
+						"display_name": "Focus Range",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "How far from Focus Distance the blur takes to reach Max Radius.\nSmaller values give a snappier falloff.",
 						"data": 2.0,
 						"min": 0.01,
 						"max": 1000.0
 					},
 					{
 						"name": "MaxRadius",
+						"display_name": "Max Radius (pixels)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Largest circle-of-confusion radius the blur can reach. Zero disables the effect.",
 						"data": 16.0,
 						"min": 0.0,
 						"max": 128.0
 					},
 					{
 						"name": "MinRadius",
+						"display_name": "Min Radius (pixels)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Pixels whose circle of confusion falls at or below this stay sharp, skipping the gather.",
 						"data": 0.5,
 						"min": 0.0,
 						"max": 8.0
 					},
 					{
 						"name": "BackgroundIsFar",
+						"display_name": "Background Is Far",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "How pixels with zero depth are treated: 0 keeps them in focus, 1 pushes them to the far plane.",
 						"data": 1.0,
 						"min": 0.0,
 						"max": 1.0
 					},
 					{
 						"name": "SampleCount",
+						"display_name": "Sample Count",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Vogel-disc samples taken per pixel. Around 32 is soft, 64 is clean, 128 removes banding.",
 						"data": 48.0,
 						"min": 4.0,
 						"max": 256.0
 					},
 					{
 						"name": "KernelRotation",
+						"display_name": "Kernel Rotation (radians)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Rotates the bokeh kernel lookup. Useful for animating highlights.",
 						"data": 0.0,
 						"min": -6.2832,
 						"max": 6.2832
 					},
 					{
 						"name": "Output",
+						"display_name": "Output",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "The input image with depth-of-field applied."
 					}
 				]
 			}
