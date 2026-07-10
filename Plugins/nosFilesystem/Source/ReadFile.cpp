@@ -8,7 +8,7 @@
 #include <optional>
 #include <string>
 
-namespace nos::utilities
+namespace nos::filesystem
 {
 
 // Reads a file from disk into a host-visible buffer on the Data output. Pure I/O: it does no
@@ -107,4 +107,4 @@ nosResult RegisterReadFile(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::filesystem

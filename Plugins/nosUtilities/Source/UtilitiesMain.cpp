@@ -27,7 +27,6 @@ namespace nos::utilities
 enum Utilities : int
 {	// CPU nodes
 	Resize = 0,
-	ChannelViewer,
 	Merge,
 	Time,
 	ReadImage,
@@ -63,8 +62,6 @@ enum Utilities : int
 	TextRender,
 	ScheduleRequest,
 	Counter,
-	ListDirectory,
-	ReadFile,
 	Count
 };
 
@@ -72,7 +69,6 @@ nosResult RegisterMerge(nosNodeFunctions*);
 nosResult RegisterTime(nosNodeFunctions*);
 nosResult RegisterReadImage(nosNodeFunctions*);
 nosResult RegisterWriteImage(nosNodeFunctions*);
-nosResult RegisterChannelViewer(nosNodeFunctions*);
 nosResult RegisterResize(nosNodeFunctions*);
 nosResult RegisterCPUSleep(nosNodeFunctions*);
 nosResult RegisterUploadBuffer(nosNodeFunctions*);
@@ -107,8 +103,6 @@ nosResult RegisterMultiLiveOut(nosNodeFunctions*);
 nosResult RegisterTextRender(nosNodeFunctions*);
 nosResult RegisterScheduleRequest(nosNodeFunctions*);
 nosResult RegisterCounter(nosNodeFunctions*);
-nosResult RegisterListDirectory(nosNodeFunctions*);
-nosResult RegisterReadFile(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -134,7 +128,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(Time)
 			GEN_CASE_NODE(ReadImage)
 			GEN_CASE_NODE(WriteImage)
-			GEN_CASE_NODE(ChannelViewer)
 			GEN_CASE_NODE(Resize)
 			GEN_CASE_NODE(CPUSleep)
 			GEN_CASE_NODE(UploadBuffer)
@@ -167,8 +160,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(TextRender)
 			GEN_CASE_NODE(ScheduleRequest)
 			GEN_CASE_NODE(Counter)
-			GEN_CASE_NODE(ListDirectory)
-			GEN_CASE_NODE(ReadFile)
 		}
 	}
 	return NOS_RESULT_SUCCESS;
@@ -179,21 +170,20 @@ extern "C"
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* out)
 {
 	out->ExportNodeFunctions = ExportNodeFunctions;
+	// ChannelViewer type renames moved to nos.mediaio together with the node.
 	out->GetRenamedTypes = [](nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outSize) {
 		if (!outRenamedFrom)
 		{
-			*outSize = 8;
+			*outSize = 6;
 			return;
 		}
 		// clang-format off
-		outRenamedFrom[0] = NOS_NAME("nos.fb.ChannelViewerChannels"); outRenamedTo[0] = NOS_NAME("nos.utilities.ChannelViewerChannels");
-		outRenamedFrom[1] = NOS_NAME("nos.fb.ChannelViewerFormats"); outRenamedTo[1] = NOS_NAME("nos.mediaio.ColorSpace");
-		outRenamedFrom[2] = NOS_NAME("nos.fb.GradientKind"); outRenamedTo[2] = NOS_NAME("nos.utilities.GradientKind");
-		outRenamedFrom[3] = NOS_NAME("nos.fb.BlendMode"); outRenamedTo[3] = NOS_NAME("nos.utilities.BlendMode");
-		outRenamedFrom[4] = NOS_NAME("nos.fb.ResizeMethod"); outRenamedTo[4] = NOS_NAME("nos.utilities.ResizeMethod");
-		outRenamedFrom[5] = NOS_NAME("nos.fb.Source"); outRenamedTo[5] = NOS_NAME("nos.utilities.Source");
-		outRenamedFrom[6] = NOS_NAME("nos.fb.Channel"); outRenamedTo[6] = NOS_NAME("nos.utilities.Channel");
-		outRenamedFrom[7] = NOS_NAME("nos.plugin.switcher.TextureSwitcherChannel"); outRenamedTo[7] = NOS_NAME("nos.utilities.TextureSwitcherChannel");
+		outRenamedFrom[0] = NOS_NAME("nos.fb.GradientKind"); outRenamedTo[0] = NOS_NAME("nos.utilities.GradientKind");
+		outRenamedFrom[1] = NOS_NAME("nos.fb.BlendMode"); outRenamedTo[1] = NOS_NAME("nos.utilities.BlendMode");
+		outRenamedFrom[2] = NOS_NAME("nos.fb.ResizeMethod"); outRenamedTo[2] = NOS_NAME("nos.utilities.ResizeMethod");
+		outRenamedFrom[3] = NOS_NAME("nos.fb.Source"); outRenamedTo[3] = NOS_NAME("nos.utilities.Source");
+		outRenamedFrom[4] = NOS_NAME("nos.fb.Channel"); outRenamedTo[4] = NOS_NAME("nos.utilities.Channel");
+		outRenamedFrom[5] = NOS_NAME("nos.plugin.switcher.TextureSwitcherChannel"); outRenamedTo[5] = NOS_NAME("nos.utilities.TextureSwitcherChannel");
 		// clang-format on
 	};
 	return NOS_RESULT_SUCCESS;

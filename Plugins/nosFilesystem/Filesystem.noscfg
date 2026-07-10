@@ -1,0 +1,25 @@
+{
+	"info": {
+		"id": {
+			"name": "nos.filesystem",
+			"version": "0.1.0"
+		},
+		"description": "File system nodes: list directories, read files.",
+		"display_name": "Filesystem",
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version": "6.6"
+			}
+		],
+		"category": "Utilities"
+	},
+	"node_definitions": [
+		"Config/ListDirectory.nosdef",
+		"Config/ReadFile.nosdef"
+	],
+	"custom_types": [
+		"Config/ListDirectory.fbs"
+	],
+	"binary_path": "Binaries/nosFilesystem"
+}

@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.16.0"
+			"version": "3.17.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -29,7 +29,6 @@
 		"Config/SevenSegment.nosdef",
 		"Config/Swizzle.nosdef",
 		"Config/TextureSwitcher.nosdef",
-		"Config/ChannelViewer.nosdef",
 		"Config/Time.nosdef",
 		"Config/ImageIO.nosdef",
 		"Config/CPUSleep.nosdef",
@@ -63,24 +62,18 @@
 		"Config/LayoutQuadCanvas.nosdef",
 		"Config/LoadCubeLUT.nosdef",
 		"Config/CalculateDispatchSize.nosdef",
-		"Config/YADIF.nosdef",
-		"Config/YADIFWithAutoDispatchSize.nosdef",
 		"Config/RepeatingJunction.nosdef",
 		"Config/MultiLiveOut.nosdef",
 		"Config/TextRender.nosdef",
 		"Config/ScheduleRequest.nosdef",
-		"Config/Counter.nosdef",
-		"Config/ListDirectory.nosdef",
-		"Config/ReadFile.nosdef"
+		"Config/Counter.nosdef"
 	],
 	"custom_types": [
-		"Config/ListDirectory.fbs",
 		"Config/Merge.fbs",
 		"Config/Gradient.fbs",
 		"Config/Resize.fbs",
 		"Config/Swizzle.fbs",
 		"Config/TextureSwitcher.fbs",
-		"Config/ChannelViewer.fbs",
 		"Config/Sink.fbs",
 		"Config/Layout.fbs",
 		"Config/TextRender.fbs",

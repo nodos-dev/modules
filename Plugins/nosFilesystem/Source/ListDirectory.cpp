@@ -9,7 +9,7 @@
 #include <optional>
 #include <regex>
 
-namespace nos::utilities
+namespace nos::filesystem
 {
 NOS_REGISTER_NAME(Directory);
 NOS_REGISTER_NAME(Pattern);
@@ -114,4 +114,4 @@ nosResult RegisterListDirectory(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::filesystem
