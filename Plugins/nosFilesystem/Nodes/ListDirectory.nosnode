@@ -3,7 +3,7 @@
 		{
 			"class_name": "ListDirectory",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Filesystem",
 				"display_name": "List Directory",
 				"aliases": [ "directory", "folder", "files", "ls", "dir" ]
 			},

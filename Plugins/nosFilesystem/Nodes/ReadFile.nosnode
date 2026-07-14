@@ -3,7 +3,7 @@
         {
             "class_name": "ReadFile",
             "menu_info": {
-                "category": "Utilities|IO",
+                "category": "Filesystem",
                 "display_name": "Read File",
                 "name_aliases": [ "load file", "file to buffer", "read bytes" ]
             },
