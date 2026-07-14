@@ -20,8 +20,6 @@ enum class Utilities : size_t
 	Time,
 	Counter,
 	TextRender,
-	ListDirectory,
-	ReadFile,
 	Count,
 };
 
@@ -31,8 +29,6 @@ void RegisterSink(nosNodeFunctions*);
 void RegisterTime(nosNodeFunctions*);
 nosResult RegisterCounter(nosNodeFunctions*);
 nosResult RegisterTextRender(nosNodeFunctions*);
-nosResult RegisterListDirectory(nosNodeFunctions*);
-nosResult RegisterReadFile(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -47,8 +43,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 	RegisterTime(outList[static_cast<size_t>(Utilities::Time)]);
 	RegisterCounter(outList[static_cast<size_t>(Utilities::Counter)]);
 	RegisterTextRender(outList[static_cast<size_t>(Utilities::TextRender)]);
-	RegisterListDirectory(outList[static_cast<size_t>(Utilities::ListDirectory)]);
-	RegisterReadFile(outList[static_cast<size_t>(Utilities::ReadFile)]);
 	return NOS_RESULT_SUCCESS;
 }
 

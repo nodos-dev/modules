@@ -32,7 +32,7 @@
 					{
 						"name": "SortBy",
 						"description": "Field the output Paths are sorted by.",
-						"type_name": "nos.utilities.ListDirectorySortBy",
+						"type_name": "nos.filesystem.ListDirectorySortBy",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_OUTPUT_PROPERTY",
 						"data": "Name"
