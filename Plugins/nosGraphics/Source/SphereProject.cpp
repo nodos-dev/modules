@@ -30,7 +30,13 @@ struct SphereProject : NodeContext
 		auto outputInfo = sys::vulkan::GetResourceInfo(output);
 		if (!outputInfo || outputInfo->Width != resolution.x() || outputInfo->Height != resolution.y())
 		{
-			nosTextureInfo info = outputInfo.value_or(nosTextureInfo{.Format = NOS_FORMAT_R16G16B16A16_SFLOAT});
+			// Usage must be spelled out for the first creation, when the pin holds no texture
+			// to inherit it from; a zero-usage image is unusable as a render target.
+			nosTextureInfo info = outputInfo.value_or(nosTextureInfo{
+				.Format = NOS_FORMAT_R16G16B16A16_SFLOAT,
+				.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_TRANSFER_SRC |
+									   NOS_IMAGE_USAGE_SAMPLED),
+			});
 			info.Width = resolution.x();
 			info.Height = resolution.y();
 			SetPinObject(NSN_Output, sys::vulkan::CreateTexture(info, "SphereProjectResult"));
