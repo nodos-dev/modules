@@ -12,8 +12,7 @@
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": {
               "resolution": "HD",
               "width": 1920,
@@ -36,8 +35,7 @@
             "type_name": "float",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": 5.0,
             "min": 0.0,
             "max": 1000.0,
@@ -52,8 +50,7 @@
             "type_name": "float",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": 2.0,
             "min": 0.01,
             "max": 1000.0,
@@ -68,8 +65,7 @@
             "type_name": "float",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": 16.0,
             "min": 0.0,
             "max": 128.0,
@@ -84,8 +80,7 @@
             "type_name": "float",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": 0.5,
             "min": 0.0,
             "max": 8.0,
@@ -100,8 +95,7 @@
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "OUTPUT_PIN",
             "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": {
               "resolution": "HD",
               "width": 1920,
@@ -129,8 +123,7 @@
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": {
               "resolution": "HD",
               "width": 1920,
@@ -164,8 +157,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -193,8 +185,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -238,8 +229,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -264,8 +254,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -288,8 +277,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 7.4,
                   "min": 0.0,
                   "max": 1000.0,
@@ -304,8 +292,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 3.1,
                   "min": 0.01,
                   "max": 1000.0,
@@ -320,8 +307,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 5.0,
                   "min": 0.0,
                   "max": 128.0,
@@ -336,8 +322,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 0.0,
                   "min": 0.0,
                   "max": 8.0,
@@ -352,8 +337,7 @@
                   "type_name": "float",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 1.0,
                   "min": 0.0,
                   "max": 1.0,
@@ -368,8 +352,7 @@
                   "type_name": "nos.fb.vec2",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 0.0, "y": 1.0 },
                   "min": { "x": -1.0, "y": -1.0 },
                   "max": { "x": 1.0, "y": 1.0 },
@@ -384,8 +367,7 @@
                   "type_name": "float",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 12.0,
                   "min": 1.0,
                   "max": 64.0,
@@ -400,8 +382,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -442,8 +423,7 @@
                   "type_name": "float",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 5.0,
                   "min": 0.0,
                   "max": 128.0,
@@ -458,8 +438,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 16.0,
                   "referred_by": [
                     "42554a0a-2d70-4ec4-a2ea-594ad71559f3"
@@ -492,8 +471,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -518,8 +496,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -542,8 +519,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 7.4,
                   "min": 0.0,
                   "max": 1000.0,
@@ -558,8 +534,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 3.1,
                   "min": 0.01,
                   "max": 1000.0,
@@ -574,8 +549,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 5.0,
                   "min": 0.0,
                   "max": 128.0,
@@ -590,8 +564,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 0.0,
                   "min": 0.0,
                   "max": 8.0,
@@ -606,8 +579,7 @@
                   "type_name": "float",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 1.0,
                   "min": 0.0,
                   "max": 1.0,
@@ -622,8 +594,7 @@
                   "type_name": "nos.fb.vec2",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.0, "y": 0.0 },
                   "min": { "x": -1.0, "y": -1.0 },
                   "max": { "x": 1.0, "y": 1.0 },
@@ -638,8 +609,7 @@
                   "type_name": "float",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 12.0,
                   "min": 1.0,
                   "max": 64.0,
@@ -654,8 +624,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -696,8 +665,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -720,8 +688,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -760,8 +727,7 @@
                   "type_name": "float",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 7.4,
                   "min": 0.0,
                   "max": 1000.0,
@@ -776,8 +742,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 5.0,
                   "referred_by": [
                     "e0b8f433-212f-48f6-ba4f-c8a194e1a707"
@@ -810,8 +775,7 @@
                   "type_name": "float",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 3.1,
                   "min": 0.01,
                   "max": 1000.0,
@@ -826,8 +790,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 2.0,
                   "referred_by": [
                     "68187c92-92f3-40d0-8b24-df6f33f9f649"
@@ -860,8 +823,7 @@
                   "type_name": "float",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 0.0,
                   "min": 0.0,
                   "max": 8.0,
@@ -876,8 +838,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 0.5,
                   "referred_by": [
                     "312c4450-a4ad-4690-ba3d-afcbc93da6eb"
@@ -910,8 +871,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,
@@ -936,8 +896,7 @@
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": {
                     "resolution": "HD",
                     "width": 1920,

@@ -20,7 +20,9 @@
                         "type_name": "string",
                         "show_as": "INPUT_PIN",
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": { "type": "FILE_PICKER" }
+                        "visualizers": [
+                            { "type": "FILE_PICKER" }
+                        ]
                     },
                     {
                         "name": "Data",

@@ -17,11 +17,13 @@
 						"type_name": "string",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "FILE_PICKER",
-							"file_extensions": [ "fbx" ],
-							"file_picker_type": "OPEN"
-						},
+						"visualizers": [
+							{
+														"type": "FILE_PICKER",
+														"file_extensions": [ "fbx" ],
+														"file_picker_type": "OPEN"
+													}
+						],
 						"description": "Path to the .fbx file to read."
 					},
 					{
@@ -30,10 +32,12 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "",
-						"visualizer": {
-							"type": "COMBO_BOX",
-							"name": ""
-						},
+						"visualizers": [
+							{
+														"type": "COMBO_BOX",
+														"name": ""
+													}
+						],
 						"description": "Object inside the .fbx whose transform is reported.\nThe list is populated once the file is loaded."
 					},
 					{
@@ -42,7 +46,9 @@
 						"type_name": "nos.math.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"visualizers": [
+							{ "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" }
+						],
 						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
 						"description": "Coordinate system the output transforms are expressed in. The node converts\nfrom the file's system (see 'Auto-Detect Source') into this one, including a\nunit change derived from the two systems' meters_per_unit."
 					},
@@ -61,7 +67,9 @@
 						"type_name": "nos.math.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"visualizers": [
+							{ "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" }
+						],
 						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
 						"description": "Coordinate system the .fbx is authored in. Used only when 'Auto-Detect\nSource' is off; otherwise the detected system (see 'Detected Frame') wins."
 					},

@@ -16,8 +16,7 @@
             "type_name": "nos.fb.vec3",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167 },
             "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
             "contents_type": "PortalPin",
@@ -29,8 +28,7 @@
             "type_name": "nos.fb.vec4",
             "show_as": "OUTPUT_PIN",
             "can_show_as": "OUTPUT_PIN_ONLY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167, "w": 0.0 },
             "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
             "contents_type": "PortalPin",
@@ -52,8 +50,7 @@
                   "type_name": "nos.fb.vec3",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "contents_type": "JobPin",
@@ -65,8 +62,7 @@
                   "type_name": "float",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 1.005067,
                   "def": 0.0,
                   "contents_type": "JobPin",
@@ -78,8 +74,7 @@
                   "type_name": "float",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": -0.030323,
                   "def": 0.0,
                   "contents_type": "JobPin",
@@ -91,8 +86,7 @@
                   "type_name": "float",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 0.06167,
                   "def": 0.0,
                   "contents_type": "JobPin",
@@ -117,8 +111,7 @@
                   "type_name": "nos.fb.vec4",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167, "w": 0.0 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
                   "contents_type": "JobPin",
@@ -131,8 +124,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 1.005067,
                   "def": 0.0,
                   "contents_type": "JobPin",
@@ -144,8 +136,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": -0.030323,
                   "def": 0.0,
                   "contents_type": "JobPin",
@@ -157,8 +148,7 @@
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 0.06167,
                   "def": 0.0,
                   "contents_type": "JobPin",
@@ -170,8 +160,7 @@
                   "type_name": "float",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": 0.0,
                   "def": 0.0,
                   "contents_type": "JobPin",
@@ -198,8 +187,7 @@
                   "type_name": "nos.fb.vec3",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "contents_type": "JobPin",
@@ -211,8 +199,7 @@
                   "type_name": "nos.fb.vec3",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167 },
                   "referred_by": [
                     "7e84db7f-fcb2-4761-9cca-a176db039d6a"
@@ -242,8 +229,7 @@
                   "type_name": "nos.fb.vec4",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167, "w": 0.0 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
                   "contents_type": "JobPin",
@@ -256,8 +242,7 @@
                   "type_name": "nos.fb.vec4",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.005067, "y": -0.030323, "z": 0.06167, "w": 0.0 },
                   "referred_by": [
                     "121837f4-7aef-454e-b61e-ba1b0b832c86"

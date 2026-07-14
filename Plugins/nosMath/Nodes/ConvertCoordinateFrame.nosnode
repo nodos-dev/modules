@@ -23,7 +23,9 @@
 						"type_name": "nos.math.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"visualizers": [
+							{ "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" }
+						],
 						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
 						"description": "Coordinate system convention of the input TransformQ (its euler encoding is unused on this quaternion node)."
 					},
@@ -33,7 +35,9 @@
 						"type_name": "nos.math.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"visualizers": [
+							{ "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" }
+						],
 						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
 						"description": "Coordinate system convention of the output TransformQ (its euler encoding is unused on this quaternion node)."
 					},

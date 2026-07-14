@@ -38,9 +38,11 @@
 						"type_name": "nos.fb.vec4",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
+						"visualizers": [
+							{
+														"type": "COLOR_PICKER"
+													}
+						],
 						"data": {
 							"x": 1,
 							"y": 1,
@@ -68,9 +70,11 @@
 						"meta_data_map": [
 							{ "key": "Category", "value": "Outline" }
 						],
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
+						"visualizers": [
+							{
+														"type": "COLOR_PICKER"
+													}
+						],
 						"data": {
 							"x": 0,
 							"y": 0,
@@ -101,9 +105,11 @@
 						"meta_data_map": [
 							{ "key": "Category", "value": "Shadow" }
 						],
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
+						"visualizers": [
+							{
+														"type": "COLOR_PICKER"
+													}
+						],
 						"data": {
 							"x": 0,
 							"y": 0,
@@ -149,9 +155,11 @@
 						"meta_data_map": [
 							{ "key": "Category", "value": "Background" }
 						],
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
+						"visualizers": [
+							{
+														"type": "COLOR_PICKER"
+													}
+						],
 						"data": {
 							"x": 0,
 							"y": 0,
@@ -226,10 +234,12 @@
 							"y": 1080
 						},
 						"description": "Output texture resolution.",
-						"visualizer": {
-							"type": "NAMED_VALUE",
-							"name": "nos.mediaio.ResolutionVisualizer"
-						}
+						"visualizers": [
+							{
+														"type": "NAMED_VALUE",
+														"name": "nos.mediaio.ResolutionVisualizer"
+													}
+						]
 					},
 					{
 						"name": "WrapWidth",
@@ -253,11 +263,13 @@
 						],
 						"data": "",
 						"description": "Path to a .ttf/.otf font file.\nLeave empty to use the bundled Roboto Mono font.",
-						"visualizer": {
-							"type": "FILE_PICKER",
-							"file_extensions": [ "ttf", "otf" ],
-							"file_picker_type": "OPEN"
-						}
+						"visualizers": [
+							{
+														"type": "FILE_PICKER",
+														"file_extensions": [ "ttf", "otf" ],
+														"file_picker_type": "OPEN"
+													}
+						]
 					},
 					{
 						"name": "Output",

@@ -16,8 +16,7 @@
             "type_name": "nos.fb.mat4",
             "show_as": "OUTPUT_PIN",
             "can_show_as": "OUTPUT_PIN_ONLY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": { "x": { "x": 1.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 1.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 1.0, "w": 0.0 }, "w": { "x": 149.749268, "y": 109.801041, "z": 34.700001, "w": 1.0 } },
             "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
             "contents_type": "PortalPin",
@@ -29,8 +28,7 @@
             "type_name": "nos.fb.vec3",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
+            "visualizers": [],
             "data": { "x": 149.749268, "y": 109.801041, "z": 34.700001 },
             "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
             "meta_data_map": [
@@ -54,8 +52,7 @@
                   "type_name": "nos.fb.Transform",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "position": { "x": 149.749267578125, "y": 109.801040649414, "z": 34.700000762939 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
                   "def": { "position": { "x": 0.0, "y": 0.0, "z": 0.0 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
                   "contents_type": "JobPin",
@@ -68,8 +65,7 @@
                   "type_name": "nos.fb.vec3d",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 149.749267578125, "y": 109.801040649414, "z": 34.700000762939 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "contents_type": "JobPin",
@@ -81,8 +77,7 @@
                   "type_name": "nos.fb.vec3d",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "contents_type": "JobPin",
@@ -94,8 +89,7 @@
                   "type_name": "nos.fb.vec3d",
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 1.0, "y": 1.0, "z": 1.0 },
                   "def": { "x": 1.0, "y": 1.0, "z": 1.0 },
                   "contents_type": "JobPin",
@@ -122,8 +116,7 @@
                   "type_name": "nos.fb.vec3",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 149.749268, "y": 109.801041, "z": 34.700001 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "meta_data_map": [
@@ -138,8 +131,7 @@
                   "type_name": "nos.fb.vec3d",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 149.749267578125, "y": 109.801040649414, "z": 34.700000762939 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "meta_data_map": [
@@ -166,8 +158,7 @@
                   "type_name": "nos.fb.Transform",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "position": { "x": 149.749267578125, "y": 109.801040649414, "z": 34.700000762939 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
                   "def": { "position": { "x": 0.0, "y": 0.0, "z": 0.0 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
                   "contents_type": "JobPin",
@@ -179,8 +170,7 @@
                   "type_name": "nos.fb.mat4",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": { "x": 1.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 1.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 1.0, "w": 0.0 }, "w": { "x": 149.749268, "y": 109.801041, "z": 34.700001, "w": 1.0 } },
                   "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
                   "contents_type": "JobPin",
@@ -204,8 +194,7 @@
                   "type_name": "nos.fb.mat4",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": { "x": 1.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 1.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 1.0, "w": 0.0 }, "w": { "x": 149.749268, "y": 109.801041, "z": 34.700001, "w": 1.0 } },
                   "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
                   "contents_type": "JobPin",
@@ -217,8 +206,7 @@
                   "type_name": "nos.fb.mat4",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": { "x": 1.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 1.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 1.0, "w": 0.0 }, "w": { "x": 149.749268, "y": 109.801041, "z": 34.700001, "w": 1.0 } },
                   "referred_by": [
                     "3397e8ac-f446-47c4-8061-45c1d11b14f6"
@@ -248,8 +236,7 @@
                   "type_name": "nos.fb.vec3",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 149.749268, "y": 109.801041, "z": 34.700001 },
                   "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
                   "contents_type": "JobPin",
@@ -261,8 +248,7 @@
                   "type_name": "nos.fb.vec3",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
+                  "visualizers": [],
                   "data": { "x": 149.749268, "y": 109.801041, "z": 34.700001 },
                   "referred_by": [
                     "0e3b701c-f197-428c-8043-7af3bf55f733"

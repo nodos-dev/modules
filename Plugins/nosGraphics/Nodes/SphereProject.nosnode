@@ -92,9 +92,11 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"description": "Fill colour for view directions that fall outside the plate.",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
+						"visualizers": [
+							{
+														"type": "COLOR_PICKER"
+													}
+						],
 						"data": {
 							"x": 0.0,
 							"y": 0.0,
@@ -107,10 +109,12 @@
 						"type_name": "nos.fb.vec2u",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "NAMED_VALUE",
-							"name": "nos.mediaio.ResolutionVisualizer"
-						},
+						"visualizers": [
+							{
+														"type": "NAMED_VALUE",
+														"name": "nos.mediaio.ResolutionVisualizer"
+													}
+						],
 						"description": "Output render resolution. Also sets the virtual camera aspect ratio.",
 						"data": {
 							"x": 1920,
