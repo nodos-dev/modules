@@ -17,6 +17,7 @@ NOS_REGISTER_NAME(SortBy);
 NOS_REGISTER_NAME(SortDescending);
 NOS_REGISTER_NAME(Paths);
 NOS_REGISTER_NAME(Count);
+NOS_REGISTER_NAME(string);
 
 // Translates a glob pattern (* and ? wildcards) into an ECMAScript regex that matches it in full.
 std::regex GlobToRegex(std::string const& glob)
@@ -91,17 +92,32 @@ struct ListDirectoryNode : NodeContext
 		for (auto const& entry : entries)
 			paths.push_back(nos::PathToUtf8(entry.path()));
 
-		uint32_t count = (uint32_t)paths.size();
-		SetPinValue(NSN_Count, nosBuffer{ .Data = &count, .Size = sizeof(count) });
+		SetPinValue(NSN_Count, nos::Buffer::From((uint32_t)paths.size()));
 
-		flatbuffers::FlatBufferBuilder fbb;
-		std::vector<flatbuffers::Offset<flatbuffers::String>> elements;
+		// Paths is an array pin: build one string object per path and wrap them in an
+		// array object. Element refs are held until CreateArrayObject has taken its own.
+		std::vector<PrimitiveObjectRef> elementRefs;
+		std::vector<nosObjectId> elementIds;
+		elementRefs.reserve(paths.size());
+		elementIds.reserve(paths.size());
 		for (auto const& path : paths)
-			elements.push_back(fbb.CreateString(path.c_str()));
-		fbb.Finish(fbb.CreateVector(elements));
-		nos::Buffer pathsBuf = fbb.Release();
-		auto root = flatbuffers::GetRoot<uint8_t>(pathsBuf.Data());
-		SetPinValue(NSN_Paths, nosBuffer{ .Data = (void*)root, .Size = pathsBuf.Size() });
+		{
+			auto element = PrimitiveObjectRef::Create(NSN_string, nos::Buffer(path.c_str(), path.size() + 1));
+			if (!element)
+				return NOS_RESULT_FAILED;
+			elementIds.push_back(element->GetObjectId());
+			elementRefs.push_back(std::move(*element));
+		}
+
+		auto it = execParams.find(NSN_Paths);
+		if (it == execParams.end())
+			return NOS_RESULT_FAILED;
+		ObjectRef pathsArray;
+		auto res = nosEngine.ObjectAPI->CreateArrayObject(
+			it->second.TypeName, elementIds.data(), elementIds.size(), &pathsArray.GetStorage());
+		if (res != NOS_RESULT_SUCCESS)
+			return res;
+		SetPinObject(NSN_Paths, pathsArray);
 
 		return NOS_RESULT_SUCCESS;
 	}
