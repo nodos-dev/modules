@@ -14,18 +14,6 @@
 				"description": "Outputs a running count that advances by Step every time the node runs.\nDrive it through the In/Out exe pins to schedule it, and call Reset to zero the count.",
 				"pins": [
 					{
-						"name": "InExe",
-						"type_name": "nos.exe",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "OutExe",
-						"type_name": "nos.exe",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY"
-					},
-					{
 						"name": "Step",
 						"description": "Amount added to the count on each run. Use a negative value to count down.",
 						"type_name": "int",
