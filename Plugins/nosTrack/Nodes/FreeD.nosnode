@@ -50,24 +50,6 @@
 						"description": "Amount of track data frames to buffer, in order to compensate for network jitter.\nIf you have a tracking network with a lot of timing jitter, this value can be increased by a few frames.\nUsually it is suggested that you have a seperate network (preferably physically seperate).\nThis will help to minimize jitter and makes it easier to manage UDP broadcast port overlaps."
 					},
 					{
-						"name": "AutoSpare",
-						"display_name": "Auto Spare",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": true
-					},
-					{
-						"name": "AutoSpareMaxJitter",
-						"display_name": "Auto Spare Max Jitter",
-						"type_name": "float",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 0.4,
-						"min": 0.0,
-						"max": 0.5
-					},
-					{
 						"name": "NegateX",
 						"type_name": "bool",
 						"show_as": "PROPERTY",
@@ -214,6 +196,58 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": false
+					},
+					{
+						"name": "TimeBased Mode",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": 0,
+						"advanced_property": true
+					},
+					{
+						"name": "TimeBased Delay",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1,
+						"description": "Delay in ms",
+						"advanced_property": true
+					},
+					{
+						"name": "EncoderDelayOverride",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": 0,
+						"advanced_property": true
+					},
+					{
+						"name": "EncoderDelay",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1,
+						"description": "Delay in ms",
+						"advanced_property": true
+					},
+					{
+						"name": "Timing Jitter",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": 0.0,
+						"readonly": true,
+						"advanced_property": true,
+						"description": "Fluctuations in packet arrival times measured in milliseconds due to network conditions like congestion or routing changes."
+					},
+					{
+						"name": "CenterShiftRatio",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"pin_category": "Transform Mapping",
+						"data": 1.0
 					}
 				]
 			}

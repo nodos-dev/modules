@@ -1,5 +1,5 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-#include "Track.h"
+#include <nosTrack/Track.h>
 #include "Builtins_generated.h"
 
 
@@ -30,6 +30,11 @@ struct UserTrack : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
+		// Guard against unready pins: GetPinValue below is dereferenced directly,
+		// so bail out if any required pin is missing (ported from zd.track.UserTrack).
+		if (!(params.contains(NSN_Impulse) && params.contains(NSN_Decay) &&
+			  params.contains(NSN_Track) && params.contains(NSN_Input)))
+			return NOS_RESULT_INVALID_ARGUMENT;
 		Impulse = glm::max(*params.GetPinValue<float>(NSN_Impulse), 1.f);
 		Decay = glm::max(*params.GetPinValue<float>(NSN_Decay), 0.f);
 		(glm::vec3&)State.location += V;
