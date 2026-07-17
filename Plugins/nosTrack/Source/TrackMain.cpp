@@ -1,5 +1,5 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-#include "Track.h"
+#include <nosTrack/Track.h>
 #include "nosSysAnimation/nosAnimationSubsystem.h"
 #include "nosTrack/Track_generated.h"
 
