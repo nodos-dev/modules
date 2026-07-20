@@ -159,9 +159,10 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 {
 	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
 	outFunctions->GetRenamedTypes = [](nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outCount) {
-		*outCount = 4;
+		*outCount = 8;
 		if (!outRenamedFrom || !outRenamedTo)
 			return;
+		// Legacy nos.fb.* names (these types once lived in the nos.fb namespace).
 		outRenamedFrom[0] = NOS_NAME_STATIC("nos.fb.Track");
 		outRenamedTo[0] = NOS_NAME_STATIC(track::Track::GetFullyQualifiedName());
 		outRenamedFrom[1] = NOS_NAME_STATIC("nos.fb.LensDistortion");
@@ -170,6 +171,16 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 		outRenamedTo[2] = NOS_NAME_STATIC("nos.track.CoordinateSystem");
 		outRenamedFrom[3] = NOS_NAME_STATIC("nos.fb.RotationSystem");
 		outRenamedTo[3] = NOS_NAME_STATIC("nos.track.RotationSystem");
+		// Legacy nos.sys.track.* names (these types lived in the removed nos.sys.track
+		// subsystem, replaced by this plugin; migrate saved graphs that still reference them).
+		outRenamedFrom[4] = NOS_NAME_STATIC("nos.sys.track.Track");
+		outRenamedTo[4] = NOS_NAME_STATIC(track::Track::GetFullyQualifiedName());
+		outRenamedFrom[5] = NOS_NAME_STATIC("nos.sys.track.LensDistortion");
+		outRenamedTo[5] = NOS_NAME_STATIC(track::LensDistortion::GetFullyQualifiedName());
+		outRenamedFrom[6] = NOS_NAME_STATIC("nos.sys.track.CoordinateSystem");
+		outRenamedTo[6] = NOS_NAME_STATIC("nos.track.CoordinateSystem");
+		outRenamedFrom[7] = NOS_NAME_STATIC("nos.sys.track.RotationSystem");
+		outRenamedTo[7] = NOS_NAME_STATIC("nos.track.RotationSystem");
 	};
 	// CameraGuide moved from nos.graphics to nos.track; migrate old graphs.
 	outFunctions->GetRenamedNodeClasses = [](nosName* outFrom, nosName* outTo, size_t* outCount) {
