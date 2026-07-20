@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.sync",
-            "version": "3.2.0"
+            "version": "3.3.0"
         },
         "display_name": "Synchronization",
         "description": "Nodos subsystem for synchronization utilities",

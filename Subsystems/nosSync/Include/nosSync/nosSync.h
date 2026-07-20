@@ -37,6 +37,15 @@ typedef struct nosSyncGroupHealth
 	nosConsensusStatus ConsensusStatus;
 } nosSyncGroupHealth;
 
+typedef struct nosSyncGroupTimeline
+{
+	uint64_t ConsensusTimestampNs; /// The timestamp of the last consensus event in nanoseconds.
+	/// Timestamp of the latest event occurrence projected from the last successful consensus event,
+	/// at or before the query time, in steady-clock nanoseconds
+	uint64_t ProjectedEventTimestampNs;
+	nosVec2u DeltaSeconds; /// Interval between events.
+} nosSyncGroupTimeline;
+
 typedef nosResult (*nosResetEventPfn)(void* userData);
 typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
 typedef void (*nosNotifySyncGroupHealthPfn)(void* userData, const nosSyncGroupHealth* status);
@@ -81,6 +90,12 @@ typedef struct nosSyncSubsystem
 	nosResult (NOSAPI_CALL* UnregisterEventGroup)(uint32_t eventGroupId);
 	/// 
 	/// ---------------------
+
+	/// Returns the timeline of the sync group that the given event group forms with the caller's
+	/// current path group, projected at the `deltaSeconds` rate. Pass {0, 0} to use the sync group's
+	/// own rate. Any other rate must align with the sync group's rate (one an integer multiple of the
+	/// other). Fails if no consensus has been achieved yet on that sync group.
+	nosResult (NOSAPI_CALL* GetCurrentSyncGroupTimeline)(uint32_t eventGroupId, nosVec2u deltaSeconds, nosSyncGroupTimeline* outTimeline);
 } nosSyncSubsystem;
 
 #pragma region Helper Declarations & Macros
@@ -88,7 +103,7 @@ typedef struct nosSyncSubsystem
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
 #define NOS_SYNC_VERSION_MAJOR 3
-#define NOS_SYNC_VERSION_MINOR 2
+#define NOS_SYNC_VERSION_MINOR 3
 
 extern struct nosModuleInfo nosSyncPluginInfo;
 extern nosSyncSubsystem* nosSync;
