@@ -72,7 +72,46 @@ struct MultiBoundedQueueNodeContext : NodeContext
 
 	std::optional<uint32_t> RequestedRingSize = std::nullopt;
 
+	enum class Status
+	{
+		OK,
+		EFFECTIVE_RING_SIZE_ADJUSTED,
+	} CurrentStatus = Status::OK;
+	std::string CurrentStatusMessage;
+
 	std::string GetName() const { return "MultiBoundedQueue"; }
+
+	std::string GetChannelDisplayName(Channel const& ch) const
+	{
+		if (auto* inputPin = GetPin(ch.InputId))
+			return inputPin->DisplayName.AsString();
+		if (auto* outputPin = GetPin(ch.OutputId))
+			return outputPin->DisplayName.AsString();
+		return ch.InputName.AsString();
+	}
+
+	void SendRingStats(Channel const& ch, std::string_view state)
+	{
+		auto& ringChannel = *ch.RingChannel;
+		auto prefix = NodeName.AsString() + " " + GetChannelDisplayName(ch);
+		nosEngine.WatchLog((prefix + " Read Size").c_str(), std::to_string(ringChannel.ReadPool.size()).c_str());
+		nosEngine.WatchLog((prefix + " Write Size").c_str(), std::to_string(ringChannel.WritePool.size()).c_str());
+		nosEngine.WatchLog((prefix + " Total Frame Count").c_str(),
+						   std::to_string(Ring.Size - ringChannel.WritePool.size()).c_str());
+		nosEngine.WatchLog((prefix + " State").c_str(), state.data());
+	}
+
+	void SetStatus(Status newStatus, std::string message = "")
+	{
+		if (CurrentStatus == newStatus && CurrentStatusMessage == message)
+			return;
+
+		CurrentStatus = newStatus;
+		CurrentStatusMessage = std::move(message);
+		ClearNodeStatusMessages();
+		if (CurrentStatus == Status::EFFECTIVE_RING_SIZE_ADJUSTED)
+			SetNodeStatusMessage(CurrentStatusMessage, fb::NodeStatusMessageType::WARNING);
+	}
 
 	static std::optional<char> ParseLetter(std::string_view pinName)
 	{
@@ -186,14 +225,17 @@ struct MultiBoundedQueueNodeContext : NodeContext
 			nosEngine.LogW((GetName() + " size cannot be 0").c_str());
 			return;
 		}
-		if (Ring.Size == size && (!RequestedRingSize.has_value() || *RequestedRingSize == size))
+		// A resize is applied asynchronously on OnPathStart. Do not keep restarting
+		// the path while the requested size is already pending.
+		if (Ring.Size == size || (RequestedRingSize && *RequestedRingSize == size))
 			return;
 		for (auto& [_, ch] : Channels)
 		{
-			if (!ch->RingChannel)
+			if (!ch->RingChannel || !PinIdToLetter.contains(ch->InputId))
 				continue;
 			nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = size};
 			nosEngine.SendPathCommand(ch->InputId, ringSizeChange);
+			break;
 		}
 		Ring.Stop();
 		PoppedSinceLastSchedule.clear();
@@ -203,8 +245,9 @@ struct MultiBoundedQueueNodeContext : NodeContext
 
 	void SendPathRestart()
 	{
-		for (auto& [_, ch] : Channels)
-			nosEngine.SendPathRestart(ch->InputId);
+		// All channels share this node context and ring. Restart its runner path
+		// once instead of enqueueing one overlapping restart per input channel.
+		nosEngine.SendPathRestart(NodeId);
 	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
@@ -330,6 +373,7 @@ struct MultiBoundedQueueNodeContext : NodeContext
 		wantedRings.reserve(Channels.size());
 
 		uint32_t maxRequired = requestedSize;
+		std::string adjustMessage;
 		for (auto& [_, ch] : Channels)
 		{
 			if (!ch->RingChannel || ch->RingChannel->Resources.empty() || !ch->TypeInfo)
@@ -340,9 +384,12 @@ struct MultiBoundedQueueNodeContext : NodeContext
 			void* input = ch->RingChannel->ResInterface->GetPinInfo(it->second, false);
 			if (!input)
 				continue;
-			auto [required, _] = ch->RingChannel->ResInterface->GetRequiredRingSize(input, requestedSize);
+			auto [required, message] = ch->RingChannel->ResInterface->GetRequiredRingSize(input, requestedSize);
 			if (required > maxRequired)
+			{
 				maxRequired = required;
+				adjustMessage = message;
+			}
 			gathered.push_back({ch.get(), ch->RingChannel, input});
 			wantedRings.push_back(ch->RingChannel);
 		}
@@ -352,6 +399,12 @@ struct MultiBoundedQueueNodeContext : NodeContext
 			return NOS_RESULT_FAILED;
 		}
 
+		bool effectiveSizeAdjusted = maxRequired != requestedSize;
+		if (effectiveSizeAdjusted)
+			SetStatus(Status::EFFECTIVE_RING_SIZE_ADJUSTED, adjustMessage);
+		else
+			SetStatus(Status::OK);
+
 		if (Ring.Size != maxRequired)
 		{
 			RequestRingResize(maxRequired);
@@ -359,6 +412,8 @@ struct MultiBoundedQueueNodeContext : NodeContext
 		}
 
 		std::vector<MultiRing::SlotPair> slots;
+		for (auto const& g : gathered)
+			SendRingStats(*g.NodeCh, "Pre Push");
 		if (!Ring.BeginPushSubset(100, wantedRings, slots))
 			return Ring.Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
 
@@ -376,6 +431,8 @@ struct MultiBoundedQueueNodeContext : NodeContext
 		}
 
 		Ring.EndPushAll(slots);
+		for (auto const& g : gathered)
+			SendRingStats(*g.NodeCh, "Post Push");
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -388,12 +445,14 @@ struct MultiBoundedQueueNodeContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 
 		ResourceInterface::ResourceBase* slot;
+		SendRingStats(*ch, "Pre Begin Pop");
 		{
 			ScopedProfilerEvent _({.Name = "Wait For Filled Slot"});
 			slot = Ring.BeginPop(*ch->RingChannel, 100);
 		}
 		if (!slot)
 			return Ring.Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
+		SendRingStats(*ch, "Post Begin Pop");
 
 		// Propagate the slot resource's descriptor onto the output pin before
 		// Copy reads cpy->PinData as the destination — otherwise the GPU copy
@@ -408,6 +467,7 @@ struct MultiBoundedQueueNodeContext : NodeContext
 		cpy->FrameNumber = slot->FrameNumber;
 
 		Ring.EndPop(*ch->RingChannel, slot);
+		SendRingStats(*ch, "End Copy From");
 
 		PoppedSinceLastSchedule.insert(ch->Letter);
 		size_t liveCount = 0;

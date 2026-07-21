@@ -82,7 +82,46 @@ struct MultiRingBufferNodeContext : NodeContext
 	std::mutex ModeMutex;
 	std::atomic_bool RepeatWhenFilling = false;
 
+	enum class Status
+	{
+		OK,
+		EFFECTIVE_RING_SIZE_ADJUSTED,
+	} CurrentStatus = Status::OK;
+	std::string CurrentStatusMessage;
+
 	std::string GetName() const { return "MultiRingBuffer"; }
+
+	std::string GetChannelDisplayName(Channel const& ch) const
+	{
+		if (auto* inputPin = GetPin(ch.InputId))
+			return inputPin->DisplayName.AsString();
+		if (auto* outputPin = GetPin(ch.OutputId))
+			return outputPin->DisplayName.AsString();
+		return ch.InputName.AsString();
+	}
+
+	void SendRingStats(Channel const& ch, std::string_view state)
+	{
+		auto& ringChannel = *ch.RingChannel;
+		auto prefix = NodeName.AsString() + " " + GetChannelDisplayName(ch);
+		nosEngine.WatchLog((prefix + " Read Size").c_str(), std::to_string(ringChannel.ReadPool.size()).c_str());
+		nosEngine.WatchLog((prefix + " Write Size").c_str(), std::to_string(ringChannel.WritePool.size()).c_str());
+		nosEngine.WatchLog((prefix + " Total Frame Count").c_str(),
+						   std::to_string(Ring.Size - ringChannel.WritePool.size()).c_str());
+		nosEngine.WatchLog((prefix + " State").c_str(), state.data());
+	}
+
+	void SetStatus(Status newStatus, std::string message = "")
+	{
+		if (CurrentStatus == newStatus && CurrentStatusMessage == message)
+			return;
+
+		CurrentStatus = newStatus;
+		CurrentStatusMessage = std::move(message);
+		ClearNodeStatusMessages();
+		if (CurrentStatus == Status::EFFECTIVE_RING_SIZE_ADJUSTED)
+			SetNodeStatusMessage(CurrentStatusMessage, fb::NodeStatusMessageType::WARNING);
+	}
 
 	static std::optional<char> ParseLetter(std::string_view pinName)
 	{
@@ -228,14 +267,17 @@ struct MultiRingBufferNodeContext : NodeContext
 			nosEngine.LogW((GetName() + " size cannot be 0").c_str());
 			return;
 		}
-		if (Ring.Size == size && (!RequestedRingSize.has_value() || *RequestedRingSize == size))
+		// A resize is applied asynchronously on OnPathStart. Do not keep restarting
+		// the path while the requested size is already pending.
+		if (Ring.Size == size || (RequestedRingSize && *RequestedRingSize == size))
 			return;
 		for (auto& [_, ch] : Channels)
 		{
-			if (!ch->RingChannel)
+			if (!ch->RingChannel || !PinIdToLetter.contains(ch->InputId))
 				continue;
 			nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = size};
 			nosEngine.SendPathCommand(ch->InputId, ringSizeChange);
+			break;
 		}
 		Ring.Stop();
 		PoppedSinceLastSchedule.clear();
@@ -245,8 +287,9 @@ struct MultiRingBufferNodeContext : NodeContext
 
 	void SendPathRestart()
 	{
-		for (auto& [_, ch] : Channels)
-			nosEngine.SendPathRestart(ch->InputId);
+		// All channels share this node context and ring. Restart its runner path
+		// once instead of enqueueing one overlapping restart per input channel.
+		nosEngine.SendPathRestart(NodeId);
 	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
@@ -381,15 +424,23 @@ struct MultiRingBufferNodeContext : NodeContext
 			auto it = pins.find(ch->InputName);
 			if (it == pins.end())
 				continue;
-			void* input = ch->RingChannel->ResInterface->GetPinInfo(it->second, true);
-			if (!input)
+			// Field rejection determines whether this sample can be pushed, not
+			// how many slots the shared ring requires. Compute the requirement
+			// first so a rejected interlaced field cannot make maxRequired fall
+			// back to the requested even size for this execution.
+			void* sizingInput = ch->RingChannel->ResInterface->GetPinInfo(it->second, false);
+			if (!sizingInput)
 				continue;
-			auto [required, message] = ch->RingChannel->ResInterface->GetRequiredRingSize(input, requestedSize);
+			auto [required, message] =
+				ch->RingChannel->ResInterface->GetRequiredRingSize(sizingInput, requestedSize);
 			if (required > maxRequired)
 			{
 				maxRequired = required;
 				adjustMessage = message;
 			}
+			void* input = ch->RingChannel->ResInterface->GetPinInfo(it->second, true);
+			if (!input)
+				continue;
 			gathered.push_back({ch.get(), ch->RingChannel, input});
 			wantedRings.push_back(ch->RingChannel);
 		}
@@ -400,9 +451,10 @@ struct MultiRingBufferNodeContext : NodeContext
 		}
 
 		bool effectiveSizeAdjusted = maxRequired != requestedSize;
-		ClearNodeStatusMessages();
 		if (effectiveSizeAdjusted)
-			SetNodeStatusMessage(adjustMessage, fb::NodeStatusMessageType::WARNING);
+			SetStatus(Status::EFFECTIVE_RING_SIZE_ADJUSTED, adjustMessage);
+		else
+			SetStatus(Status::OK);
 
 		if (Ring.Size != maxRequired)
 		{
@@ -413,6 +465,8 @@ struct MultiRingBufferNodeContext : NodeContext
 		}
 
 		std::vector<MultiRing::SlotPair> slots;
+		for (auto const& g : gathered)
+			SendRingStats(*g.NodeCh, "Pre Push");
 		if (!Ring.BeginPushSubset(100, wantedRings, slots))
 			return Ring.Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
 
@@ -431,6 +485,8 @@ struct MultiRingBufferNodeContext : NodeContext
 		}
 
 		Ring.EndPushAll(slots);
+		for (auto const& g : gathered)
+			SendRingStats(*g.NodeCh, "Post Push");
 
 		if (Mode == RingMode::FILL)
 		{
@@ -468,6 +524,7 @@ struct MultiRingBufferNodeContext : NodeContext
 		{
 			Ring.EndPop(*ch->RingChannel, ch->LastPopped);
 			ch->LastPopped = nullptr;
+			SendRingStats(*ch, "End Frame");
 		}
 
 		if (OnRestart == OnRestartType::WAIT_UNTIL_FULL && RepeatWhenFilling)
@@ -488,12 +545,14 @@ struct MultiRingBufferNodeContext : NodeContext
 		}
 
 		ResourceInterface::ResourceBase* slot;
+		SendRingStats(*ch, "Pre Begin Pop");
 		{
 			ScopedProfilerEvent _({.Name = "Wait For Filled Slot"});
 			slot = Ring.BeginPop(*ch->RingChannel, 100);
 		}
 		if (!slot)
 			return Ring.Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
+		SendRingStats(*ch, "Post Begin Pop");
 
 		nos::Buffer outPinVal;
 		bool changePinValue = ch->RingChannel->ResInterface->BeginCopyFrom(slot, *cpy->PinData, outPinVal);
