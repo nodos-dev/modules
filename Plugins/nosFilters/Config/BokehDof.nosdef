@@ -9,7 +9,7 @@
 			"node": {
 				"class_name": "BokehDof",
 				"name": "Bokeh DoF",
-				"description": "Single-pass 2D depth-of-field. CoC is computed from a linear view-space Z input; samples are gathered on a Vogel disc weighted by the BokehShape kernel texture, so bokeh takes the shape painted into BokehShape.",
+				"description": "Single-pass 2D depth-of-field. CoC follows a physical thin-lens model (Aperture, Focus\nDistance, Fov) from a linear view-space Z input; samples are gathered on a Vogel disc weighted\nby the BokehShape kernel texture, so bokeh takes the shape painted into BokehShape.",
 				"contents_type": "Job",
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
@@ -63,15 +63,26 @@
 						"max": 1000.0
 					},
 					{
-						"name": "FocusRange",
-						"display_name": "Focus Range",
+						"name": "Aperture",
+						"display_name": "Aperture (lens radius)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "How far from Focus Distance the blur takes to reach Max Radius.\nSmaller values give a snappier falloff.",
-						"data": 2.0,
-						"min": 0.01,
-						"max": 1000.0
+						"description": "Thin-lens radius in the same world units as the Depth input. Larger values give a\nshallower depth of field.",
+						"data": 0.03,
+						"min": 0.0,
+						"max": 1.0
+					},
+					{
+						"name": "Fov",
+						"display_name": "FOV (vertical, degrees)",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Vertical field of view of the camera that rendered the inputs, in degrees; projects\nthe world-space blur radius to pixels.",
+						"data": 60.0,
+						"min": 1.0,
+						"max": 179.0
 					},
 					{
 						"name": "MaxRadius",

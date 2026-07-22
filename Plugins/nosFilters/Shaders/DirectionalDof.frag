@@ -15,9 +15,10 @@ layout(binding = 2) uniform DirectionalDofParams
 {
     // Focus distance in the same units as the Depth input (linear view-space Z).
     float FocusDistance;
-    // Distance from focus where CoC reaches MaxRadius.
-    // Smaller value = sharper focus falloff; larger = gentler.
-    float FocusRange;
+    // Thin-lens radius in the same world units as the Depth input.
+    float Aperture;
+    // Vertical field of view in degrees; projects the world-space blur radius to pixels.
+    float Fov;
     // Maximum CoC radius in pixels.
     float MaxRadius;
     // 0 = treat zero depth as "no info, keep sharp"; 1 = treat zero depth as far.
@@ -33,17 +34,20 @@ Params;
 layout(location = 0) out vec4 rt;
 layout(location = 0) in vec2 uv;
 
-float CocFromDepth(float Z)
+// Thin lens: a point at Z with focus at F blurs to a world-space radius
+// Aperture * |Z - F| / F at its own plane; dividing by Z projects it to screen.
+// CocScale converts that to pixels: ImageHeight / (2 * tan(Fov / 2)).
+float CocFromDepth(float Z, float CocScale)
 {
-    // Treat Z<=0 (no depth signal) as either "near focus" (BackgroundIsFar=0)
-    // or as far plane (BackgroundIsFar=1). Picking far avoids halos around empty regions.
+    float F = max(Params.FocusDistance, 1e-4);
+    float Coc;
     if (Z <= 0.0)
-        Z = mix(Params.FocusDistance, Params.FocusDistance + Params.FocusRange * 4.0, Params.BackgroundIsFar);
-
-    float D   = abs(Z - Params.FocusDistance);
-    float Coc = D / max(Params.FocusRange, 1e-4);
-    Coc       = clamp(Coc * Params.MaxRadius, 0.0, Params.MaxRadius);
-    return Coc;
+        // Z -> infinity limit of |Z - F| / (F * Z) is 1 / F; 0 keeps zero depth sharp.
+        // Picking far avoids halos around empty regions.
+        Coc = Params.BackgroundIsFar * Params.Aperture / F * CocScale;
+    else
+        Coc = Params.Aperture * abs(Z - F) / (F * Z) * CocScale;
+    return clamp(Coc, 0.0, Params.MaxRadius);
 }
 
 void main()
@@ -51,9 +55,11 @@ void main()
     vec2 TextureSize = textureSize(Input, 0);
     vec2 TexelSize   = 1.0 / TextureSize;
 
+    float CocScale = TextureSize.y / (2.0 * tan(radians(Params.Fov) * 0.5));
+
     vec4  CenterColor = texture(Input, uv);
     float CenterZ     = texture(Depth, uv).r;
-    float CenterCoC   = CocFromDepth(CenterZ);
+    float CenterCoC   = CocFromDepth(CenterZ, CocScale);
 
     if (CenterCoC <= Params.MinRadius || Params.MaxRadius < MASK_THRESHOLD)
     {
@@ -79,12 +85,12 @@ void main()
 
         vec4  SPos   = texture(Input, uv + Ofs);
         float ZPos   = texture(Depth, uv + Ofs).r;
-        float CocPos = CocFromDepth(ZPos);
+        float CocPos = CocFromDepth(ZPos, CocScale);
         float WPos   = Step <= CocPos ? 1.0 : 0.0;
 
         vec4  SNeg   = texture(Input, uv - Ofs);
         float ZNeg   = texture(Depth, uv - Ofs).r;
-        float CocNeg = CocFromDepth(ZNeg);
+        float CocNeg = CocFromDepth(ZNeg, CocScale);
         float WNeg   = Step <= CocNeg ? 1.0 : 0.0;
 
         Accum  += SPos * WPos + SNeg * WNeg;

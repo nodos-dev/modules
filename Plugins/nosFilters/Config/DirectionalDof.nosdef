@@ -9,7 +9,7 @@
 			"node": {
 				"class_name": "DirectionalDof",
 				"name": "Directional DoF",
-				"description": "1D depth-aware blur. CoC is computed per pixel from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a separable disc bokeh.",
+				"description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a\nseparable disc bokeh.",
 				"contents_type": "Job",
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
@@ -46,13 +46,22 @@
 						"max": 1000.0
 					},
 					{
-						"name": "FocusRange",
+						"name": "Aperture",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 2.0,
-						"min": 0.01,
-						"max": 1000.0
+						"data": 0.03,
+						"min": 0.0,
+						"max": 1.0
+					},
+					{
+						"name": "Fov",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 60.0,
+						"min": 1.0,
+						"max": 179.0
 					},
 					{
 						"name": "MaxRadius",

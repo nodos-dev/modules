@@ -1,11 +1,41 @@
 { "nodes": [
     {
       "class_name": "nos.filters.DepthOfField",
+      "menu_info": {
+        "category": "Filters",
+        "display_name": "Depth of Field"
+      },
       "node": {
         "id": "5899940c-437e-4f71-b119-bb80fb5d1e1a",
         "name": "DepthOfField",
         "class_name": "nos.filters.DepthOfField",
         "pins": [
+          {
+            "id": "2be9d3ba-9386-43b0-ae1c-58168be2a289",
+            "name": "Input",
+            "type_name": "nos.sys.vulkan.Texture",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": {
+              "resolution": "HD",
+              "width": 1920,
+              "height": 1080,
+              "format": "R16G16B16A16_SFLOAT",
+              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+              "filtering": "LINEAR"
+            },
+            "def": {
+              "filtering": "LINEAR"
+            },
+            "advanced_property": true,
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "true" }
+            ],
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "479248dc-200d-4a4d-87d2-f2c7c77f667f" }
+          },
           {
             "id": "1950c2e6-a0f6-485b-8a02-bded8a2f6ed5",
             "name": "Depth",
@@ -34,7 +64,7 @@
             "id": "e0b8f433-212f-48f6-ba4f-c8a194e1a707",
             "name": "FocusDistance",
             "type_name": "float",
-            "show_as": "INPUT_PIN",
+            "show_as": "PROPERTY",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
             },
@@ -48,25 +78,41 @@
           },
           {
             "id": "68187c92-92f3-40d0-8b24-df6f33f9f649",
-            "name": "FocusRange",
+            "name": "Aperture",
             "type_name": "float",
-            "show_as": "INPUT_PIN",
+            "show_as": "PROPERTY",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
             },
-            "data": 2.0,
-            "min": 0.01,
-            "max": 1000.0,
-            "def": 2.0,
-            "step": 9.9999,
+            "data": 0.03,
+            "min": 0.0,
+            "max": 1.0,
+            "def": 0.03,
+            "step": 0.01,
             "contents_type": "PortalPin",
             "contents": { "source_id": "534a26e9-1ebd-4ed2-89fb-bdf5d34b6ec1" }
+          },
+          {
+            "id": "24c59a92-9c62-469e-9f47-0447cc7e7c6b",
+            "name": "Fov",
+            "type_name": "float",
+            "show_as": "PROPERTY",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": 60.0,
+            "min": 1.0,
+            "max": 179.0,
+            "def": 60.0,
+            "step": 1.0,
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "12a49125-01ce-47c5-8273-042ad78133d1" }
           },
           {
             "id": "42554a0a-2d70-4ec4-a2ea-594ad71559f3",
             "name": "MaxRadius",
             "type_name": "float",
-            "show_as": "INPUT_PIN",
+            "show_as": "PROPERTY",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
             },
@@ -82,7 +128,7 @@
             "id": "312c4450-a4ad-4690-ba3d-afcbc93da6eb",
             "name": "MinRadius",
             "type_name": "float",
-            "show_as": "INPUT_PIN",
+            "show_as": "PROPERTY",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
             },
@@ -122,32 +168,6 @@
             ],
             "contents_type": "PortalPin",
             "contents": { "source_id": "c278680b-43b5-40ce-b1af-a4551c2e58f0" }
-          },
-          {
-            "id": "2be9d3ba-9386-43b0-ae1c-58168be2a289",
-            "name": "Input",
-            "type_name": "nos.sys.vulkan.Texture",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": {
-              "resolution": "HD",
-              "width": 1920,
-              "height": 1080,
-              "format": "R16G16B16A16_SFLOAT",
-              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-              "filtering": "LINEAR"
-            },
-            "def": {
-              "filtering": "LINEAR"
-            },
-            "advanced_property": true,
-            "meta_data_map": [
-              { "key": "AdvancedProperty", "value": "true" }
-            ],
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "479248dc-200d-4a4d-87d2-f2c7c77f667f" }
           }
         ],
         "pos": { "x": 0.0, "y": 0.0 },
@@ -300,17 +320,33 @@
                 },
                 {
                   "id": "55bffdc3-e0fa-4c0f-9ead-5a3b96c232bf",
-                  "name": "FocusRange",
+                  "name": "Aperture",
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 3.1,
-                  "min": 0.01,
-                  "max": 1000.0,
-                  "def": 2.0,
-                  "step": 9.9999,
+                  "data": 0.03,
+                  "min": 0.0,
+                  "max": 1.0,
+                  "def": 0.03,
+                  "step": 0.01,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "b08436e6-cbcd-41c1-83f9-68ae5efaab1e",
+                  "name": "Fov",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 60.0,
+                  "min": 1.0,
+                  "max": 179.0,
+                  "def": 60.0,
+                  "step": 1.0,
                   "contents_type": "JobPin",
                   "contents": { }
                 },
@@ -428,7 +464,7 @@
               "contents_type": "Job",
               "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "Shaders/DirectionalDof.frag" } },
               "function_category": "Default Node",
-              "description": "1D depth-aware blur. CoC is computed per pixel from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a separable disc bokeh.",
+              "description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a\nseparable disc bokeh.",
               "plugin_version": { "major": 1, "minor": 7, "patch": 0 }
             },
             {
@@ -554,17 +590,33 @@
                 },
                 {
                   "id": "78893474-3dfc-4a36-b897-77760ba19c8c",
-                  "name": "FocusRange",
+                  "name": "Aperture",
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 3.1,
-                  "min": 0.01,
-                  "max": 1000.0,
-                  "def": 2.0,
-                  "step": 9.9999,
+                  "data": 0.03,
+                  "min": 0.0,
+                  "max": 1.0,
+                  "def": 0.03,
+                  "step": 0.01,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "03210286-7bc8-48e2-ab59-7d3f7c0633ae",
+                  "name": "Fov",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 60.0,
+                  "min": 1.0,
+                  "max": 179.0,
+                  "def": 60.0,
+                  "step": 1.0,
                   "contents_type": "JobPin",
                   "contents": { }
                 },
@@ -682,7 +734,7 @@
               "contents_type": "Job",
               "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "Shaders/DirectionalDof.frag" } },
               "function_category": "Default Node",
-              "description": "1D depth-aware blur. CoC is computed per pixel from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a separable disc bokeh.",
+              "description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a\nseparable disc bokeh.",
               "plugin_version": { "major": 1, "minor": 7, "patch": 0 }
             },
             {
@@ -801,7 +853,7 @@
             },
             {
               "id": "2c0861b9-e416-4741-b56d-8dfa81c49516",
-              "name": "FocusRange",
+              "name": "Aperture",
               "class_name": "nos.internal.GraphInput",
               "pins": [
                 {
@@ -812,11 +864,11 @@
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": 3.1,
-                  "min": 0.01,
-                  "max": 1000.0,
-                  "def": 2.0,
-                  "step": 9.9999,
+                  "data": 0.03,
+                  "min": 0.0,
+                  "max": 1.0,
+                  "def": 0.03,
+                  "step": 0.01,
                   "contents_type": "JobPin",
                   "contents": { }
                 },
@@ -828,14 +880,14 @@
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 2.0,
+                  "data": 0.03,
                   "referred_by": [
                     "68187c92-92f3-40d0-8b24-df6f33f9f649"
                   ],
-                  "min": 0.01,
-                  "max": 1000.0,
-                  "def": 2.0,
-                  "step": 9.9999,
+                  "min": 0.0,
+                  "max": 1.0,
+                  "def": 0.03,
+                  "step": 0.01,
                   "meta_data_map": [
                     { "key": "PinHidden", "value": "true" }
                   ],
@@ -844,6 +896,56 @@
                 }
               ],
               "pos": { "x": 655.0, "y": 1175.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "0ad103da-aae2-40df-91ae-22e936933834",
+              "name": "Fov",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "e070d051-88af-474e-a73f-d303bc12723b",
+                  "name": "Output",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": 60.0,
+                  "min": 1.0,
+                  "max": 179.0,
+                  "def": 60.0,
+                  "step": 1.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "12a49125-01ce-47c5-8273-042ad78133d1",
+                  "name": "Input",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 60.0,
+                  "referred_by": [
+                    "24c59a92-9c62-469e-9f47-0447cc7e7c6b"
+                  ],
+                  "min": 1.0,
+                  "max": 179.0,
+                  "def": 60.0,
+                  "step": 1.0,
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 655.0, "y": 1475.0 },
               "contents_type": "Job",
               "contents": { "type": "" },
               "function_category": "Default Node",
@@ -980,7 +1082,9 @@
             { "from": "7c60934b-ba19-4faf-9923-411511649cd0", "to": "c1b814c4-e424-40a0-99d6-0437d948d1d7", "id": "fc25a2f4-0af4-49ae-9052-133a76cfc044" },
             { "from": "6a933bab-7bf6-4388-b990-abd1b9729e64", "to": "78893474-3dfc-4a36-b897-77760ba19c8c", "id": "f6ba18f8-0ef1-42db-a774-c4b02aa78fac" },
             { "from": "d5387b2e-f8c6-4b2e-8a42-a11eed779a1d", "to": "4f471215-bebf-49be-a6e4-909c394d1f1a", "id": "afd9d7ff-f9e2-4a67-b874-2cfb2f870447" },
-            { "from": "f0feee29-3782-49fe-a834-94e2b57916a8", "to": "05132381-cf95-4253-9fc2-e87f84b70dd8", "id": "82919455-4a51-490a-8ab2-201952d2e126" }
+            { "from": "f0feee29-3782-49fe-a834-94e2b57916a8", "to": "05132381-cf95-4253-9fc2-e87f84b70dd8", "id": "82919455-4a51-490a-8ab2-201952d2e126" },
+            { "from": "e070d051-88af-474e-a73f-d303bc12723b", "to": "b08436e6-cbcd-41c1-83f9-68ae5efaab1e", "id": "c3d7fbcf-7b26-43fe-bdd4-e17214942743" },
+            { "from": "e070d051-88af-474e-a73f-d303bc12723b", "to": "03210286-7bc8-48e2-ab59-7d3f7c0633ae", "id": "eaf0da2d-288b-4960-8cc7-172a4107547a" }
           ] },
         "function_category": "Default Node",
         "display_name": "Depth of Field",
