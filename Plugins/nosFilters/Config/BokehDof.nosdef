@@ -9,7 +9,7 @@
 			"node": {
 				"class_name": "BokehDof",
 				"name": "Bokeh DoF",
-				"description": "Single-pass 2D depth-of-field. CoC follows a physical thin-lens model (Aperture, Focus\nDistance, Fov) from a linear view-space Z input. Scatter-as-gather: each pixel in the MaxCoc\nsearch radius spreads over its own CoC disc, shaped by the BokehShape kernel texture and\nnormalized by disc area, so energy is conserved and defocused foregrounds bleed over sharp\nneighbors as a real lens does.",
+				"description": "Single-pass thin-lens depth-of-field with physical camera parameters (focal length,\naperture diameter, focus distance). Reads linear Z in metres from the depth input's red\nchannel; zero or negative depth stays sharp. Scatter-as-gather disk sampler: the gather\nradius follows the center pixel's circle of confusion and each tap is weighted by how far\nits own disc reaches, so sharp foregrounds do not bleed onto a blurred background. Taps are\nadditionally shaped by the BokehShape kernel texture; a plain white disc reproduces a circular\naperture.",
 				"contents_type": "Job",
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
@@ -35,7 +35,7 @@
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Linear view-space Z per pixel, read from the red channel. Drives the circle of confusion.",
+						"description": "Linear Z in metres per pixel, read from the red channel. Zero or negative values are\nbackground and stay sharp.",
 						"data": {
 							"filtering": "NEAREST"
 						}
@@ -46,65 +46,74 @@
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Kernel texture sampled across the unit disc; the shape painted into it becomes the bokeh.",
+						"description": "Kernel texture sampled across the unit disc; the shape painted into it becomes the bokeh.\nFeed from a Bokeh Shape node. Must be connected: an empty texture zeroes every tap and the\nimage passes through unblurred.",
 						"data": {
 							"filtering": "LINEAR"
 						}
 					},
 					{
-						"name": "FocusDistance",
-						"display_name": "Focus Distance",
+						"name": "FocalMm",
+						"display_name": "Focal Length (mm)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Depth that stays perfectly sharp, in the same units as the Depth input.",
-						"data": 5.0,
+						"description": "Lens focal length in millimetres.",
+						"data": 32.0,
+						"min": 1.0,
+						"max": 300.0
+					},
+					{
+						"name": "ApertureMm",
+						"display_name": "Aperture (mm)",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Aperture diameter in millimetres: focal length divided by the f-stop. Larger values give\na shallower depth of field.",
+						"data": 11.43,
 						"min": 0.0,
+						"max": 100.0
+					},
+					{
+						"name": "FocusM",
+						"display_name": "Focus Distance (m)",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Distance that stays perfectly sharp, in metres.",
+						"data": 10.0,
+						"min": 0.1,
 						"max": 1000.0
 					},
 					{
-						"name": "Aperture",
-						"display_name": "Aperture (lens radius)",
+						"name": "PxPerMm",
+						"display_name": "Pixels Per Sensor mm",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Thin-lens radius in the same world units as the Depth input. Larger values give a\nshallower depth of field.",
-						"data": 0.03,
-						"min": 0.0,
-						"max": 1.0
-					},
-					{
-						"name": "Fov",
-						"display_name": "FOV (vertical, degrees)",
-						"type_name": "float",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Vertical field of view of the camera that rendered the inputs, in degrees; projects\nthe world-space blur radius to pixels.",
-						"data": 60.0,
+						"description": "Projects the sensor-space blur circle to output pixels: image width in pixels divided\nby sensor width in millimetres.",
+						"data": 80.0,
 						"min": 1.0,
-						"max": 179.0
+						"max": 500.0
 					},
 					{
-						"name": "MaxCoc",
-						"display_name": "Max CoC (pixels)",
+						"name": "MaxBlurPx",
+						"display_name": "Max Blur (pixels)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Largest circle of confusion this pass can represent, and the gather search radius; blur\nbeyond it is truncated. Zero disables the effect.",
-						"data": 16.0,
+						"description": "Largest circle of confusion this pass can represent, in pixels; blur beyond it is\ntruncated. Zero disables the effect.",
+						"data": 60.0,
 						"min": 0.0,
 						"max": 128.0
 					},
 					{
-						"name": "BackgroundIsFar",
-						"display_name": "Background Is Far",
-						"type_name": "float",
+						"name": "ShowCoC",
+						"display_name": "Show CoC",
+						"type_name": "bool",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "How pixels with zero depth are treated: 0 keeps them in focus, 1 pushes them to the far plane.",
-						"data": 1.0,
-						"min": 0.0,
-						"max": 1.0
+						"description": "Renders the circle-of-confusion heatmap (green sharp to red max blur) instead of\nthe image.",
+						"data": false
 					},
 					{
 						"name": "SampleCount",
@@ -112,7 +121,7 @@
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Ceiling for the adaptive tap count. The pass takes as many Vogel-disc samples as Max CoC\nneeds for a ~1.5 pixel spacing, but never more than this.",
+						"description": "Ceiling for the adaptive tap count. The pass takes as many disc taps as the gather radius\nneeds for a ~1.5 pixel spacing, but never more than this.",
 						"data": 128.0,
 						"min": 8.0,
 						"max": 512.0
@@ -123,7 +132,7 @@
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Rotates the bokeh kernel lookup. Useful for animating highlights.",
+						"description": "Rotates the bokeh kernel lookup. Smooth per-frame rotation without regenerating the\nshape texture.",
 						"data": 0.0,
 						"min": -6.2832,
 						"max": 6.2832
