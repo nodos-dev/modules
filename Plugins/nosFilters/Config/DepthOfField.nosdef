@@ -110,7 +110,7 @@
           },
           {
             "id": "42554a0a-2d70-4ec4-a2ea-594ad71559f3",
-            "name": "MaxRadius",
+            "name": "MaxCoc",
             "type_name": "float",
             "show_as": "PROPERTY",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -123,22 +123,6 @@
             "step": 1.28,
             "contents_type": "PortalPin",
             "contents": { "source_id": "63f77504-73aa-4b89-8849-65e27649b272" }
-          },
-          {
-            "id": "312c4450-a4ad-4690-ba3d-afcbc93da6eb",
-            "name": "MinRadius",
-            "type_name": "float",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": 0.5,
-            "min": 0.0,
-            "max": 8.0,
-            "def": 0.5,
-            "step": 0.08,
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "97561978-6da1-4a33-a6bc-c654008a8261" }
           },
           {
             "id": "ce6c0d45-8ce1-47ef-bd73-addda06d826e",
@@ -352,7 +336,7 @@
                 },
                 {
                   "id": "bdc5ae5a-10cc-4c3c-b013-573a64bd8ec6",
-                  "name": "MaxRadius",
+                  "name": "MaxCoc",
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -363,22 +347,6 @@
                   "max": 128.0,
                   "def": 16.0,
                   "step": 1.28,
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "d77d3716-69f5-4c5d-a342-414dc11597fb",
-                  "name": "MinRadius",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 0.0,
-                  "min": 0.0,
-                  "max": 8.0,
-                  "def": 0.5,
-                  "step": 0.08,
                   "contents_type": "JobPin",
                   "contents": { }
                 },
@@ -464,12 +432,12 @@
               "contents_type": "Job",
               "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "Shaders/DirectionalDof.frag" } },
               "function_category": "Default Node",
-              "description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a\nseparable disc bokeh.",
+              "description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Scatter-as-gather: each tap in the MaxCoc search\nradius contributes where its own CoC reaches the pixel, weighted for energy conservation.\nChain two instances along (1,0) and (0,1) for a separable disc bokeh.",
               "plugin_version": { "major": 1, "minor": 7, "patch": 0 }
             },
             {
               "id": "deac982f-b51b-4ae0-b6c6-9b2998d3e5a9",
-              "name": "MaxRadius",
+              "name": "MaxCoc",
               "class_name": "nos.internal.GraphInput",
               "pins": [
                 {
@@ -622,7 +590,7 @@
                 },
                 {
                   "id": "4f471215-bebf-49be-a6e4-909c394d1f1a",
-                  "name": "MaxRadius",
+                  "name": "MaxCoc",
                   "type_name": "float",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -633,22 +601,6 @@
                   "max": 128.0,
                   "def": 16.0,
                   "step": 1.28,
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "05132381-cf95-4253-9fc2-e87f84b70dd8",
-                  "name": "MinRadius",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 0.0,
-                  "min": 0.0,
-                  "max": 8.0,
-                  "def": 0.5,
-                  "step": 0.08,
                   "contents_type": "JobPin",
                   "contents": { }
                 },
@@ -734,7 +686,7 @@
               "contents_type": "Job",
               "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "Shaders/DirectionalDof.frag" } },
               "function_category": "Default Node",
-              "description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a\nseparable disc bokeh.",
+              "description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Scatter-as-gather: each tap in the MaxCoc search\nradius contributes where its own CoC reaches the pixel, weighted for energy conservation.\nChain two instances along (1,0) and (0,1) for a separable disc bokeh.",
               "plugin_version": { "major": 1, "minor": 7, "patch": 0 }
             },
             {
@@ -952,56 +904,6 @@
               "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
             },
             {
-              "id": "3951aaae-16df-4b07-b1a9-b8b2a01b19c7",
-              "name": "MinRadius",
-              "class_name": "nos.internal.GraphInput",
-              "pins": [
-                {
-                  "id": "f0feee29-3782-49fe-a834-94e2b57916a8",
-                  "name": "Output",
-                  "type_name": "float",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": 0.0,
-                  "min": 0.0,
-                  "max": 8.0,
-                  "def": 0.5,
-                  "step": 0.08,
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "97561978-6da1-4a33-a6bc-c654008a8261",
-                  "name": "Input",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 0.5,
-                  "referred_by": [
-                    "312c4450-a4ad-4690-ba3d-afcbc93da6eb"
-                  ],
-                  "min": 0.0,
-                  "max": 8.0,
-                  "def": 0.5,
-                  "step": 0.08,
-                  "meta_data_map": [
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": 655.0, "y": 1325.0 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
               "id": "a1d16ddd-0144-4daa-97b2-e9b3b019c8c1",
               "name": "Input",
               "class_name": "nos.internal.GraphInput",
@@ -1071,7 +973,6 @@
             }
           ], "connections": [
             { "from": "8f4d23a7-3b94-4a1c-ba14-d1ce47e92acd", "to": "b1b03fce-6863-42e6-a78a-260743b5441d", "id": "83839676-0760-4699-ae80-c0a789e273d8" },
-            { "from": "f0feee29-3782-49fe-a834-94e2b57916a8", "to": "d77d3716-69f5-4c5d-a342-414dc11597fb", "id": "4c05135f-6001-4679-b39c-b248559ae56d" },
             { "from": "9587b7b1-8fc7-437b-9459-ee73f90de097", "to": "14aab6c6-10ce-4a39-9c6f-8c5633fe59e2", "id": "231cdfe5-7ac7-4013-9d20-68d5af8509b7" },
             { "from": "7c60934b-ba19-4faf-9923-411511649cd0", "to": "d6a91b7a-b576-487b-bd2c-89fee90a37d1", "id": "1cdaef73-876c-472a-97ff-04bf1f01348e" },
             { "from": "c271ac23-2923-45c2-b262-b654455a93c3", "to": "9e368dde-bb31-44d8-aaad-782e92fe2366", "id": "231fc88c-a52e-48d0-a6ee-8c2fdfe3ef0d" },
@@ -1082,7 +983,6 @@
             { "from": "7c60934b-ba19-4faf-9923-411511649cd0", "to": "c1b814c4-e424-40a0-99d6-0437d948d1d7", "id": "fc25a2f4-0af4-49ae-9052-133a76cfc044" },
             { "from": "6a933bab-7bf6-4388-b990-abd1b9729e64", "to": "78893474-3dfc-4a36-b897-77760ba19c8c", "id": "f6ba18f8-0ef1-42db-a774-c4b02aa78fac" },
             { "from": "d5387b2e-f8c6-4b2e-8a42-a11eed779a1d", "to": "4f471215-bebf-49be-a6e4-909c394d1f1a", "id": "afd9d7ff-f9e2-4a67-b874-2cfb2f870447" },
-            { "from": "f0feee29-3782-49fe-a834-94e2b57916a8", "to": "05132381-cf95-4253-9fc2-e87f84b70dd8", "id": "82919455-4a51-490a-8ab2-201952d2e126" },
             { "from": "e070d051-88af-474e-a73f-d303bc12723b", "to": "b08436e6-cbcd-41c1-83f9-68ae5efaab1e", "id": "c3d7fbcf-7b26-43fe-bdd4-e17214942743" },
             { "from": "e070d051-88af-474e-a73f-d303bc12723b", "to": "03210286-7bc8-48e2-ab59-7d3f7c0633ae", "id": "eaf0da2d-288b-4960-8cc7-172a4107547a" }
           ] },

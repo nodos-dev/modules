@@ -9,7 +9,7 @@
 			"node": {
 				"class_name": "BokehDof",
 				"name": "Bokeh DoF",
-				"description": "Single-pass 2D depth-of-field. CoC follows a physical thin-lens model (Aperture, Focus\nDistance, Fov) from a linear view-space Z input; samples are gathered on a Vogel disc weighted\nby the BokehShape kernel texture, so bokeh takes the shape painted into BokehShape.",
+				"description": "Single-pass 2D depth-of-field. CoC follows a physical thin-lens model (Aperture, Focus\nDistance, Fov) from a linear view-space Z input. Scatter-as-gather: each pixel in the MaxCoc\nsearch radius spreads over its own CoC disc, shaped by the BokehShape kernel texture and\nnormalized by disc area, so energy is conserved and defocused foregrounds bleed over sharp\nneighbors as a real lens does.",
 				"contents_type": "Job",
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
@@ -85,26 +85,15 @@
 						"max": 179.0
 					},
 					{
-						"name": "MaxRadius",
-						"display_name": "Max Radius (pixels)",
+						"name": "MaxCoc",
+						"display_name": "Max CoC (pixels)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Largest circle-of-confusion radius the blur can reach. Zero disables the effect.",
+						"description": "Largest circle of confusion this pass can represent, and the gather search radius; blur\nbeyond it is truncated. Zero disables the effect.",
 						"data": 16.0,
 						"min": 0.0,
 						"max": 128.0
-					},
-					{
-						"name": "MinRadius",
-						"display_name": "Min Radius (pixels)",
-						"type_name": "float",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Pixels whose circle of confusion falls at or below this stay sharp, skipping the gather.",
-						"data": 0.5,
-						"min": 0.0,
-						"max": 8.0
 					},
 					{
 						"name": "BackgroundIsFar",
@@ -123,10 +112,10 @@
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Vogel-disc samples taken per pixel. Around 32 is soft, 64 is clean, 128 removes banding.",
-						"data": 48.0,
-						"min": 4.0,
-						"max": 256.0
+						"description": "Ceiling for the adaptive tap count. The pass takes as many Vogel-disc samples as Max CoC\nneeds for a ~1.5 pixel spacing, but never more than this.",
+						"data": 128.0,
+						"min": 8.0,
+						"max": 512.0
 					},
 					{
 						"name": "KernelRotation",

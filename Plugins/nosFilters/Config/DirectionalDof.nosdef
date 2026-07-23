@@ -9,7 +9,7 @@
 			"node": {
 				"class_name": "DirectionalDof",
 				"name": "Directional DoF",
-				"description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a\nseparable disc bokeh.",
+				"description": "1D depth-aware blur. CoC follows a physical thin-lens model (Aperture, Focus Distance,\nFov) from a linear view-space Z input. Scatter-as-gather: each tap in the MaxCoc search\nradius contributes where its own CoC reaches the pixel, weighted for energy conservation.\nChain two instances along (1,0) and (0,1) for a separable disc bokeh.",
 				"contents_type": "Job",
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
@@ -64,22 +64,13 @@
 						"max": 179.0
 					},
 					{
-						"name": "MaxRadius",
+						"name": "MaxCoc",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": 16.0,
 						"min": 0.0,
 						"max": 128.0
-					},
-					{
-						"name": "MinRadius",
-						"type_name": "float",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 0.5,
-						"min": 0.0,
-						"max": 8.0
 					},
 					{
 						"name": "BackgroundIsFar",

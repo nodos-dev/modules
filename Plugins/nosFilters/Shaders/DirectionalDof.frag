@@ -1,13 +1,21 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 // Directional depth-of-field pass.
-// Computes circle-of-confusion (CoC) per pixel from a linear view-space Z input,
-// then does a 1D weighted gather along Direction. Chain two instances
-// (Direction = (1,0) and Direction = (0,1)) for a separable approximation of
-// disc bokeh; visually close to a gaussian bokeh and cheap.
+// Scatter-as-gather along Direction: every tap within the MaxCoc search radius
+// contributes where its own thin-lens CoC reaches this pixel, weighted 1 / CoC
+// so energy is conserved along the line. Chain two instances (Direction = (1,0)
+// and Direction = (0,1)) for a separable approximation of disc bokeh.
 
 #version 450
 
 #define MASK_THRESHOLD 0.001
+// A source pixel cannot spread over less than its own pixel: floor for CoC (px).
+#define MIN_COC        0.5
+// Half-width of the soft edge on coverage (px); 1 px total anti-aliased edge.
+#define COVER_FEATHER  0.5
+// Tap spacing the adaptive sample count aims for along the line (px).
+#define TAP_SPACING    1.5
+// Never take fewer taps per side than this, even for a tiny search radius.
+#define MIN_TAPS       4.0
 
 layout(binding = 0) uniform sampler2D Input;
 layout(binding = 1) uniform sampler2D Depth;
@@ -19,14 +27,14 @@ layout(binding = 2) uniform DirectionalDofParams
     float Aperture;
     // Vertical field of view in degrees; projects the world-space blur radius to pixels.
     float Fov;
-    // Maximum CoC radius in pixels.
-    float MaxRadius;
+    // Largest CoC (pixels) this pass can represent, and the gather search radius.
+    // Blur beyond it is truncated. Zero disables the effect.
+    float MaxCoc;
     // 0 = treat zero depth as "no info, keep sharp"; 1 = treat zero depth as far.
     float BackgroundIsFar;
     vec2 Direction;
-    // Optional: clamp CoC near the focus plane to avoid noise; raise to skip tiny blurs.
-    float MinRadius;
-    // Sample count along the direction (one side; total taps = 2*N+1). Higher = smoother.
+    // Ceiling for the adaptive tap count (one side; total taps = 2*N+1). The pass
+    // takes as many taps as MaxCoc needs for ~1.5 px spacing, but never more.
     float SampleCount;
 }
 Params;
@@ -47,7 +55,7 @@ float CocFromDepth(float Z, float CocScale)
         Coc = Params.BackgroundIsFar * Params.Aperture / F * CocScale;
     else
         Coc = Params.Aperture * abs(Z - F) / (F * Z) * CocScale;
-    return clamp(Coc, 0.0, Params.MaxRadius);
+    return clamp(Coc, 0.0, Params.MaxCoc);
 }
 
 void main()
@@ -57,11 +65,8 @@ void main()
 
     float CocScale = TextureSize.y / (2.0 * tan(radians(Params.Fov) * 0.5));
 
-    vec4  CenterColor = texture(Input, uv);
-    float CenterZ     = texture(Depth, uv).r;
-    float CenterCoC   = CocFromDepth(CenterZ, CocScale);
-
-    if (CenterCoC <= Params.MinRadius || Params.MaxRadius < MASK_THRESHOLD)
+    vec4 CenterColor = texture(Input, uv);
+    if (Params.MaxCoc < MASK_THRESHOLD)
     {
         rt = CenterColor;
         return;
@@ -69,33 +74,32 @@ void main()
 
     vec2 Dir = normalize(Params.Direction);
 
-    int   N        = int(max(1.0, Params.SampleCount));
-    float RadiusPx = CenterCoC;
-    float Step     = RadiusPx / float(N);
+    // Enough taps to keep spacing near TAP_SPACING over the search radius, capped
+    // by SampleCount. No per-pixel early-out: a sharp pixel must still receive
+    // bleed from defocused neighbors.
+    int   N    = int(clamp(Params.MaxCoc / TAP_SPACING, MIN_TAPS, max(MIN_TAPS, Params.SampleCount)));
+    float Step = Params.MaxCoc / float(N);
 
-    // Box-weighted average; for separable-2D this gives a soft disc.
-    // CoC-clamping per sample prevents fragments in focus from bleeding outward.
-    vec4  Accum  = CenterColor;
-    float Weight = 1.0;
+    vec4  Accum  = vec4(0.0);
+    float Weight = 0.0;
 
-    for (int i = 1; i <= N; ++i)
+    for (int i = -N; i <= N; ++i)
     {
-        float T      = float(i) * Step;
-        vec2  Ofs    = Dir * T * TexelSize;
+        float T   = float(i) * Step;
+        vec2  Ofs = Dir * T * TexelSize;
 
-        vec4  SPos   = texture(Input, uv + Ofs);
-        float ZPos   = texture(Depth, uv + Ofs).r;
-        float CocPos = CocFromDepth(ZPos, CocScale);
-        float WPos   = Step <= CocPos ? 1.0 : 0.0;
+        float ZSamp  = texture(Depth, uv + Ofs).r;
+        float CocSmp = CocFromDepth(ZSamp, CocScale);
 
-        vec4  SNeg   = texture(Input, uv - Ofs);
-        float ZNeg   = texture(Depth, uv - Ofs).r;
-        float CocNeg = CocFromDepth(ZNeg, CocScale);
-        float WNeg   = Step <= CocNeg ? 1.0 : 0.0;
+        // The sample contributes only where its own CoC reaches this pixel;
+        // soft edge instead of a binary cut. Weight 1 / CoC spreads its energy
+        // over its blur length.
+        float Cover = 1.0 - smoothstep(CocSmp - COVER_FEATHER, CocSmp + COVER_FEATHER, abs(T));
+        float W     = Cover / max(CocSmp, MIN_COC);
 
-        Accum  += SPos * WPos + SNeg * WNeg;
-        Weight += WPos + WNeg;
+        Accum  += texture(Input, uv + Ofs) * W;
+        Weight += W;
     }
 
-    rt = Accum / Weight;
+    rt = Weight > 1e-4 ? Accum / Weight : CenterColor;
 }

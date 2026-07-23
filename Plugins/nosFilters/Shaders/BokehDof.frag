@@ -1,16 +1,24 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 // Single-pass 2D bokeh depth-of-field with a kernel-texture shaping the bokeh.
 //
-// Computes a per-pixel circle of confusion (CoC) from a linear view-space Z
-// input, then gathers samples on a Vogel (golden-angle) disc within that CoC.
-// Each sample's contribution is weighted by BokehShape sampled at the same
-// unit-disc position, so the bokeh takes on the shape painted into BokehShape
-// (regular polygon, ring, custom artwork, etc.).
+// Scatter-as-gather: every pixel within the MaxCoc search radius is treated as
+// a scatterer whose radiance spreads over its own thin-lens CoC disc, shaped by
+// BokehShape and normalized by disc area (1 / CoC^2) so energy is conserved. A
+// sample contributes to this pixel only where its disc reaches it, so defocused
+// foregrounds bleed over sharp neighbors as a real lens does.
 
 #version 450
 
 #define MASK_THRESHOLD 0.001
 #define GOLDEN_ANGLE   2.39996322972865332
+// A source pixel cannot spread over less than its own pixel: floor for CoC (px).
+#define MIN_COC        0.5
+// Half-width of the soft edge on disc coverage (px); 1 px total anti-aliased edge.
+#define COVER_FEATHER  0.5
+// Tap spacing the adaptive sample count aims for inside the search disc (px).
+#define TAP_SPACING    1.5
+// Never take fewer taps than this, even for a tiny search radius.
+#define MIN_TAPS       8.0
 
 layout(binding = 0) uniform sampler2D Input;
 layout(binding = 1) uniform sampler2D Depth;
@@ -23,13 +31,13 @@ layout(binding = 3) uniform BokehDofParams
     float Aperture;
     // Vertical field of view in degrees; projects the world-space blur radius to pixels.
     float Fov;
-    // Maximum CoC radius in pixels.
-    float MaxRadius;
-    // Skip the gather when CoC <= MinRadius (keeps focused regions crisp & cheap).
-    float MinRadius;
+    // Largest CoC (pixels) this pass can represent, and the gather search radius.
+    // Blur beyond it is truncated. Zero disables the effect.
+    float MaxCoc;
     // 0 = treat zero depth as "near focus" (stays sharp); 1 = treat as far plane.
     float BackgroundIsFar;
-    // Total Vogel-disc sample count. ~32 = soft, ~64 = clean, ~128 = no banding.
+    // Ceiling for the adaptive tap count. The pass takes as many Vogel-disc taps
+    // as MaxCoc needs for ~1.5 px spacing, but never more than this.
     float SampleCount;
     // Rotate the kernel lookup (radians). Useful for animated highlights.
     float KernelRotation;
@@ -51,7 +59,7 @@ float CocFromDepth(float Z, float CocScale)
         Coc = Params.BackgroundIsFar * Params.Aperture / F * CocScale;
     else
         Coc = Params.Aperture * abs(Z - F) / (F * Z) * CocScale;
-    return clamp(Coc, 0.0, Params.MaxRadius);
+    return clamp(Coc, 0.0, Params.MaxCoc);
 }
 
 void main()
@@ -61,54 +69,60 @@ void main()
 
     float CocScale = TextureSize.y / (2.0 * tan(radians(Params.Fov) * 0.5));
 
-    vec4  CenterColor = texture(Input, uv);
-    float CenterZ     = texture(Depth, uv).r;
-    float CenterCoC   = CocFromDepth(CenterZ, CocScale);
-
-    if (CenterCoC <= Params.MinRadius || Params.MaxRadius < MASK_THRESHOLD)
+    vec4 CenterColor = texture(Input, uv);
+    if (Params.MaxCoc < MASK_THRESHOLD)
     {
         rt = CenterColor;
         return;
     }
 
-    int   N        = int(max(1.0, Params.SampleCount));
-    float CosR     = cos(Params.KernelRotation);
-    float SinR     = sin(Params.KernelRotation);
+    // Enough taps to keep spacing inside the search disc near TAP_SPACING, capped
+    // by SampleCount. No per-pixel early-out: a sharp pixel must still receive
+    // bleed from defocused neighbors.
+    int N = int(clamp(Params.MaxCoc * Params.MaxCoc / (TAP_SPACING * TAP_SPACING),
+                      MIN_TAPS, max(MIN_TAPS, Params.SampleCount)));
 
-    // Vogel disc: golden-angle spiral with sqrt radius for uniform area density.
-    // Sample 0 is the center; included implicitly via CenterColor initialization.
-    vec4  Accum  = CenterColor;
-    float Weight = texture(BokehShape, vec2(0.5)).r;
-    Accum       *= Weight;
+    float CosR = cos(Params.KernelRotation);
+    float SinR = sin(Params.KernelRotation);
 
-    for (int i = 1; i < N; ++i)
+    // Vogel disc over the fixed search radius; sample 0 is the center tap.
+    vec4  Accum  = vec4(0.0);
+    float Weight = 0.0;
+
+    for (int i = 0; i < N; ++i)
     {
         float Frac = float(i) / float(N);
         float R    = sqrt(Frac);                          // unit-disc radius
         float Th   = float(i) * GOLDEN_ANGLE;
         vec2  Unit = vec2(cos(Th) * R, sin(Th) * R);      // unit disc position
 
-        // Rotated lookup into the bokeh kernel.
-        vec2 ShapeUv = vec2(Unit.x * CosR - Unit.y * SinR,
-                            Unit.x * SinR + Unit.y * CosR) * 0.5 + 0.5;
-        float WShape = texture(BokehShape, ShapeUv).r;
+        vec2  Ofs    = Unit * Params.MaxCoc * TexelSize;
+        float ZSamp  = texture(Depth, uv + Ofs).r;
+        float CocSmp = CocFromDepth(ZSamp, CocScale);
+        float DistPx = R * Params.MaxCoc;                 // sample-to-center distance
+
+        // The sample contributes only where its own disc reaches this pixel;
+        // soft edge instead of a binary cut.
+        float Cover = 1.0 - smoothstep(CocSmp - COVER_FEATHER, CocSmp + COVER_FEATHER, DistPx);
+        if (Cover <= 0.0)
+            continue;
+
+        // Kernel lookup in the source disc's own coordinates: this pixel sits at
+        // -Unit * MaxCoc / CoC inside the sample's disc.
+        float CocSafe = max(CocSmp, MIN_COC);
+        vec2  KPos    = -Unit * (Params.MaxCoc / CocSafe);
+        vec2  ShapeUv = vec2(KPos.x * CosR - KPos.y * SinR,
+                             KPos.x * SinR + KPos.y * CosR) * 0.5 + 0.5;
+        float WShape  = texture(BokehShape, clamp(ShapeUv, 0.0, 1.0)).r;
         if (WShape <= MASK_THRESHOLD)
             continue;
 
-        vec2  Ofs    = Unit * CenterCoC * TexelSize;
-        vec4  Sample = texture(Input, uv + Ofs);
-        float ZSamp  = texture(Depth, uv + Ofs).r;
-        float CocSmp = CocFromDepth(ZSamp, CocScale);
-
-        // Per-sample CoC rejection prevents in-focus pixels bleeding outward.
-        // A sample contributes only if its own CoC is at least its distance from center.
-        float Dist = R * CenterCoC;
-        float WCoc = Dist <= CocSmp ? 1.0 : 0.0;
-
-        float W = WShape * WCoc;
-        Accum  += Sample * W;
+        // Energy conservation: the source spreads its radiance over its disc area.
+        float W = WShape * Cover / (CocSafe * CocSafe);
+        Accum  += texture(Input, uv + Ofs) * W;
         Weight += W;
     }
 
-    rt = Accum / max(Weight, 1e-4);
+    // Ring-shaped kernels can zero out every tap of a sharp pixel; pass through.
+    rt = Weight > 1e-4 ? Accum / Weight : CenterColor;
 }
