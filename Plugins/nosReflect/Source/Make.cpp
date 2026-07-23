@@ -223,10 +223,10 @@ struct MakeNode : NodeContext
 		if (!AvailableTypes.empty())
 			return AvailableTypes;
 		size_t count = 0;
-		if (nosEngine.GetPinDataTypeNames(nullptr, &count) == NOS_RESULT_FAILED)
+		if (nosEngine.GetPinDataTypeNames(nullptr, nullptr, &count) == NOS_RESULT_FAILED)
 			return AvailableTypes;
 		std::vector<nosName> names(count);
-		nosEngine.GetPinDataTypeNames(names.data(), &count);
+		nosEngine.GetPinDataTypeNames(nullptr, names.data(), &count);
 		for (auto n : names)
 			if (n != NSN_TypeNameGeneric)
 				AvailableTypes.push_back(n);
@@ -519,26 +519,26 @@ struct MakeNode : NodeContext
 	}
 };
 
-nosResult RegisterMake(nosNodeFunctions* fn)
-{
-	NOS_BIND_NODE_CLASS(NSN_Make, MakeNode, fn);
+// Type names (by nosName id) we've already emitted a "Make <Type>" quick-add preset for. Engine node
+// menu entries are append-only, so we must only ever register presets for types not seen before.
+// Accessed only from the plugin manager thread (RegisterMake at load & OnPostOtherPluginLoaded).
+static std::unordered_set<uint64_t> GMakePresetTypes;
 
-	std::vector<nosName> typeNames;
-	size_t count = 0;
-	auto res = nosEngine.GetPinDataTypeNames(0, &count);
-	if (NOS_RESULT_FAILED != res)
-	{
-		typeNames.resize(count);
-		nosEngine.GetPinDataTypeNames(typeNames.data(), &count);
-	}
+// Registers "Make <Type>" quick-add presets for the given types that we haven't emitted one for yet.
+// Only the delta is registered (engine menu entries are append-only), so it's safe to call repeatedly.
+void RegisterMakePresetsForTypes(const nosName* typeNames, size_t count)
+{
 	std::vector<nos::Buffer> nodePresets;
-	for (auto& typeName : typeNames)
+	for (size_t i = 0; i < count; ++i)
 	{
+		nosName typeName = typeNames[i];
 		nos::TypeInfo typeInfo(typeName);
 		if (!MakeNode::IsTypeSupported(typeInfo, true))
 			continue;
 		if (typeInfo.TypeName == NSN_DictTypeName)
 			continue; // "Make Dict" is provided as a curated preset in Make.nosnode
+		if (!GMakePresetTypes.insert(typeName.ID).second)
+			continue; // already emitted a preset for this type
 		std::string name = nos::Name(typeInfo.TypeName).AsString();
 		auto idx = name.find_last_of(".");
 		idx = idx == std::string::npos ? 0 : 1 + idx;
@@ -555,10 +555,33 @@ nosResult RegisterMake(nosNodeFunctions* fn)
 		nos::Buffer buf = fbb.Release();
 		nodePresets.push_back(std::move(buf));
 	}
+	if (nodePresets.empty())
+		return;
 	std::vector<nosFbNodePresetPtr> fbNodePresets;
 	for (auto& buf : nodePresets)
 		fbNodePresets.push_back(flatbuffers::GetMutableRoot<nos::fb::NodePreset>(buf.Data()));
 	nosEngine.RegisterNodePresets(NOS_NAME("nos.reflect.Make"), fbNodePresets.size(), fbNodePresets.data());
+}
+
+// Load-time seeding: enumerate every currently-registered type (builtins + already-loaded plugins) once.
+// Newcomers from plugins loaded later arrive directly via OnPostOtherPluginLoaded (no re-enumeration).
+void RegisterMakePresets()
+{
+	std::vector<nosName> typeNames;
+	size_t count = 0;
+	auto res = nosEngine.GetPinDataTypeNames(nullptr, 0, &count);
+	if (NOS_RESULT_FAILED != res)
+	{
+		typeNames.resize(count);
+		nosEngine.GetPinDataTypeNames(nullptr, typeNames.data(), &count);
+	}
+	RegisterMakePresetsForTypes(typeNames.data(), typeNames.size());
+}
+
+nosResult RegisterMake(nosNodeFunctions* fn)
+{
+	NOS_BIND_NODE_CLASS(NSN_Make, MakeNode, fn);
+	RegisterMakePresets();
 	return NOS_RESULT_SUCCESS;
 }
 

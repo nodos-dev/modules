@@ -5,6 +5,7 @@
 
 #include <map>
 #include <sstream>
+#include <unordered_set>
 
 namespace nos::reflect
 {
@@ -185,10 +186,7 @@ struct ArithmeticNode : NodeContext
 			return false;
 		if (info->BaseType == NOS_BASE_TYPE_ARRAY || info->BaseType == NOS_BASE_TYPE_UNION)
 			return false;
-		for (int i = 0; i < info->AttributeCount; ++i)
-			if (info->Attributes[i].Name == NOS_NAME_STATIC("resource"))
-				return false;
-		return true;
+        return !info.HasAttribute(NOS_NAME_STATIC("resource"));
 	}
 
 	// Types worth offering in the type menus / presets: supported scalars, strings, and builtin structs
@@ -199,16 +197,11 @@ struct ArithmeticNode : NodeContext
 			return false;
 		if (info->BaseType == NOS_BASE_TYPE_STRUCT)
 		{
-			bool builtin = false;
-			for (int i = 0; i < info->AttributeCount; ++i)
-				if (info->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
-					builtin = true;
-			if (!builtin)
-				return false;
+            return info.HasAttribute(NOS_NAME_STATIC("builtin"));
 		}
 		return true;
 	}
-
+    
 	// Output takes A's type (A defines the result shape for both elementwise and broadcast); until A is
 	// known it previews B's type.
 	static nos::Name DeriveOutputType(nos::Name aType, nos::Name bType)
@@ -320,10 +313,10 @@ struct ArithmeticNode : NodeContext
 		if (!AvailableTypes.empty())
 			return AvailableTypes;
 		size_t count = 0;
-		if (nosEngine.GetPinDataTypeNames(nullptr, &count) == NOS_RESULT_FAILED)
+		if (nosEngine.GetPinDataTypeNames(nullptr, nullptr, &count) == NOS_RESULT_FAILED)
 			return AvailableTypes;
 		std::vector<nosName> names(count);
-		nosEngine.GetPinDataTypeNames(names.data(), &count);
+		nosEngine.GetPinDataTypeNames(nullptr, names.data(), &count);
 		for (auto n : names)
 			if (nos::TypeInfo info(n); info && IsArithmeticType(info))
 				AvailableTypes.push_back(n);
@@ -508,24 +501,34 @@ struct ArithmeticNode : NodeContext
 	}
 };
 
-void RegisterArithmeticNodePresets() {
-	std::vector<nosName> typeNames;
-	size_t count = 0;
-	auto res = nosEngine.GetPinDataTypeNames(0, &count);
-	if (NOS_RESULT_FAILED != res)
+// Arithmetic type names (by nosName id) we've already emitted operator presets for. Engine node menu
+// entries are append-only, so we only ever register presets for types not seen before. Accessed only
+// from the plugin manager thread (RegisterArithmetic at load & OnPostOtherPluginLoaded).
+static std::unordered_set<uint64_t> GArithmeticPresetTypes;
+
+// Registers the operator x type presets for the given types that are arithmetic and not emitted yet.
+// Only the delta is registered (engine menu entries are append-only), so it's safe to call repeatedly.
+void RegisterArithmeticPresetsForTypes(const nosName* typeNames, size_t count) {
+	// Collect arithmetic types we haven't emitted presets for yet.
+	std::vector<nosName> newTypes;
+	for (size_t i = 0; i < count; ++i)
 	{
-		typeNames.resize(count);
-		nosEngine.GetPinDataTypeNames(typeNames.data(), &count);
+		nosName typeName = typeNames[i];
+		nos::TypeInfo typeInfo(typeName);
+		if (!ArithmeticNode::IsArithmeticType(typeInfo))
+			continue;
+		if (GArithmeticPresetTypes.insert(typeName.ID).second)
+			newTypes.push_back(typeName);
 	}
+	if (newTypes.empty())
+		return;
 	std::vector<nos::Buffer> nodePresets;
 	for (uint32_t binaryOpIndx = 0; binaryOpIndx < uint32_t(BinaryOperator::MAX) + 1; binaryOpIndx++) {
 		auto binaryOp = BinaryOperator(binaryOpIndx);
 		std::string binaryOpStr = BinaryOpToDisplayName(binaryOp);
-		for (auto& typeName : typeNames)
+		for (auto& typeName : newTypes)
 		{
 			nos::TypeInfo typeInfo(typeName);
-			if (!ArithmeticNode::IsArithmeticType(typeInfo))
-				continue;
 			// Non-ADD operators don't apply to strings (only concatenation is defined).
 			if (binaryOp != BinaryOperator::ADD && typeInfo->BaseType == NOS_BASE_TYPE_STRING)
 				continue;
@@ -552,6 +555,20 @@ void RegisterArithmeticNodePresets() {
 	for (auto& buf : nodePresets)
 		fbNodePresets.push_back(flatbuffers::GetMutableRoot<nos::fb::NodePreset>(buf.Data()));
 	nosEngine.RegisterNodePresets(NSN_Arithmetic, fbNodePresets.size(), fbNodePresets.data());
+}
+
+// Load-time seeding: enumerate every currently-registered type (builtins + already-loaded plugins) once.
+// Newcomers from plugins loaded later arrive directly via OnPostOtherPluginLoaded (no re-enumeration).
+void RegisterArithmeticNodePresets() {
+	std::vector<nosName> typeNames;
+	size_t count = 0;
+	auto res = nosEngine.GetPinDataTypeNames(nullptr, 0, &count);
+	if (NOS_RESULT_FAILED != res)
+	{
+		typeNames.resize(count);
+		nosEngine.GetPinDataTypeNames(nullptr, typeNames.data(), &count);
+	}
+	RegisterArithmeticPresetsForTypes(typeNames.data(), typeNames.size());
 }
 
 nosResult RegisterArithmetic(nosNodeFunctions* fn)

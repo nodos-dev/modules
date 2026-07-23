@@ -2,18 +2,7 @@
 	"nodes": [
 		{
 			"class_name": "Arithmetic",
-			"menu_info": {
-				"category": "Math",
-				"display_name": "Arithmetic",
-				"name_aliases": [
-					"math",
-					"operator",
-					"add",
-					"sub",
-					"mul",
-					"div"
-				]
-			},
+			"hide_in_context_menu": true,
 			"presets": [
 				{
 					"menu_info": {

@@ -1,5 +1,7 @@
 #include <Nodos/Plugin.hpp>
 
+#include <vector>
+
 #include <nosSysVariables/nosVariableSubsystem.h>
 #include <nosTransfer/nosTransfer.h>
 
@@ -61,6 +63,14 @@ nosResult RegisterObjectRingBuffer(nosNodeFunctions* node);
 nosResult RegisterBoundedObjectQueue(nosNodeFunctions* node);
 nosResult RegisterFrameRateConverter(nosNodeFunctions* node);
 
+// Preset generators for the type-driven dynamic nodes. The *ForTypes variants register presets for a
+// given set of types (used with the newcomers queried on OnPostOtherPluginLoaded); the no-arg variants
+// enumerate all currently-registered types once at load. All delta-based: only not-yet-emitted types.
+void RegisterMakePresets();
+void RegisterArithmeticNodePresets();
+void RegisterMakePresetsForTypes(const nosName* typeNames, size_t count);
+void RegisterArithmeticPresetsForTypes(const nosName* typeNames, size_t count);
+
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
 	*outCount = (size_t)(Nodes::Count);
@@ -113,6 +123,18 @@ extern "C"
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outPluginFunctions)
 {
 	outPluginFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	// When any other plugin finishes loading, ask the engine for just that plugin's data types (the
+	// newcomers) - no full re-scan - and emit Make/Arithmetic quick-add presets for them. Delta-based, so
+	// the engine firing once per loaded plugin only ever registers new types.
+	outPluginFunctions->OnPostOtherPluginLoaded = [](nosPluginIdentifier pluginId) {
+		size_t count = 0;
+		if (nosEngine.GetPinDataTypeNames(&pluginId, nullptr, &count) == NOS_RESULT_FAILED || count == 0)
+			return;
+		std::vector<nosName> types(count);
+		nosEngine.GetPinDataTypeNames(&pluginId, types.data(), &count);
+		RegisterMakePresetsForTypes(types.data(), types.size());
+		RegisterArithmeticPresetsForTypes(types.data(), types.size());
+	};
 	outPluginFunctions->GetRenamedTypes = [](nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outCount) {
 		*outCount = 1;
 		if (!outRenamedFrom)
