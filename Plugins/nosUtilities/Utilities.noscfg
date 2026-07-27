@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.17.1"
+			"version": "3.18.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -66,7 +66,8 @@
 		"Config/MultiLiveOut.nosdef",
 		"Config/TextRender.nosdef",
 		"Config/ScheduleRequest.nosdef",
-		"Config/Counter.nosdef"
+		"Config/Counter.nosdef",
+		"Config/PathPicker.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

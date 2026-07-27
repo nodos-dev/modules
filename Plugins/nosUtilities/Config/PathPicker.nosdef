@@ -1,0 +1,37 @@
+{
+	"nodes": [
+		{
+			"class_name": "PathPicker",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Path Picker",
+				"aliases": [ "path", "file picker", "browse", "pick file" ]
+			},
+			"node": {
+				"class_name": "PathPicker",
+				"display_name": "Path Picker",
+				"contents_type": "Job",
+				"description": "Browse for a file and forward its path.\nGives nodes whose path pin has no picker a way to be driven from one.",
+				"pins": [
+					{
+						"name": "Path",
+						"display_name": "Path",
+						"description": "File to pick. Browse for it or type it in.",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "FILE_PICKER" }
+					},
+					{
+						"name": "Out",
+						"display_name": "Out",
+						"description": "The picked path.",
+						"type_name": "string",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	]
+}
