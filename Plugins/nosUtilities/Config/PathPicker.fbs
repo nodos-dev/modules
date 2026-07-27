@@ -1,0 +1,6 @@
+namespace nos.utilities;
+
+enum PathPickerMode : uint {
+  File = 0,
+  Folder = 1,
+}

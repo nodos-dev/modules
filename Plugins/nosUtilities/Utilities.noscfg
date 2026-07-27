@@ -78,7 +78,8 @@
 		"Config/Sink.fbs",
 		"Config/Layout.fbs",
 		"Config/TextRender.fbs",
-		"Config/ScheduleRequest.fbs"
+		"Config/ScheduleRequest.fbs",
+		"Config/PathPicker.fbs"
 	],
 	"defaults": [
 		"Config/Defaults.json"

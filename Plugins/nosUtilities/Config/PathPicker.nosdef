@@ -11,12 +11,21 @@
 				"class_name": "PathPicker",
 				"display_name": "Path Picker",
 				"contents_type": "Job",
-				"description": "Browse for a file and forward its path.\nGives nodes whose path pin has no picker a way to be driven from one.",
+				"description": "Browse for a file or a folder and forward its path.\nGives nodes whose path pin has no picker a way to be driven from one.",
 				"pins": [
+					{
+						"name": "Mode",
+						"display_name": "Mode",
+						"description": "What Path browses for: a file or a folder.",
+						"type_name": "nos.utilities.PathPickerMode",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": "File"
+					},
 					{
 						"name": "Path",
 						"display_name": "Path",
-						"description": "File to pick. Browse for it or type it in.",
+						"description": "Path to pick. Browse for it or type it in.",
 						"type_name": "string",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",

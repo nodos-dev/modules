@@ -3,11 +3,15 @@
 #include <Nodos/PluginHelpers.hpp>
 
 #include "Names.h"
+#include "PathPicker_generated.h"
 
 namespace nos::utilities
 {
+NOS_REGISTER_NAME(Mode);
+
 // Forwards the path picked on the Path property to the Out pin, so nodes whose
-// path pin carries no file picker can still be driven from one.
+// path pin carries no file picker can still be driven from one. Mode swaps the
+// picker between files and folders.
 struct PathPickerNode : NodeContext
 {
 	PathPickerNode(nosFbNodePtr node) : NodeContext(node)
@@ -27,6 +31,10 @@ struct PathPickerNode : NodeContext
 	{
 		if (pinName == NSN_Path)
 			SetPinValue(NSN_Out, val);
+		else if (pinName == NSN_Mode)
+			SetPinVisualizer(NSN_Path, {.type = *static_cast<PathPickerMode*>(val.Data) == PathPickerMode::Folder
+											? fb::VisualizerType::FOLDER_PICKER
+											: fb::VisualizerType::FILE_PICKER});
 	}
 };
 
