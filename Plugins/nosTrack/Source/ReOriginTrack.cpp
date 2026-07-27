@@ -5,6 +5,10 @@
 
 #include <glm/glm.hpp>
 
+#include <fstream>
+#include <filesystem>
+#include <iomanip>
+
 #include <nosGraphics/CoordinateFrameConversion.hpp>
 
 namespace nos::track
@@ -14,6 +18,7 @@ NOS_REGISTER_NAME(Input);
 NOS_REGISTER_NAME(Output);
 NOS_REGISTER_NAME(CoordinateSystem);
 NOS_REGISTER_NAME(Origin);
+NOS_REGISTER_NAME(Path);
 NOS_REGISTER_NAME(ReOriginTrack_MarkOrigin);
 NOS_REGISTER_NAME(ReOriginTrack_ClearOrigin);
 
@@ -103,6 +108,47 @@ struct ReOriginTrackContext : NodeContext
 		SetPinValue(NSN_Origin, {.Data = buf.Data(), .Size = buf.Size()});
 	}
 
+	void SaveOrigin(std::string const& utf8Path)
+	{
+		std::filesystem::path path = nos::Utf8ToPath(utf8Path);
+		try
+		{
+			if (!path.parent_path().empty() && !std::filesystem::exists(path.parent_path()))
+				std::filesystem::create_directories(path.parent_path());
+		}
+		catch (std::filesystem::filesystem_error& e)
+		{
+			nosEngine.LogE("ReOriginTrack: %s", e.what());
+			return;
+		}
+
+		std::ofstream file(path);
+		if (!file.is_open())
+		{
+			nosEngine.LogE("ReOriginTrack: Cannot open %s", utf8Path.c_str());
+			return;
+		}
+
+		auto const& l = Origin.location;
+		auto const& r = Origin.rotation;
+		file << std::setprecision(12);
+		file << "{\n";
+		file << "\t\"coordinate_system\": {\n";
+		file << "\t\t\"up\": \"" << nos::graphics::EnumNameSignedAxis(Frame.up()) << "\",\n";
+		file << "\t\t\"forward\": \"" << nos::graphics::EnumNameSignedAxis(Frame.forward()) << "\",\n";
+		file << "\t\t\"handedness\": \"" << nos::graphics::EnumNameHandedness(Frame.handedness()) << "\",\n";
+		file << "\t\t\"euler_order\": \"" << nos::graphics::EnumNameEulerOrder(Frame.euler().order()) << "\",\n";
+		file << "\t\t\"euler_sign\": [ " << (int)Frame.euler().sign_x() << ", " << (int)Frame.euler().sign_y()
+			 << ", " << (int)Frame.euler().sign_z() << " ],\n";
+		file << "\t\t\"meters_per_unit\": " << Frame.meters_per_unit() << "\n";
+		file << "\t},\n";
+		file << "\t\"location\": { \"x\": " << l.x() << ", \"y\": " << l.y() << ", \"z\": " << l.z() << " },\n";
+		file << "\t\"rotation\": { \"x\": " << r.x() << ", \"y\": " << r.y() << ", \"z\": " << r.z() << " }\n";
+		file << "}\n";
+
+		nosEngine.LogI("ReOriginTrack: Saved origin to %s", utf8Path.c_str());
+	}
+
 	void UpdateStatus()
 	{
 		if (HasOrigin())
@@ -118,12 +164,22 @@ struct ReOriginTrackContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 
 		names[0] = NOS_NAME_STATIC("ReOriginTrack_MarkOrigin");
-		fns[0] = [](void* ctx, nosFunctionExecuteParams*) {
+		fns[0] = [](void* ctx, nosFunctionExecuteParams* params) {
 			auto* self = static_cast<ReOriginTrackContext*>(ctx);
 			self->Origin = self->LatestInput;
 			self->StoreOrigin();
 			self->UpdateStatus();
 			nosEngine.LogI("ReOriginTrack: Origin marked");
+
+			nos::NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
+			auto* pathData = execParams[NSN_Path].Data;
+			if (pathData && pathData->Size)
+			{
+				std::string path((const char*)pathData->Data, pathData->Size);
+				path.resize(strlen(path.c_str())); // Drop the trailing null the string pin carries.
+				if (!path.empty())
+					self->SaveOrigin(path);
+			}
 			return NOS_RESULT_SUCCESS;
 		};
 

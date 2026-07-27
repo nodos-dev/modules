@@ -11,7 +11,7 @@
 				"class_name": "nos.track.ReOriginTrack",
 				"display_name": "Re-Origin Track",
 				"contents_type": "Job",
-				"description": "Re-expresses the input track relative to a marked origin pose.\nClick Mark Origin to capture the current input pose as the reference;\noutput location/rotation then become the input pose in that origin's local frame\n(rigid-body relative: inverse(T_origin) * T_input). All other fields (fov, zoom,\nfocus, sensor, lens, ...) pass through unchanged. Until an origin is marked the\noutput equals the input. Set CoordinateSystem to match the connected track.",
+				"description": "Re-expresses the input track relative to a marked origin pose.\nClick Mark Origin to capture the current input pose as the reference;\noutput location/rotation then become the input pose in that origin's local frame\n(rigid-body relative: inverse(T_origin) * T_input). All other fields (fov, zoom,\nfocus, sensor, lens, ...) pass through unchanged. Until an origin is marked the\noutput equals the input. Set CoordinateSystem to match the connected track.\nMark Origin can also write the captured pose to a JSON file.",
 				"pins": [
 					{
 						"name": "Input",
@@ -64,7 +64,21 @@
 						"class_name": "ReOriginTrack_MarkOrigin",
 						"display_name": "Mark Origin",
 						"contents_type": "Job",
-						"pins": []
+						"pins": [
+							{
+								"name": "Path",
+								"display_name": "Path",
+								"type_name": "string",
+								"show_as": "PROPERTY",
+								"can_show_as": "INPUT_PIN_OR_PROPERTY",
+								"visualizer": {
+									"type": "FILE_PICKER",
+									"file_extensions": [ "json" ],
+									"file_picker_type": "SAVE"
+								},
+								"description": "Optional file to write the marked origin pose to, as JSON (location,\nrotation and the coordinate system they are expressed in). Left empty,\nthe origin is only stored on the node."
+							}
+						]
 					},
 					{
 						"class_name": "ReOriginTrack_ClearOrigin",

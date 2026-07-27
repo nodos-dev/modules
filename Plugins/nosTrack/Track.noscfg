@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.track",
-			"version": "1.12.0"
+			"version": "1.13.0"
 		},
 		"display_name": "Track",
 		"category": "Virtual Studio",
