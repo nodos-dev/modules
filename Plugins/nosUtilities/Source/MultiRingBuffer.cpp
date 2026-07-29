@@ -2,7 +2,10 @@
 
 #pragma once
 
+#include <algorithm>
+#include <mutex>
 #include <set>
+#include <shared_mutex>
 
 #include <Nodos/PluginHelpers.hpp>
 
@@ -51,11 +54,15 @@ struct MultiRingBufferNodeContext : NodeContext
 		uuid InputId{};
 		uuid OutputId{};
 		nos::TypeInfo TypeInfo;
-		MultiRing::Channel* RingChannel = nullptr;
+		MultiRing::ChannelPtr RingChannel;
 		std::atomic_bool IsOutLive = false;
-		ResourceInterface::ResourceBase* LastPopped = nullptr;
+		MultiRing::SlotPtr LastPopped;
 		bool NeedsRecreation = false;
 		std::size_t RemainingRepeatableCount = 0;
+		// Watch log prefix, rebuilt whenever the pins change. The per-frame
+		// stats path must not read the SDK pin map, which another runner
+		// thread rewrites on pin updates.
+		std::string StatsPrefix;
 
 		Channel(char letter)
 			: Letter(letter),
@@ -66,14 +73,58 @@ struct MultiRingBufferNodeContext : NodeContext
 		}
 	};
 
-	std::map<char, std::unique_ptr<Channel>> Channels;
+	using ChannelPtr = std::shared_ptr<Channel>;
+
+	std::map<char, ChannelPtr> Channels;
 	std::unordered_map<uuid, char> PinIdToLetter;
 	MultiRing Ring;
-	// Channels popped since the last SendScheduleRequest. One producer run
-	// pushes one slot per live channel, so we must only schedule again once
-	// every live channel has been popped — otherwise schedule requests pile
-	// up by a factor of N (channels) per consumer tick.
+	// One producer run pushes one slot to each channel it gathered, so we must
+	// only schedule again once every one of those has been popped — otherwise
+	// schedule requests pile up by a factor of N (channels) per consumer tick.
+	//
+	// The expectation is what the producer actually pushed, not which output
+	// pins are live. Pin liveness means "run CopyFrom even when the pin is
+	// clean"; it does not mean a CopyFrom exists. An output that is live but not
+	// on a compiled path is never popped, and counting it would hold the round
+	// open forever.
+	std::set<char> PushedLastRound;
 	std::set<char> PoppedSinceLastSchedule;
+
+	void ResetScheduleRoundUnlocked()
+	{
+		PushedLastRound.clear();
+		PoppedSinceLastSchedule.clear();
+	}
+
+	void ForgetChannelInRoundUnlocked(char letter)
+	{
+		PushedLastRound.erase(letter);
+		PoppedSinceLastSchedule.erase(letter);
+	}
+
+	// True once every channel of the last producer run has been consumed.
+	bool IsRoundCompleteUnlocked() const
+	{
+		return !PushedLastRound.empty() &&
+			   std::includes(PoppedSinceLastSchedule.begin(), PoppedSinceLastSchedule.end(),
+							 PushedLastRound.begin(), PushedLastRound.end());
+	}
+
+	// Guards everything above. The node's pins are spread over several paths —
+	// the producer path executes the node while each consumer path calls
+	// CopyFrom for its own output — so these callbacks run concurrently on
+	// different threads, and the per-frame ones only read.
+	//
+	// Not recursive, deliberately. SetPinValue on a pin this runner manages
+	// dispatches OnPinValueChanged inline on the calling thread rather than
+	// enqueueing it, so holding this across such a call would let the callback
+	// observe half-updated state. The rule is to not do that — never hold this
+	// across an engine call that can re-enter. A deadlock in testing is the
+	// wanted failure; a recursive mutex would hide it.
+	//
+	// Never held across a blocking ring wait or a GPU wait; take it, snapshot
+	// or commit, release. Lock order is always StateMutex before Ring's mutex.
+	std::shared_mutex StateMutex;
 
 	OnRestartType OnRestart = OnRestartType::WAIT_UNTIL_FULL;
 	std::optional<uint32_t> RequestedRingSize = std::nullopt;
@@ -100,19 +151,28 @@ struct MultiRingBufferNodeContext : NodeContext
 		return ch.InputName.AsString();
 	}
 
-	void SendRingStats(Channel const& ch, std::string_view state)
+	void UpdateStatsPrefixUnlocked(Channel& ch)
 	{
-		auto& ringChannel = *ch.RingChannel;
-		auto prefix = NodeName.AsString() + " " + GetChannelDisplayName(ch);
-		nosEngine.WatchLog((prefix + " Read Size").c_str(), std::to_string(ringChannel.ReadPool.size()).c_str());
-		nosEngine.WatchLog((prefix + " Write Size").c_str(), std::to_string(ringChannel.WritePool.size()).c_str());
-		nosEngine.WatchLog((prefix + " Total Frame Count").c_str(),
-						   std::to_string(Ring.Size - ringChannel.WritePool.size()).c_str());
+		ch.StatsPrefix = NodeName.AsString() + " " + GetChannelDisplayName(ch);
+	}
+
+	void SendRingStats(Channel const& ch, MultiRing::Channel& ringChannel, std::string_view state)
+	{
+		std::string prefix;
+		{
+			std::shared_lock lock(StateMutex);
+			prefix = ch.StatsPrefix;
+		}
+		auto stats = Ring.GetStats(ringChannel);
+		nosEngine.WatchLog((prefix + " Read Size").c_str(), std::to_string(stats.ReadCount).c_str());
+		nosEngine.WatchLog((prefix + " Write Size").c_str(), std::to_string(stats.WriteCount).c_str());
+		nosEngine.WatchLog((prefix + " Total Frame Count").c_str(), std::to_string(stats.TotalFrameCount).c_str());
 		nosEngine.WatchLog((prefix + " State").c_str(), state.data());
 	}
 
 	void SetStatus(Status newStatus, std::string message = "")
 	{
+		std::unique_lock lock(StateMutex);
 		if (CurrentStatus == newStatus && CurrentStatusMessage == message)
 			return;
 
@@ -151,7 +211,7 @@ struct MultiRingBufferNodeContext : NodeContext
 
 			auto& channel = Channels[*letter];
 			if (!channel)
-				channel = std::make_unique<Channel>(*letter);
+				channel = std::make_shared<Channel>(*letter);
 
 			if (IsInputPin(pinNameSv))
 				channel->InputId = uuid(*pin->id());
@@ -172,7 +232,10 @@ struct MultiRingBufferNodeContext : NodeContext
 		}
 
 		for (auto& [_, ch] : Channels)
-			InitChannel(*ch);
+		{
+			InitChannelUnlocked(*ch);
+			UpdateStatsPrefixUnlocked(*ch);
+		}
 
 		for (auto const& pinId : pinsToUnorphan)
 			SetPinOrphanState(pinId, fb::PinOrphanStateType::ACTIVE);
@@ -185,22 +248,24 @@ struct MultiRingBufferNodeContext : NodeContext
 		});
 		AddPinValueWatcher(NSN_Alignment, [this](nos::Buffer const& newAlignment, std::optional<nos::Buffer> oldVal) {
 			bool any = false;
-			for (auto& [_, ch] : Channels)
 			{
-				if (!ch->RingChannel)
-					continue;
-				if (ch->RingChannel->ResInterface->CheckNewResource(NSN_Alignment, newAlignment, oldVal))
+				std::unique_lock lock(StateMutex);
+				for (auto& [_, ch] : Channels)
 				{
-					nosEngine.SendPathRestart(ch->InputId);
-					ch->NeedsRecreation = true;
-					any = true;
+					if (!ch->RingChannel)
+						continue;
+					if (ch->RingChannel->ResInterface->CheckNewResource(NSN_Alignment, newAlignment, oldVal))
+					{
+						nosEngine.SendPathRestart(ch->InputId);
+						ch->NeedsRecreation = true;
+						any = true;
+					}
 				}
+				if (any)
+					ResetScheduleRoundUnlocked();
 			}
 			if (any)
-			{
 				Ring.Stop();
-				PoppedSinceLastSchedule.clear();
-			}
 		});
 		AddPinValueWatcher(NOS_NAME_STATIC("RepeatWhenFilling"),
 						   [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
@@ -210,12 +275,13 @@ struct MultiRingBufferNodeContext : NodeContext
 
 	~MultiRingBufferNodeContext() override
 	{
+		std::shared_lock lock(StateMutex);
 		for (auto& [_, ch] : Channels)
 			NOS_SOFT_CHECK(ch->LastPopped == nullptr);
 		Ring.Stop();
 	}
 
-	void InitChannel(Channel& ch)
+	void InitChannelUnlocked(Channel& ch)
 	{
 		std::shared_ptr<ResourceInterface> resource;
 		if (ch.TypeInfo->TypeName == NOS_NAME(sys::vulkan::Buffer::GetFullyQualifiedName()))
@@ -225,33 +291,33 @@ struct MultiRingBufferNodeContext : NodeContext
 		else
 			resource = std::make_shared<CPUTrivialResource>();
 
-		ch.RingChannel = &Ring.AddChannel(ch.Letter, std::move(resource), &ch);
+		ch.RingChannel = Ring.AddChannel(ch.Letter, std::move(resource));
 	}
 
-	Channel* GetChannelByPinId(uuid const& id)
+	ChannelPtr GetChannelByPinIdUnlocked(uuid const& id)
 	{
 		auto it = PinIdToLetter.find(id);
 		if (it == PinIdToLetter.end())
 			return nullptr;
 		auto chIt = Channels.find(it->second);
-		return chIt != Channels.end() ? chIt->second.get() : nullptr;
+		return chIt != Channels.end() ? chIt->second : nullptr;
 	}
 
 	void SeedOutputPin(Channel& ch)
 	{
-		if (!ch.RingChannel || ch.RingChannel->Resources.empty())
+		if (!ch.RingChannel)
 			return;
-		auto* base = ch.RingChannel->Resources[0].get();
+		auto base = Ring.FirstResource(*ch.RingChannel);
 		if (!base)
 			return;
 		if (ch.TypeInfo->TypeName == NOS_NAME(sys::vulkan::Buffer::GetFullyQualifiedName()))
 		{
-			if (auto* res = ResourceInterface::GetResource<GPUBufferResource>(base))
+			if (auto* res = ResourceInterface::GetResource<GPUBufferResource>(base.get()))
 				nosEngine.SetPinValueByName(NodeId, ch.OutputName, res->VkRes.ToPinData());
 		}
 		else if (ch.TypeInfo->TypeName == NOS_NAME(sys::vulkan::Texture::GetFullyQualifiedName()))
 		{
-			if (auto* res = ResourceInterface::GetResource<GPUTextureResource>(base))
+			if (auto* res = ResourceInterface::GetResource<GPUTextureResource>(base.get()))
 			{
 				sys::vulkan::TTexture texDef = vkss::ConvertTextureInfo(res->VkRes);
 				texDef.unscaled = true;
@@ -267,22 +333,25 @@ struct MultiRingBufferNodeContext : NodeContext
 			nosEngine.LogW((GetName() + " size cannot be 0").c_str());
 			return;
 		}
-		// A resize is applied asynchronously on OnPathStart. Do not keep restarting
-		// the path while the requested size is already pending.
-		if (Ring.Size == size || (RequestedRingSize && *RequestedRingSize == size))
-			return;
-		for (auto& [_, ch] : Channels)
 		{
-			if (!ch->RingChannel || !PinIdToLetter.contains(ch->InputId))
-				continue;
-			nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = size};
-			nosEngine.SendPathCommand(ch->InputId, ringSizeChange);
-			break;
+			std::unique_lock lock(StateMutex);
+			// A resize is applied asynchronously on OnPathStart. Do not keep restarting
+			// the path while the requested size is already pending.
+			if (Ring.Size == size || (RequestedRingSize && *RequestedRingSize == size))
+				return;
+			for (auto& [_, ch] : Channels)
+			{
+				if (!ch->RingChannel || !PinIdToLetter.contains(ch->InputId))
+					continue;
+				nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = size};
+				nosEngine.SendPathCommand(ch->InputId, ringSizeChange);
+				break;
+			}
+			ResetScheduleRoundUnlocked();
+			RequestedRingSize = size;
 		}
 		Ring.Stop();
-		PoppedSinceLastSchedule.clear();
 		SendPathRestart();
-		RequestedRingSize = size;
 	}
 
 	void SendPathRestart()
@@ -297,16 +366,18 @@ struct MultiRingBufferNodeContext : NodeContext
 		auto sv = pinName.AsString();
 		if (!IsInputPin(sv))
 			return;
-		auto* ch = GetChannelByPinId(pinId);
-		if (!ch || !ch->RingChannel)
-			return;
-		if (ch->RingChannel->ResInterface->CheckNewResource(NSN_Input, value, std::nullopt))
 		{
+			std::unique_lock lock(StateMutex);
+			auto ch = GetChannelByPinIdUnlocked(pinId);
+			if (!ch || !ch->RingChannel)
+				return;
+			if (!ch->RingChannel->ResInterface->CheckNewResource(NSN_Input, value, std::nullopt))
+				return;
 			nosEngine.SendPathRestart(ch->InputId);
-			Ring.Stop();
-			PoppedSinceLastSchedule.clear();
+			ResetScheduleRoundUnlocked();
 			ch->NeedsRecreation = true;
 		}
+		Ring.Stop();
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
@@ -315,6 +386,7 @@ struct MultiRingBufferNodeContext : NodeContext
 		auto letter = ParseLetter(pinNameStr);
 		if (!letter)
 			return NOS_RESULT_FAILED;
+		std::unique_lock lock(StateMutex);
 		auto chIt = Channels.find(*letter);
 		if (chIt == Channels.end())
 			return NOS_RESULT_FAILED;
@@ -326,7 +398,7 @@ struct MultiRingBufferNodeContext : NodeContext
 		if (ch.RingChannel)
 		{
 			Ring.Stop();
-			PoppedSinceLastSchedule.clear();
+			ResetScheduleRoundUnlocked();
 			Ring.RemoveChannel(*letter);
 			ch.RingChannel = nullptr;
 		}
@@ -341,13 +413,18 @@ struct MultiRingBufferNodeContext : NodeContext
 
 	void OnPinUpdated(const nosPinUpdate*) override
 	{
+		std::unique_lock lock(StateMutex);
 		for (auto& [_, ch] : Channels)
+		{
 			if (!ch->RingChannel)
-				InitChannel(*ch);
+				InitChannelUnlocked(*ch);
+			UpdateStatsPrefixUnlocked(*ch);
+		}
 	}
 
 	void OnNodeUpdated(nosNodeUpdate const* update) override
 	{
+		std::unique_lock lock(StateMutex);
 		if (update->Type == NOS_NODE_UPDATE_PIN_DELETED)
 		{
 			auto it = PinIdToLetter.find(update->PinDeleted);
@@ -368,6 +445,9 @@ struct MultiRingBufferNodeContext : NodeContext
 					Ring.RemoveChannel(letter);
 					ch.RingChannel = nullptr;
 				}
+				// Drop the popped mark with the channel: a stale entry counts
+				// towards a round whose live channel count has just shrunk.
+				ForgetChannelInRoundUnlocked(letter);
 				Channels.erase(chIt);
 			}
 		}
@@ -382,7 +462,7 @@ struct MultiRingBufferNodeContext : NodeContext
 				return;
 			auto& chPtr = Channels[*letter];
 			if (!chPtr)
-				chPtr = std::make_unique<Channel>(*letter);
+				chPtr = std::make_shared<Channel>(*letter);
 			if (IsInputPin(sv))
 				chPtr->InputId = uuid(*pin->id());
 			else
@@ -392,13 +472,14 @@ struct MultiRingBufferNodeContext : NodeContext
 			}
 			PinIdToLetter[uuid(*pin->id())] = *letter;
 			if (!chPtr->RingChannel)
-				InitChannel(*chPtr);
+				InitChannelUnlocked(*chPtr);
+			UpdateStatsPrefixUnlocked(*chPtr);
 		}
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		if (Channels.empty() || Ring.Exit)
+		if (Ring.Exit)
 			return NOS_RESULT_FAILED;
 
 		NodeExecuteParams pins(params);
@@ -406,43 +487,48 @@ struct MultiRingBufferNodeContext : NodeContext
 
 		struct Gathered
 		{
-			Channel* NodeCh;
-			MultiRing::Channel* RingCh;
+			ChannelPtr NodeCh;
+			MultiRing::ChannelPtr RingCh;
 			void* Input;
 		};
 		std::vector<Gathered> gathered;
-		gathered.reserve(Channels.size());
-		std::vector<MultiRing::Channel*> wantedRings;
-		wantedRings.reserve(Channels.size());
+		std::vector<MultiRing::ChannelPtr> wantedRings;
 
 		uint32_t maxRequired = requestedSize;
 		std::string adjustMessage;
-		for (auto& [_, ch] : Channels)
 		{
-			if (!ch->RingChannel || ch->RingChannel->Resources.empty() || !ch->TypeInfo)
-				continue;
-			auto it = pins.find(ch->InputName);
-			if (it == pins.end())
-				continue;
-			// Field rejection determines whether this sample can be pushed, not
-			// how many slots the shared ring requires. Compute the requirement
-			// first so a rejected interlaced field cannot make maxRequired fall
-			// back to the requested even size for this execution.
-			void* sizingInput = ch->RingChannel->ResInterface->GetPinInfo(it->second, false);
-			if (!sizingInput)
-				continue;
-			auto [required, message] =
-				ch->RingChannel->ResInterface->GetRequiredRingSize(sizingInput, requestedSize);
-			if (required > maxRequired)
+			std::shared_lock lock(StateMutex);
+			if (Channels.empty())
+				return NOS_RESULT_FAILED;
+			gathered.reserve(Channels.size());
+			wantedRings.reserve(Channels.size());
+			for (auto& [_, ch] : Channels)
 			{
-				maxRequired = required;
-				adjustMessage = message;
+				if (!ch->RingChannel || !ch->TypeInfo || !Ring.HasResources(*ch->RingChannel))
+					continue;
+				auto it = pins.find(ch->InputName);
+				if (it == pins.end())
+					continue;
+				// Field rejection determines whether this sample can be pushed, not
+				// how many slots the shared ring requires. Compute the requirement
+				// first so a rejected interlaced field cannot make maxRequired fall
+				// back to the requested even size for this execution.
+				void* sizingInput = ch->RingChannel->ResInterface->GetPinInfo(it->second, false);
+				if (!sizingInput)
+					continue;
+				auto [required, message] =
+					ch->RingChannel->ResInterface->GetRequiredRingSize(sizingInput, requestedSize);
+				if (required > maxRequired)
+				{
+					maxRequired = required;
+					adjustMessage = message;
+				}
+				void* input = ch->RingChannel->ResInterface->GetPinInfo(it->second, true);
+				if (!input)
+					continue;
+				gathered.push_back({ch, ch->RingChannel, input});
+				wantedRings.push_back(ch->RingChannel);
 			}
-			void* input = ch->RingChannel->ResInterface->GetPinInfo(it->second, true);
-			if (!input)
-				continue;
-			gathered.push_back({ch.get(), ch->RingChannel, input});
-			wantedRings.push_back(ch->RingChannel);
 		}
 		if (gathered.empty())
 		{
@@ -466,7 +552,7 @@ struct MultiRingBufferNodeContext : NodeContext
 
 		std::vector<MultiRing::SlotPair> slots;
 		for (auto const& g : gathered)
-			SendRingStats(*g.NodeCh, "Pre Push");
+			SendRingStats(*g.NodeCh, *g.RingCh, "Pre Push");
 		if (!Ring.BeginPushSubset(100, wantedRings, slots))
 			return Ring.Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
 
@@ -474,7 +560,7 @@ struct MultiRingBufferNodeContext : NodeContext
 		for (size_t i = 0; i < gathered.size(); ++i)
 		{
 			auto& g = gathered[i];
-			auto* slot = slots[i].second;
+			auto* slot = slots[i].second.get();
 			g.RingCh->ResInterface->Push(slot, g.Input, params,
 										 NOS_NAME_STATIC("MultiRingBuffer"), true);
 			if (!g.NodeCh->IsOutLive)
@@ -486,13 +572,21 @@ struct MultiRingBufferNodeContext : NodeContext
 
 		Ring.EndPushAll(slots);
 		for (auto const& g : gathered)
-			SendRingStats(*g.NodeCh, "Post Push");
+			SendRingStats(*g.NodeCh, *g.RingCh, "Post Push");
+
+		{
+			// These are the pops the next round waits for.
+			std::unique_lock lock(StateMutex);
+			PushedLastRound.clear();
+			for (auto const& g : gathered)
+				PushedLastRound.insert(g.NodeCh->Letter);
+		}
 
 		if (Mode == RingMode::FILL)
 		{
 			bool isFillComplete = true;
-			for (auto* rc : wantedRings)
-				if (Ring.WritePoolSize(*rc) != 0)
+			for (auto const& ringCh : wantedRings)
+				if (Ring.WritePoolSize(*ringCh) != 0)
 				{
 					isFillComplete = false;
 					break;
@@ -509,30 +603,47 @@ struct MultiRingBufferNodeContext : NodeContext
 
 	nosResult CopyFrom(nosCopyInfo* cpy) override
 	{
-		auto* ch = GetChannelByPinId(cpy->ID);
-		if (!ch || !ch->RingChannel || Ring.Exit)
-			return NOS_RESULT_FAILED;
-		if (!ch->IsOutLive)
-			return NOS_RESULT_SUCCESS;
+		ChannelPtr ch;
+		MultiRing::ChannelPtr ringCh;
+		MultiRing::SlotPtr lastPopped;
+		{
+			std::unique_lock lock(StateMutex);
+			ch = GetChannelByPinIdUnlocked(cpy->ID);
+			if (!ch || !ch->RingChannel || Ring.Exit)
+				return NOS_RESULT_FAILED;
+			if (!ch->IsOutLive)
+				return NOS_RESULT_SUCCESS;
+			ringCh = ch->RingChannel;
+			// Claim the previous slot while holding the lock so a concurrent
+			// OnPathStop cannot return it a second time.
+			lastPopped = std::exchange(ch->LastPopped, nullptr);
+		}
 
 		// EndPop the previous frame's slot before popping a new one. We can't
 		// rely on OnEndFrame: the engine only fires it on the path's primary
 		// source pin, so live secondary outputs (e.g. a second channel feeding
 		// the same consumer) never receive it. By the time the consumer asks
 		// for the next frame on this pin, it's done with the previous one.
-		if (ch->LastPopped)
+		if (lastPopped)
 		{
-			Ring.EndPop(*ch->RingChannel, ch->LastPopped);
-			ch->LastPopped = nullptr;
-			SendRingStats(*ch, "End Frame");
+			Ring.EndPop(*ringCh, std::move(lastPopped));
+			SendRingStats(*ch, *ringCh, "End Frame");
 		}
 
 		if (OnRestart == OnRestartType::WAIT_UNTIL_FULL && RepeatWhenFilling)
 		{
-			if (ch->RemainingRepeatableCount > 0)
+			bool repeat = false;
 			{
-				ch->RingChannel->ResInterface->OnRepeatPinValue(cpy);
-				ch->RemainingRepeatableCount--;
+				std::unique_lock lock(StateMutex);
+				if (ch->RemainingRepeatableCount > 0)
+				{
+					ch->RemainingRepeatableCount--;
+					repeat = true;
+				}
+			}
+			if (repeat)
+			{
+				ringCh->ResInterface->OnRepeatPinValue(cpy);
 				return NOS_RESULT_SUCCESS;
 			}
 		}
@@ -544,56 +655,61 @@ struct MultiRingBufferNodeContext : NodeContext
 				return NOS_RESULT_PENDING;
 		}
 
-		ResourceInterface::ResourceBase* slot;
-		SendRingStats(*ch, "Pre Begin Pop");
+		MultiRing::SlotPtr slot;
+		SendRingStats(*ch, *ringCh, "Pre Begin Pop");
 		{
 			ScopedProfilerEvent _({.Name = "Wait For Filled Slot"});
-			slot = Ring.BeginPop(*ch->RingChannel, 100);
+			slot = Ring.BeginPop(*ringCh, 100);
 		}
 		if (!slot)
 			return Ring.Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
-		SendRingStats(*ch, "Post Begin Pop");
+		SendRingStats(*ch, *ringCh, "Post Begin Pop");
 
 		nos::Buffer outPinVal;
-		bool changePinValue = ch->RingChannel->ResInterface->BeginCopyFrom(slot, *cpy->PinData, outPinVal);
+		bool changePinValue = ringCh->ResInterface->BeginCopyFrom(slot.get(), *cpy->PinData, outPinVal);
 		if (changePinValue)
 			nosEngine.SetPinValueByName(NodeId, ch->OutputName, outPinVal);
 
-		ch->RingChannel->ResInterface->WaitForDownloadToEnd(slot, "MultiRingBuffer", NodeName.AsString(), cpy);
+		ringCh->ResInterface->WaitForDownloadToEnd(slot.get(), "MultiRingBuffer", NodeName.AsString(), cpy);
 
 		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
 		cpy->FrameNumber = slot->FrameNumber;
 
-		ch->LastPopped = slot;
-
-		PoppedSinceLastSchedule.insert(ch->Letter);
-		size_t liveCount = 0;
-		for (auto& [_, c] : Channels)
-			if (c->IsOutLive)
-				++liveCount;
-		if (PoppedSinceLastSchedule.size() >= liveCount)
+		bool schedule = false;
 		{
-			SendScheduleRequest(1);
-			PoppedSinceLastSchedule.clear();
+			std::unique_lock lock(StateMutex);
+			ch->LastPopped = std::move(slot);
+
+			PoppedSinceLastSchedule.insert(ch->Letter);
+			if (IsRoundCompleteUnlocked())
+			{
+				ResetScheduleRoundUnlocked();
+				schedule = true;
+			}
 		}
+		if (schedule)
+			SendScheduleRequest(1);
 		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnEndFrame(uuid const& pinId, nosEndFrameCause cause) override
 	{
-		auto* ch = GetChannelByPinId(pinId);
+		if (cause != NOS_END_FRAME_FAILED)
+			return;
+		std::unique_lock lock(StateMutex);
+		auto ch = GetChannelByPinIdUnlocked(pinId);
 		if (!ch)
 			return;
-
-		if (cause == NOS_END_FRAME_FAILED)
-		{
-			if (pinId == ch->OutputId)
-				return;
-			if (!ch->IsOutLive)
-				return;
-			ChangePinLiveness(ch->OutputName, false);
-			ch->IsOutLive = false;
-		}
+		if (pinId == ch->OutputId)
+			return;
+		if (!ch->IsOutLive)
+			return;
+		ChangePinLiveness(ch->OutputName, false);
+		ch->IsOutLive = false;
+		// Drop the popped mark with the liveness, for the same reason: leaving it
+		// set while the live count shrinks satisfies the round test early on every
+		// later pop.
+		ForgetChannelInRoundUnlocked(ch->Letter);
 		// EndPop happens at the start of the next CopyFrom for this channel
 		// rather than here, because OnEndFrame is unreliable for secondary
 		// live outputs.
@@ -610,79 +726,88 @@ struct MultiRingBufferNodeContext : NodeContext
 		switch (command->Event)
 		{
 		case NOS_RING_SIZE_CHANGE:
+		{
 			if (command->RingSize == 0)
 				return;
-			RequestedRingSize = command->RingSize;
+			{
+				std::unique_lock lock(StateMutex);
+				RequestedRingSize = command->RingSize;
+			}
 			nosEngine.SetPinValue(*GetPinId(NSN_Size), nos::Buffer::From(command->RingSize));
 			break;
+		}
 		default: return;
 		}
 	}
 
 	void OnPathStop() override
 	{
-		if (OnRestart == OnRestartType::WAIT_UNTIL_FULL)
-			Mode = RingMode::FILL;
-		for (auto& [_, ch] : Channels)
+		std::vector<std::pair<MultiRing::ChannelPtr, MultiRing::SlotPtr>> toEnd;
 		{
-			if (ch->LastPopped && ch->RingChannel)
-			{
-				Ring.EndPop(*ch->RingChannel, ch->LastPopped);
-				ch->LastPopped = nullptr;
-			}
+			std::unique_lock lock(StateMutex);
+			if (OnRestart == OnRestartType::WAIT_UNTIL_FULL)
+				Mode = RingMode::FILL;
+			for (auto& [_, ch] : Channels)
+				if (ch->LastPopped && ch->RingChannel)
+					toEnd.emplace_back(ch->RingChannel, std::exchange(ch->LastPopped, nullptr));
+			ResetScheduleRoundUnlocked();
 		}
+		for (auto& [ringCh, slot] : toEnd)
+			Ring.EndPop(*ringCh, std::move(slot));
 		Ring.Stop();
-		PoppedSinceLastSchedule.clear();
 	}
 
 	void OnPathStart() override
 	{
-		if (Channels.empty())
-			return;
-
-		PoppedSinceLastSchedule.clear();
-
-		if (OnRestart == OnRestartType::RESET || RepeatWhenFilling)
-			Ring.ResetAll(false);
-		else
-		{
-			for (auto& [_, ch] : Channels)
-				if (ch->RingChannel)
-					Ring.MoveOneReadToWriteIfFull(*ch->RingChannel);
-		}
-
-		if (RequestedRingSize)
-		{
-			Ring.ResizeAll(*RequestedRingSize);
-			for (auto& [_, ch] : Channels)
-				ch->NeedsRecreation = false;
-			RequestedRingSize = std::nullopt;
-		}
-		for (auto& [_, ch] : Channels)
-		{
-			if (ch->NeedsRecreation && ch->RingChannel)
-			{
-				Ring.RecreateChannelResources(*ch->RingChannel);
-				ch->NeedsRecreation = false;
-			}
-		}
-
 		size_t totalSchedule = 0;
-		for (auto& [_, ch] : Channels)
 		{
-			if (!ch->RingChannel)
-				continue;
-			if (ch->RingChannel->Resources.empty())
+			std::unique_lock lock(StateMutex);
+			if (Channels.empty())
+				return;
+
+			ResetScheduleRoundUnlocked();
+
+			if (OnRestart == OnRestartType::RESET || RepeatWhenFilling)
+				Ring.ResetAll(false);
+			else
 			{
-				totalSchedule = std::max<size_t>(totalSchedule, 1);
-				continue;
+				for (auto& [_, ch] : Channels)
+					if (ch->RingChannel)
+						Ring.MoveOneReadToWriteIfFull(*ch->RingChannel);
 			}
-			auto emptySlotCount = Ring.WritePoolSize(*ch->RingChannel);
-			if (RepeatWhenFilling)
-				ch->RemainingRepeatableCount = std::max(emptySlotCount, (size_t)1) - 1;
-			totalSchedule = std::max(totalSchedule, emptySlotCount);
-			ch->RingChannel->ResInterface->OnPathStart();
-			SeedOutputPin(*ch);
+
+			if (RequestedRingSize)
+			{
+				Ring.ResizeAll(*RequestedRingSize);
+				for (auto& [_, ch] : Channels)
+					ch->NeedsRecreation = false;
+				RequestedRingSize = std::nullopt;
+			}
+			for (auto& [_, ch] : Channels)
+			{
+				if (ch->NeedsRecreation && ch->RingChannel)
+				{
+					Ring.RecreateChannelResources(*ch->RingChannel);
+					ch->NeedsRecreation = false;
+				}
+			}
+
+			for (auto& [_, ch] : Channels)
+			{
+				if (!ch->RingChannel)
+					continue;
+				if (!Ring.HasResources(*ch->RingChannel))
+				{
+					totalSchedule = std::max<size_t>(totalSchedule, 1);
+					continue;
+				}
+				auto emptySlotCount = Ring.WritePoolSize(*ch->RingChannel);
+				if (RepeatWhenFilling)
+					ch->RemainingRepeatableCount = std::max(emptySlotCount, (size_t)1) - 1;
+				totalSchedule = std::max(totalSchedule, emptySlotCount);
+				ch->RingChannel->ResInterface->OnPathStart();
+				SeedOutputPin(*ch);
+			}
 		}
 		Ring.Start();
 		if (totalSchedule > 0)
@@ -709,8 +834,11 @@ struct MultiRingBufferNodeContext : NodeContext
 		auto letter = ParseLetter(sv);
 		if (!letter)
 			return;
-		if (Channels.size() <= 1)
-			return;
+		{
+			std::shared_lock lock(StateMutex);
+			if (Channels.size() <= 1)
+				return;
+		}
 		flatbuffers::FlatBufferBuilder fbb;
 		std::vector items = {nos::CreateContextMenuItemDirect(
 			fbb, "Remove Channel", MenuCommand(REMOVE_CHANNEL, static_cast<uint8_t>(*letter)))};
@@ -726,12 +854,15 @@ struct MultiRingBufferNodeContext : NodeContext
 		case ADD_CHANNEL:
 		{
 			char newLetter = 0;
-			for (char c : CHANNEL_LETTERS)
 			{
-				if (!Channels.contains(c))
+				std::shared_lock lock(StateMutex);
+				for (char c : CHANNEL_LETTERS)
 				{
-					newLetter = c;
-					break;
+					if (!Channels.contains(c))
+					{
+						newLetter = c;
+						break;
+					}
 				}
 			}
 			if (newLetter == 0)
@@ -766,13 +897,18 @@ struct MultiRingBufferNodeContext : NodeContext
 		case REMOVE_CHANNEL:
 		{
 			char letter = static_cast<char>(command.Letter);
-			auto it = Channels.find(letter);
-			if (it == Channels.end())
-				return;
-			auto& ch = *it->second;
+			uuid inputId, outputId;
+			{
+				std::shared_lock lock(StateMutex);
+				auto it = Channels.find(letter);
+				if (it == Channels.end())
+					return;
+				inputId = it->second->InputId;
+				outputId = it->second->OutputId;
+			}
 			nos::TPartialNodeUpdate update;
 			update.node_id = NodeId;
-			update.pins_to_delete = {ch.InputId, ch.OutputId};
+			update.pins_to_delete = {inputId, outputId};
 			flatbuffers::FlatBufferBuilder fbb;
 			HandleEvent(CreateAppEvent(fbb, nos::CreatePartialNodeUpdate(fbb, &update)));
 			break;
