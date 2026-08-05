@@ -159,7 +159,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 {
 	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
 	outFunctions->GetRenamedTypes = [](nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outCount) {
-		*outCount = 8;
+		*outCount = 9;
 		if (!outRenamedFrom || !outRenamedTo)
 			return;
 		// Legacy nos.fb.* names (these types once lived in the nos.fb namespace).
@@ -181,6 +181,9 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 		outRenamedTo[6] = NOS_NAME_STATIC("nos.track.CoordinateSystem");
 		outRenamedFrom[7] = NOS_NAME_STATIC("nos.sys.track.RotationSystem");
 		outRenamedTo[7] = NOS_NAME_STATIC("nos.track.RotationSystem");
+
+		outRenamedFrom[8] = NOS_NAME_STATIC("nos.graphics.CoordinateFrame");
+		outRenamedTo  [8] = NOS_NAME_STATIC("nos.math.CoordinateFrame");
 	};
 	// CameraGuide moved from nos.graphics to nos.track; migrate old graphs.
 	outFunctions->GetRenamedNodeClasses = [](nosName* outFrom, nosName* outTo, size_t* outCount) {
