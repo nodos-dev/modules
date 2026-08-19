@@ -170,41 +170,51 @@ void nosWebRTCManager::RemovePeerConnection(int connectionID)
 
 void nosWebRTCManager::Dispose()
 {
-    std::vector<PeerConnectionPtr> peerConnections;
+    std::vector<nosPeerConnectionState> peerConnectionStates;
     {
         std::lock_guard lock(PeerConnectionsMutex);
         if (IsDisposed)
             return;
 
         IsDisposed = true;
-        peerConnections.reserve(p_PeerConnections.size());
-        for (const auto& [connectionID, state] : p_PeerConnections) {
-            if (state.PeerConnection) {
-                peerConnections.push_back(state.PeerConnection);
-            }
+        peerConnectionStates.reserve(p_PeerConnections.size());
+        for (auto& [connectionID, state] : p_PeerConnections) {
+            peerConnectionStates.push_back(std::move(state));
         }
         p_PeerConnections.clear();
         p_PeerIDToConnectionID.clear();
     }
 
-    for (auto& peerConnection : peerConnections) {
-        if (!peerConnection)
+    // PeerConnectionInterface keeps a raw PeerConnectionObserver pointer. Keep the
+    // complete state alive until Close() has run and the WebRTC threads have stopped.
+    for (auto& state : peerConnectionStates) {
+        if (state.Observer) {
+            state.Observer->ClearCallbacks();
+        }
+        if (state.CreateSDPObserver) {
+            state.CreateSDPObserver->ClearCallbacks();
+        }
+        if (state.SetSDPObserver) {
+            state.SetSDPObserver->ClearCallbacks();
+        }
+
+        if (!state.PeerConnection)
             continue;
 
-        for (const auto& sender : peerConnection->GetSenders()) {
+        for (const auto& sender : state.PeerConnection->GetSenders()) {
             for (auto& videoTrack : p_VideoTracks) {
                 if (videoTrack == sender->track()) {
-                    peerConnection->RemoveTrack(sender);
+                    state.PeerConnection->RemoveTrack(sender);
                     videoTrack->set_enabled(false);
                 }
             }
         }
-        peerConnection->Close();
-        peerConnection = nullptr;
+        state.PeerConnection->Close();
+        state.PeerConnection = nullptr;
     }
 
-    //scoped_refptr overloads = operator so that it releases 
-    // old pointer and decrements refCount when you assign new one
+    // scoped_refptr overloads operator= so that it releases the old pointer and
+    // decrements its reference count when assigned a new one.
     for (auto& videoTrack : p_VideoTracks) {
         videoTrack = nullptr;
     }
@@ -452,7 +462,7 @@ void nosWebRTCManager::ReleasePeerConnectionState(int connectionID, nosPeerConne
     }
 
     if (removedState) {
-        *removedState = it->second;
+        *removedState = std::move(it->second);
     }
 
     p_PeerConnections.erase(it);

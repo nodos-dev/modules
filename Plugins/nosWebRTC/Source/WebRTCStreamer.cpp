@@ -68,8 +68,8 @@ public:
 		manager->AddVideoSource(nosVideoSource);
 	}
 	~nosWebRTCStreamerInterface() {
-		manager->Dispose();
 		Dispose();
+		manager->Dispose();
 	}
 	
 	// Returns true if the connection should be in https
