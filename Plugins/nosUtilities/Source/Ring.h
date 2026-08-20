@@ -844,35 +844,17 @@ struct RingNodeBase : NodeContext
 			resource = std::make_unique<GPUTextureResource>();
 		else
 			resource = std::make_unique<CPUTrivialResource>();
+		if (auto inputVal = GetWatchedPinValue(NSN_Input))
+			resource->CheckNewResource(NSN_Input, *inputVal, std::nullopt);
+		if (auto alignmentVal = GetWatchedPinValue(NSN_Alignment))
+			resource->CheckNewResource(NSN_Alignment, *alignmentVal, std::nullopt);
+		uint32_t size = 1;
+		if (auto sizeVal = GetWatchedPinValue(NSN_Size))
+			size = *InterpretPinValue<uint32_t>(*sizeVal);
+		Ring = std::make_unique<TRing>(size, std::move(resource));
 
-		Ring = std::make_unique<TRing>(1, std::move(resource));
 
 		Ring->Stop();
-		AddPinValueWatcher(NSN_Size, [this](nos::Buffer const& newSize, std::optional<nos::Buffer> oldVal) {
-			uint32_t size = *newSize.As<uint32_t>();
-			if (oldVal && oldVal == newSize)
-				return;
-			RequestRingResize(size);
-		});
-		AddPinValueWatcher(NSN_Input, [this](nos::Buffer const& newBuf, std::optional<nos::Buffer> oldVal) {
-			if (Ring->ResInterface->CheckNewResource(NSN_Input, newBuf, oldVal))
-			{
-				SendPathRestart();
-				Ring->Stop();
-				NeedsRecreation = true;
-			}
-		});
-		AddPinValueWatcher(NSN_Alignment, [this](nos::Buffer const& newAlignment, std::optional<nos::Buffer> oldVal) {
-			if (Ring->ResInterface->CheckNewResource(NSN_Alignment, newAlignment, oldVal))
-			{
-				SendPathRestart();
-				Ring->Stop();
-				NeedsRecreation = true;
-			}
-		});
-		AddPinValueWatcher(NOS_NAME_STATIC("RepeatWhenFilling"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
-			RepeatWhenFilling = *newVal.As<bool>();
-		});
 	}
 
 	RingNodeBase(nosFbNodePtr node, OnRestartType onRestart) : NodeContext(node), OnRestart(onRestart), TypeInfo(NSN_Generic)
@@ -885,6 +867,36 @@ struct RingNodeBase : NodeContext
 		for (auto& pin : Pins | std::views::values)
 			if (pin.TypeName != NSN_Generic && (pin.Name == NSN_Output || pin.Name == NSN_Input))
 				typeName = pin.TypeName;
+
+		AddPinValueWatcher(NSN_Size, [this](nos::Buffer const& newSize, std::optional<nos::Buffer> oldVal) {
+			if (!Ring)
+				return;
+			uint32_t size = *newSize.As<uint32_t>();
+			if (oldVal && oldVal == newSize)
+				return;
+			RequestRingResize(size);
+		});
+		AddPinValueWatcher(NSN_Input, [this](nos::Buffer const& newBuf, std::optional<nos::Buffer> oldVal) {
+			if (Ring && Ring->ResInterface->CheckNewResource(NSN_Input, newBuf, oldVal))
+			{
+				SendPathRestart();
+				Ring->Stop();
+				NeedsRecreation = true;
+			}
+		});
+		AddPinValueWatcher(NSN_Alignment, [this](nos::Buffer const& newAlignment, std::optional<nos::Buffer> oldVal) {
+			if (Ring && Ring->ResInterface->CheckNewResource(NSN_Alignment, newAlignment, oldVal))
+			{
+				SendPathRestart();
+				Ring->Stop();
+				NeedsRecreation = true;
+			}
+		});
+		AddPinValueWatcher(NOS_NAME_STATIC("RepeatWhenFilling"),
+						   [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
+							   RepeatWhenFilling = *newVal.As<bool>();
+							   nosEngine.SendPathRestart(NodeId);
+						   });
 		if (typeName != NSN_Generic) {
 			TypeInfo = nos::TypeInfo(typeName);
 			Init();
