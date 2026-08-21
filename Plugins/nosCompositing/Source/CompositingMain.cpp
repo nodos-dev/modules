@@ -112,6 +112,8 @@ void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.GridOutputItem"), NOS_NAME("nos.compositing.GridOutputItem")},
 		{NOS_NAME("nos.utilities.LayoutDrawItem"), NOS_NAME("nos.compositing.LayoutDrawItem")},
 		{NOS_NAME("nos.utilities.LayoutOutputInfo"), NOS_NAME("nos.compositing.LayoutOutputInfo")},
+		{NOS_NAME("nos.utilities.layout.LayoutDrawItem"), NOS_NAME("nos.compositing.LayoutDrawItem")},
+		{NOS_NAME("nos.utilities.layout.LayoutOutputInfo"), NOS_NAME("nos.compositing.LayoutOutputInfo")},
 		{NOS_NAME("zd.utilities.BlendMode"), NOS_NAME("nos.compositing.BlendMode")},
 		{NOS_NAME("zd.utilities.CanvasLayer"), NOS_NAME("nos.compositing.CanvasLayer")},
 		{NOS_NAME("zd.utilities.MixerChannelType"), NOS_NAME("nos.compositing.MixerChannelType")},

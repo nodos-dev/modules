@@ -102,6 +102,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 {
 static std::vector<std::pair<nos::Name, nos::Name>> renames = {
+		{NOS_NAME("nos.utilities.ScheduleRequestMode"), NOS_NAME("nos.flow.ScheduleRequestMode")},
 	};
 
 	if (!outFrom)
