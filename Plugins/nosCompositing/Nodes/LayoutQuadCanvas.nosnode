@@ -10,7 +10,7 @@
 				"id": "9ad95de1-d52a-409a-809d-da7d98b13f30",
 				"name": "LayoutQuadCanvas",
 				"class_name": "LayoutQuadCanvas",
-				"description": "Deprecated: use Quad Merge instead, which does the same 2x2 composition as a single node with a Resolution pin.\nThis node is kept so existing graphs keep working and is hidden from the node creation menu.",
+				"description": "Deprecated: use Quad Merge instead, which does the same 2x2 composition as a single node with a Resolution pin.\nThis node is kept so existing graphs keep working.",
 				"pins": [
 					{
 						"id": "acdf750c-9637-4807-9d29-578f11bcc010",
