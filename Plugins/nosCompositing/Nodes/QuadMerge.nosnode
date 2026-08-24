@@ -10,7 +10,10 @@
 					"concatenate",
 					"add",
 					"quarter",
-					"texture"
+					"texture",
+					"quad",
+					"canvas",
+					"layout"
 				]
 			},
 			"node": {
@@ -53,10 +56,36 @@
 						"description": "Quadrant 3: bottom/right"
 					},
 					{
+						"name": "Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						},
+						"description": "Resolution of the merged output texture",
+						"visualizers": [
+							{
+								"type": "NAMED_VALUE",
+								"name": "nos.mediaio.ResolutionVisualizer"
+							}
+						]
+					},
+					{
 						"name": "Output",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"extensions": [
+							{
+								"name": "texture_options",
+								"type_name": "nos.sys.vulkan.TexturePinOptions",
+								"data": {
+									"unscaled": true
+								}
+							}
+						]
 					}
 				]
 			}

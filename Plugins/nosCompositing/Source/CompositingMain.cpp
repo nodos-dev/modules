@@ -15,6 +15,7 @@ namespace nos::compositing
 void RegisterBoxFit(nosNodeFunctions*);
 nosResult RegisterChannelViewer(nosNodeFunctions*);
 nosResult RegisterMerge(nosNodeFunctions*);
+void RegisterQuadMerge(nosNodeFunctions*);
 nosResult RegisterLayoutDrawer(nosNodeFunctions*);
 void RegisterFreeLayout(nosNodeFunctions*);
 void RegisterGridLayout(nosNodeFunctions*);
@@ -31,6 +32,7 @@ enum class Nodes : size_t
 	BoxFit,
 	ChannelViewer,
 	Merge,
+	QuadMerge,
 	LayoutDrawer,
 	FreeLayout,
 	GridLayout,
@@ -75,6 +77,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(BoxFit)
 			GEN_CASE_NODE_RESULT(ChannelViewer)
 			GEN_CASE_NODE_RESULT(Merge)
+			GEN_CASE_NODE(QuadMerge)
 			GEN_CASE_NODE_RESULT(LayoutDrawer)
 			GEN_CASE_NODE(FreeLayout)
 			GEN_CASE_NODE(GridLayout)
