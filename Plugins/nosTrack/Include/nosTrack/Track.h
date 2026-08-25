@@ -19,7 +19,9 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <deque>
 #include <queue>
+#include <unordered_map>
 #include <vector>
 #include <functional>
 #include <algorithm>
@@ -44,7 +46,6 @@ NOS_REGISTER_NAME_SPACED(TimeBased_Delay, "TimeBased Delay");
 NOS_REGISTER_NAME(EncoderDelayOverride);
 NOS_REGISTER_NAME(EncoderDelay);
 NOS_REGISTER_NAME(Track);
-NOS_REGISTER_NAME(Delay);
 NOS_REGISTER_NAME(NegateX);
 NOS_REGISTER_NAME(NegateY);
 NOS_REGISTER_NAME(NegateZ);
@@ -241,12 +242,15 @@ struct TrackNodeContext : public NodeContext, public nos::Thread
 public:
 	std::mutex QMutex;
 	std::atomic_uint Port;
-	std::atomic_uint Delay;
 	std::atomic_uint SpareCount = 1;
 	std::atomic_bool ShouldRestart = false;
+	bool RestartPending = false; // Restart requested, waiting for enough fresh execute time samples
 	std::atomic_bool NeverStarve = false;
 	std::atomic_bool UDPConnected = false;
-	std::queue<track::TTrack> DataQueue;
+	std::deque<TimedTrack> DataQueue;
+	static constexpr size_t TRACK_RECONCILE_SAMPLE_COUNT = 5;
+	static constexpr size_t MAX_QUEUED_TRACKS = 512;
+	std::deque<std::chrono::high_resolution_clock::time_point> ExecuteTimes;
 	std::atomic_uint LastServedFrameNumber = 0;
 
 	// Time-based receiver mode (ported from zd.track): instead of popping one queued
@@ -278,10 +282,43 @@ public:
 	};
 	TransformMapping Args = {};
 
-	virtual ~TrackNodeContext() {}
+	virtual ~TrackNodeContext() { Stop(); }
 
 	// Derived receiver nodes implement the wire-protocol parse.
 	virtual bool Parse(std::vector<uint8_t> const& data, track::TTrack& out) = 0;
+
+	enum class StatusType
+	{
+		Jitter,
+		Feed,
+	};
+	void SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
+	{
+		std::unique_lock lock(StatusMutex);
+		auto it = StatusMessages.find(statusType);
+		if (it != StatusMessages.end() && it->second.type == msgType && it->second.text == text)
+			return; // Only send statuses to the Engine when they change
+		StatusMessages[statusType] = fb::TNodeStatusMessage{{}, std::move(text), msgType};
+		UpdateStatus();
+	}
+
+	void ClearStatus(StatusType statusType)
+	{
+		std::unique_lock lock(StatusMutex);
+		if (StatusMessages.erase(statusType))
+			UpdateStatus();
+	}
+
+	void UpdateStatus()
+	{
+		std::vector<fb::TNodeStatusMessage> messages;
+		for (auto& [type, message] : StatusMessages)
+			messages.push_back(message);
+		SetNodeStatusMessages(messages);
+	}
+
+	std::mutex StatusMutex;
+	std::unordered_map<StatusType, fb::TNodeStatusMessage> StatusMessages;
 
 	nosResult OnCreate(nos::fb::Node const* node) override
 	{
@@ -290,7 +327,6 @@ public:
 		{
 			auto str = pin->name()->str();
 			LoadField<uint32_t>(pin, NSN_UDP_Port, Port);
-			LoadField<uint32_t>(pin, NSN_Delay, Delay);
 			LoadField<uint32_t>(pin, NSN_Spare_Count, SpareCount);
 			LoadField<bool>(pin, NSN_NegateX, Args.NegatePos.x);
 			LoadField<bool>(pin, NSN_NegateY, Args.NegatePos.y);
@@ -312,7 +348,7 @@ public:
 			LoadField<uint32_t>(pin, NSN_EncoderDelay, EncoderDelayInMs);
 			LoadField<float>(pin, NSN_CenterShiftRatio, Args.CenterShiftRatio);
 		}
-		Restart();
+		ShouldRestart = true;
 		if (enable)
 			Start();
 		Jitter.OnJitterStatusChanged = std::bind(&TrackNodeContext::JitterStatusChanged, this, std::placeholders::_1);
@@ -321,23 +357,18 @@ public:
 
 	void JitterStatusChanged(JitterLevel jl)
 	{
-		std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> msg;
-		flatbuffers::FlatBufferBuilder fbb;
 		switch (jl)
 		{
 		case JitterLevel::LOW:
-			msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, "Low Network Jitter (<1 ms)", fb::NodeStatusMessageType::INFO));
+			SetStatus(StatusType::Jitter, fb::NodeStatusMessageType::INFO, "Low Network Jitter (<1 ms)");
 			break;
 		case JitterLevel::MODERATE:
-			msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, "Moderate Network Jitter (>1 ms)", fb::NodeStatusMessageType::WARNING));
+			SetStatus(StatusType::Jitter, fb::NodeStatusMessageType::WARNING, "Moderate Network Jitter (>1 ms)");
 			break;
 		case JitterLevel::HIGH:
-			msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, "High Network Jitter (>5 ms)", fb::NodeStatusMessageType::FAILURE));
+			SetStatus(StatusType::Jitter, fb::NodeStatusMessageType::FAILURE, "High Network Jitter (>5 ms)");
 			break;
 		}
-
-		HandleEvent(CreateAppEvent(
-			fbb, nos::CreatePartialNodeUpdateDirect(fbb, &NodeId, nos::ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
 	}
 
 	void UpdateJitterPinValue()
@@ -356,12 +387,11 @@ public:
 
 	void OnPathStart() override
 	{
-		Restart();
+		ShouldRestart = true;
 	}
 
 	void OnPathStop() override
 	{
-		Stop();
 	}
 
 	void OnPathCommand(const nosPathCommand* command) override
@@ -471,8 +501,27 @@ public:
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		// Network-jitter tracking runs in both receiver modes.
 		NodeExecuteParams p(params);
+		if (ShouldRestart)
+		{
+			ShouldRestart = false;
+			// Samples from before the restart would skew the average into the past; collect fresh
+			// ones and reconcile the queue once enough frames have passed.
+			ExecuteTimes.clear();
+			RestartPending = true;
+		}
+		ExecuteTimes.push_back(std::chrono::high_resolution_clock::now());
+		if (ExecuteTimes.size() > TRACK_RECONCILE_SAMPLE_COUNT)
+			ExecuteTimes.pop_front();
+		if (RestartPending && ExecuteTimes.size() >= TRACK_RECONCILE_SAMPLE_COUNT)
+		{
+			Restart(p.GetDeltaTime());
+			RestartPending = false;
+		}
+
+		std::unique_lock<std::mutex> guard(QMutex);
+
+		// Network-jitter tracking runs in both receiver modes.
 		Jitter.SetDeltaSeconds(p.GetDeltaTime());
 		UpdateJitterPinValue();
 
@@ -480,42 +529,29 @@ public:
 		// with an optional independent encoder delay for fov/zoom/focus.
 		if (UseTimedTrack)
 		{
-			track::TTrack trackData;
-			{
-				std::unique_lock<std::mutex> guard(QMutex);
-				trackData = GetTrack(DelayInMs, EncoderDelayOverride ? EncoderDelayInMs : DelayInMs);
-			}
+			auto trackData = GetTrack(DelayInMs, EncoderDelayOverride ? EncoderDelayInMs : DelayInMs);
 			nos::Buffer ttrackBuf = UpdateTrackOut(trackData);
 			nosEngine.SetPinValueByName(NodeId, NSN_Track, { .Data = ttrackBuf.Data(), .Size = ttrackBuf.Size() });
 			return NOS_RESULT_SUCCESS;
 		}
 
-		if (ShouldRestart)
+		if (DataQueue.empty())
 		{
-			Restart();
-			ShouldRestart = false;
-		}
-		track::TTrack track;
-		{
-			std::unique_lock<std::mutex> guard(QMutex);
-			if (DataQueue.size() <= Delay)
+			if (NeverStarve)
+				return NOS_RESULT_SUCCESS;
+
+			if (IsRunning())
 			{
-				if (NeverStarve)
-					return NOS_RESULT_SUCCESS;
-
-				if (IsRunning())
-				{
-					nosEngine.LogI("Thread active but no data in track queue");
-					return NOS_RESULT_PENDING;
-				}
-				return NOS_RESULT_FAILED;
+				SetStatus(StatusType::Feed, fb::NodeStatusMessageType::WARNING, "No track data");
+				return NOS_RESULT_PENDING;
 			}
-			track = DataQueue.front();
-			DataQueue.pop();
+			return NOS_RESULT_FAILED;
 		}
 
-		nos::Buffer trackBuf = UpdateTrackOut(track);
+		nos::Buffer trackBuf = UpdateTrackOut(DataQueue.front().track);
 		nosEngine.SetPinValueByName(NodeId, NSN_Track, { .Data = trackBuf.Data(), .Size = trackBuf.Size() });
+		DataQueue.pop_front();
+		ClearStatus(StatusType::Feed);
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -548,13 +584,6 @@ public:
 		SET_VALUE(glm::vec3, CameraRotation, CameraRotation);
 		SET_VALUE(float, CenterShiftRatio, CenterShiftRatio);
 #undef SET_VALUE
-
-		if (pinName == NOS_NAME_STATIC("Delay"))
-		{
-			Delay = *(uint32_t*)value;
-			SignalRestart();
-			return;
-		}
 
 		if (pinName == NSN_Enable)
 		{
@@ -626,27 +655,61 @@ public:
 		}
 	}
 
-	void Restart()
+	void Restart(double deltaSeconds)
 	{
-		track::TTrack defaultTrack = GetDefaultOrFirstTrack();
+		using namespace std::chrono;
+		if (deltaSeconds <= 0.0 || ExecuteTimes.empty())
+			return;
+		auto interval = duration_cast<high_resolution_clock::duration>(duration<double>(deltaSeconds));
+		auto tolerance = interval / 2;
+
+		// Anchor the frame grid to the node's execute times, since the queue is consumed once per
+		// execute. Average the last few execute times, each projected forward to the latest frame,
+		// to smooth per-frame scheduling jitter.
+		auto base = ExecuteTimes.front();
+		high_resolution_clock::duration sum{};
+		for (size_t i = 0; i < ExecuteTimes.size(); i++)
+			sum += (ExecuteTimes[i] - base) + interval * (int64_t)(ExecuteTimes.size() - 1 - i);
+		auto executeTime = base + sum / (int64_t)ExecuteTimes.size();
+
+		// Serve tracks SpareCount + 1 frames behind, so the queue keeps that many spares against jitter
+		auto firstTrackTime = executeTime - interval * ((int64_t)SpareCount.load() + 1);
+
 		std::unique_lock<std::mutex> guard(QMutex);
+
+		if (!DataQueue.empty())
+		{
+			// Receive times carry network jitter too; smooth them like the execute times by averaging
+			// the first few queued tracks, each projected back to the front slot.
+			auto sampleCount = (int64_t)std::min(DataQueue.size(), TRACK_RECONCILE_SAMPLE_COUNT);
+			auto frontBase = DataQueue.front().time;
+			high_resolution_clock::duration frontSum{};
+			for (int64_t i = 0; i < sampleCount; i++)
+				frontSum += (DataQueue[i].time - frontBase) - interval * i;
+			auto frontTime = frontBase + frontSum / sampleCount;
+
+			// Tracks received before the first-track time are stale; drop them. A front within half a
+			// frame of it remains as a suitable first track.
+			auto stale = (firstTrackTime - frontTime + tolerance) / interval;
+			for (int64_t i = 0; i < stale && !DataQueue.empty(); i++)
+				DataQueue.pop_front();
+
+			// If the oldest track was received after the first-track time, tracks for the frames in
+			// between were missed; fill their slots with default track data.
+			auto missing = std::min((frontTime - firstTrackTime + tolerance) / interval, (int64_t)MAX_QUEUED_TRACKS);
+			if (missing > 0)
+			{
+				track::TTrack defaultTrack;
+				auto defaultTrackData = GetDefaultValueOfType(NOS_NAME_STATIC(nos::track::Track::GetFullyQualifiedName()));
+				if (defaultTrackData)
+					flatbuffers::GetRoot<nos::track::Track>(defaultTrackData->Data())->UnPackTo(&defaultTrack);
+				for (int64_t i = missing - 1; i >= 0; i--)
+					DataQueue.push_front({ defaultTrack, firstTrackTime + interval * i });
+			}
+		}
+
 		DataVector.resize(512);
 		Jitter.Reset();
-		while (DataQueue.size() > Delay + SpareCount)
-			DataQueue.pop();
-		DataQueue = {};
-		while (DataQueue.size() < Delay + SpareCount + 1)
-			DataQueue.push(defaultTrack);
-	}
-
-	track::TTrack GetDefaultOrFirstTrack()
-	{
-		{
-			std::unique_lock guard(QMutex);
-			if (!DataQueue.empty())
-				return DataQueue.front();
-		}
-		return GetDefaultValueOfType(NOS_NAME_STATIC(nos::track::Track::GetFullyQualifiedName()))->As<track::TTrack>();
 	}
 
 	virtual nos::Buffer UpdateTrackOut(track::TTrack& outTrack)
@@ -734,18 +797,21 @@ public:
 					if (Parse(std::vector<uint8_t>{buf, buf + len}, data))
 					{
 						std::unique_lock<std::mutex> guard(QMutex);
+						TimedTrack tt;
+						tt.track = data;
+						tt.time = std::chrono::high_resolution_clock::now();
 						if (UseTimedTrack)
 						{
 							// Time-based mode: keep a time-stamped ring of the most recent samples.
-							TimedTrack tt;
-							tt.track = data;
-							tt.time = std::chrono::high_resolution_clock::now();
 							ShiftElementsRight(DataVector);
 							DataVector[0] = tt;
 						}
 						else
 						{
-							DataQueue.push(data);
+							// If no one is consuming (e.g. path stopped), drop oldest tracks to bound the queue
+							while (DataQueue.size() >= MAX_QUEUED_TRACKS)
+								DataQueue.pop_front();
+							DataQueue.push_back(tt);
 							nosEngine.WatchLog("Track Queue Size", std::to_string(DataQueue.size()).c_str());
 							if (reviveFromOrphanOnFirstSuccess)
 							{
