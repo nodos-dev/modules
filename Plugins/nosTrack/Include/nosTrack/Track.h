@@ -348,6 +348,7 @@ public:
 			LoadField<uint32_t>(pin, NSN_EncoderDelay, EncoderDelayInMs);
 			LoadField<float>(pin, NSN_CenterShiftRatio, Args.CenterShiftRatio);
 		}
+		DataVector.resize(MAX_QUEUED_TRACKS);
 		ShouldRestart = true;
 		if (enable)
 			Start();
@@ -708,7 +709,7 @@ public:
 			}
 		}
 
-		DataVector.resize(512);
+		DataVector.resize(MAX_QUEUED_TRACKS);
 		Jitter.Reset();
 	}
 
