@@ -813,7 +813,7 @@ public:
 							while (DataQueue.size() >= MAX_QUEUED_TRACKS)
 								DataQueue.pop_front();
 							DataQueue.push_back(tt);
-							nosEngine.WatchLog("Track Queue Size", std::to_string(DataQueue.size()).c_str());
+							nosEngine.WatchLog((NodeName.AsString() + " Track Queue Size").c_str(), std::to_string(DataQueue.size()).c_str());
 							if (reviveFromOrphanOnFirstSuccess)
 							{
 								reviveFromOrphanOnFirstSuccess = false;
