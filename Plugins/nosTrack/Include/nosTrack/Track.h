@@ -20,6 +20,7 @@
 #include <chrono>
 #include <cmath>
 #include <deque>
+#include <optional>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -262,6 +263,11 @@ public:
 	std::atomic_bool EncoderDelayOverride = false;
 	std::atomic_uint EncoderDelayInMs = 1;
 
+	// Warn only on sustained starvation; the queue briefly running empty between a packet's arrival
+	// and the next execute is normal and would flip the status every frame. Guarded by QMutex.
+	static constexpr auto NO_TRACK_DATA_STATUS_DELAY = std::chrono::milliseconds(500);
+	std::optional<std::chrono::steady_clock::time_point> StarvedSince;
+
 	// Network-jitter measurement (ported from zd.track).
 	NetworkJitter Jitter;
 	std::chrono::time_point<std::chrono::steady_clock> JitterLastUpdatedTime = std::chrono::steady_clock::now();
@@ -291,15 +297,17 @@ public:
 	{
 		Jitter,
 		Feed,
+		UDP,
 	};
-	void SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
+	bool SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
 	{
 		std::unique_lock lock(StatusMutex);
 		auto it = StatusMessages.find(statusType);
 		if (it != StatusMessages.end() && it->second.type == msgType && it->second.text == text)
-			return; // Only send statuses to the Engine when they change
+			return false; // Only send statuses to the Engine when they change
 		StatusMessages[statusType] = fb::TNodeStatusMessage{{}, std::move(text), msgType};
 		UpdateStatus();
+		return true;
 	}
 
 	void ClearStatus(StatusType statusType)
@@ -353,6 +361,8 @@ public:
 		if (enable)
 			Start();
 		Jitter.OnJitterStatusChanged = std::bind(&TrackNodeContext::JitterStatusChanged, this, std::placeholders::_1);
+		// NetworkJitter only reports level changes, so show the initial level ourselves
+		JitterStatusChanged(JitterLevel::LOW);
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -543,7 +553,11 @@ public:
 
 			if (IsRunning())
 			{
-				SetStatus(StatusType::Feed, fb::NodeStatusMessageType::WARNING, "No track data");
+				auto now = std::chrono::steady_clock::now();
+				if (!StarvedSince)
+					StarvedSince = now;
+				if (now - *StarvedSince >= NO_TRACK_DATA_STATUS_DELAY)
+					SetStatus(StatusType::Feed, fb::NodeStatusMessageType::WARNING, "No track data");
 				return NOS_RESULT_PENDING;
 			}
 			return NOS_RESULT_FAILED;
@@ -552,6 +566,7 @@ public:
 		nos::Buffer trackBuf = UpdateTrackOut(DataQueue.front().track);
 		nosEngine.SetPinValueByName(NodeId, NSN_Track, { .Data = trackBuf.Data(), .Size = trackBuf.Size() });
 		DataQueue.pop_front();
+		StarvedSince.reset();
 		ClearStatus(StatusType::Feed);
 		return NOS_RESULT_SUCCESS;
 	}
@@ -762,6 +777,17 @@ public:
 		HandleEvent(
 			nos::CreateAppEvent(fbb, nos::app::CreateSetThreadNameDirect(fbb, (uint64_t)StdThread.native_handle(), "Track")));
 
+		std::optional<std::pair<fb::PinOrphanStateType, std::string>> lastOrphanState;
+		auto changeOrphanState = [&](bool newOrphan, std::string const& message = {})
+			{
+				auto newOrphanState = std::pair{
+					newOrphan ? fb::PinOrphanStateType::PASSIVE : fb::PinOrphanStateType::ACTIVE, message };
+				if (lastOrphanState && *lastOrphanState == newOrphanState)
+					return; // Only send orphan state to the Engine when it changes
+				lastOrphanState = newOrphanState;
+				SetPinOrphanState(NSN_Track, newOrphanState.first, message.c_str());
+			};
+
 		asio::io_service io_serv;
 		nos::rc<udp::socket> sock;
 		while (!ShouldStop && !sock)
@@ -772,12 +798,15 @@ public:
 				sock->set_option(udp::socket::reuse_address(true));
 				sock->set_option(asio::detail::socket_option::integer<SOL_SOCKET, SO_RCVTIMEO>{1000});
 				sock->bind(udp::endpoint(udp::v4(), Port));
-				SetPinOrphanState(NSN_Track, fb::PinOrphanStateType::ACTIVE);
+				ClearStatus(StatusType::UDP);
+				changeOrphanState(false);
 			}
 			catch (const  asio::system_error& e)
 			{
-				SetPinOrphanState(NSN_Track, fb::PinOrphanStateType::PASSIVE, ("Could not open UDP socket " + std::to_string(Port.load()) + ": " + e.what()).c_str());
-				nosEngine.LogW("could not open UDP socket %d: %s", Port.load(), e.what());
+				std::string error = "Could not open UDP socket " + std::to_string(Port.load()) + ":\n\t" + e.what();
+				if (SetStatus(StatusType::UDP, fb::NodeStatusMessageType::FAILURE, error))
+					nosEngine.LogW("%s", error.c_str());
+				changeOrphanState(true, error);
 				std::this_thread::sleep_for(std::chrono::seconds(2));
 				sock = nullptr;
 			}
@@ -814,19 +843,24 @@ public:
 								DataQueue.pop_front();
 							DataQueue.push_back(tt);
 							nosEngine.WatchLog((NodeName.AsString() + " Track Queue Size").c_str(), std::to_string(DataQueue.size()).c_str());
-							if (reviveFromOrphanOnFirstSuccess)
-							{
-								reviveFromOrphanOnFirstSuccess = false;
-								SetPinOrphanState(NSN_Track, fb::PinOrphanStateType::ACTIVE);
-							}
+						}
+						StarvedSince.reset();
+						ClearStatus(StatusType::Feed);
+						if (reviveFromOrphanOnFirstSuccess)
+						{
+							reviveFromOrphanOnFirstSuccess = false;
+							ClearStatus(StatusType::UDP);
+							changeOrphanState(false);
 						}
 					}
 				}
 			}
 			catch (const  asio::system_error& e)
 			{
-				nosEngine.LogW("Exception when listening on port %d: %s", Port.load(), e.what());
-				SetPinOrphanState(NSN_Track, fb::PinOrphanStateType::PASSIVE, ("Exception when listening on port " + std::to_string(Port.load()) + ": " + e.what()).c_str());
+				std::string error = "Exception when listening on port " + std::to_string(Port.load()) + ":\n\t" + e.what();
+				if (SetStatus(StatusType::UDP, fb::NodeStatusMessageType::FAILURE, error))
+					nosEngine.LogW("%s", error.c_str());
+				changeOrphanState(true, error);
 				reviveFromOrphanOnFirstSuccess = true;
 			}
 		}
@@ -839,7 +873,8 @@ public:
 			sock->close();
 			sock = nullptr;
 		}
-		SetPinOrphanState(NSN_Track, fb::PinOrphanStateType::PASSIVE, "UDP thread is not active");
+		ClearStatus(StatusType::UDP);
+		changeOrphanState(true, "UDP thread is not active");
 	}
 
 	template<class T>
