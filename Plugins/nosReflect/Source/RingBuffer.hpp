@@ -242,23 +242,23 @@ struct RingBufferNodeBase : NodeContext
 	{
 		AddPinValueWatcher<uint32_t>(NOS_NAME("Capacity"), [this](const uint32_t* newCapacity, std::optional<const uint32_t*> oldCapacity)
 		{
-			if (*newCapacity != Capacity)
+			const bool updatedViaPathCommand = CapacityUpdatedViaPathCommand;
+			CapacityUpdatedViaPathCommand = false;
+			if (*newCapacity == Capacity)
+				return;
+			if (*newCapacity == 0)
 			{
-				Capacity = std::max(1u, *newCapacity);
-				if (*newCapacity != Capacity)
-				{
-					nosEngine.LogW("%s: Capacity cannot be %lu.",  GetItemPath(NodeId).value_or("<unknown>").c_str(), *newCapacity);
-					SetPinValue(NOS_NAME("Capacity"), Capacity);
-					return;
-				}
-				if (!CapacityUpdatedViaPathCommand)
-				{
-					nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
-					nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
-					CapacityUpdatedViaPathCommand = false;
-				}
-				SendPathRestart(NSN_Input);
+				nosEngine.LogW("%s: Capacity cannot be 0.", GetItemPath(NodeId).value_or("<unknown>").c_str());
+				SetPinValue(NOS_NAME("Capacity"), 1u);
+				return;
 			}
+			Capacity = *newCapacity;
+			if (!updatedViaPathCommand)
+			{
+				nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
+				nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
+			}
+			SendPathRestart(NSN_Input);
 		});
 	}
 
@@ -331,21 +331,17 @@ struct RingBufferNodeBase : NodeContext
 
 	void OnPathCommand(const nosPathCommand* command) override
 	{
-		switch (command->Event)
+		if (command->Event != NOS_RING_SIZE_CHANGE)
+			return;
+		if (command->RingSize == 0)
 		{
-		case NOS_RING_SIZE_CHANGE: {
-				if (command->RingSize == 0)
-				{
-					nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
-					return;
-				}
-				CapacityUpdatedViaPathCommand = true;
-				SetPinValue(NOS_NAME("Capacity"), command->RingSize);
-				break;
-		}
-		default:
+			nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
 			return;
 		}
+		if (command->RingSize == Capacity)
+			return;
+		CapacityUpdatedViaPathCommand = true;
+		SetPinValue(NOS_NAME("Capacity"), command->RingSize);
 	}
 
 	void OnPinUpdated(nosPinUpdate const* update) override

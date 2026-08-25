@@ -63,23 +63,22 @@ struct FrameRateConverterNode : NodeContext
 
 	void OnCapacityPinValueChanged(uint32_t const* newCapacity, std::optional<uint32_t const*> oldCapacity)
 	{
+		const bool updatedViaPathCommand = CapacityUpdatedViaPathCommand;
+		CapacityUpdatedViaPathCommand = false;
 		if (*newCapacity == Capacity)
 			return;
-		Capacity = std::max(1u, *newCapacity);
-		EffectiveCapacity = std::lcm(Ratio.x(), Ratio.y()) * Capacity;
-		if (*newCapacity != Capacity)
+		if (*newCapacity == 0)
 		{
-			nosEngine.LogW("%s: Capacity cannot be %u.",
-						   GetItemPath(NodeId).value_or("<unknown>").c_str(),
-						   *newCapacity);
-			SetPinValue(NOS_NAME("Capacity"), Capacity);
+			nosEngine.LogW("%s: Capacity cannot be 0.", GetItemPath(NodeId).value_or("<unknown>").c_str());
+			SetPinValue(NOS_NAME("Capacity"), 1u);
 			return;
 		}
-		if (!CapacityUpdatedViaPathCommand)
+		Capacity = *newCapacity;
+		EffectiveCapacity = std::lcm(Ratio.x(), Ratio.y()) * Capacity;
+		if (!updatedViaPathCommand)
 		{
 			nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
 			nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
-			CapacityUpdatedViaPathCommand = false;
 		}
 		SendPathRestart(NSN_Input);
 	}
@@ -215,20 +214,17 @@ struct FrameRateConverterNode : NodeContext
 
 	void OnPathCommand(const nosPathCommand* command) override
 	{
-		switch (command->Event)
+		if (command->Event != NOS_RING_SIZE_CHANGE)
+			return;
+		if (command->RingSize == 0)
 		{
-		case NOS_RING_SIZE_CHANGE: {
-			if (command->RingSize == 0)
-			{
-				nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
-				return;
-			}
-			CapacityUpdatedViaPathCommand = true;
-			SetPinValue(NOS_NAME("Capacity"), command->RingSize);
-			break;
+			nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
+			return;
 		}
-		default: return;
-		}
+		if (command->RingSize == Capacity)
+			return;
+		CapacityUpdatedViaPathCommand = true;
+		SetPinValue(NOS_NAME("Capacity"), command->RingSize);
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
