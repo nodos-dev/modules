@@ -219,7 +219,6 @@ struct FreeDNodeContext : public TrackNodeContext
 			{
 				LoadField<glm::vec2>(pin, NSN_ZoomRange, ZoomRange);
 				LoadField<glm::vec2>(pin, NSN_FocusRange, FocusRange);
-				LoadField<bool>(pin, NSN_NeverStarve, NeverStarve);
 				LoadField<bool>(pin, NSN_InvertZoom, InvertZoom);
 				LoadField<bool>(pin, NSN_InvertFocus, InvertFocus);
 			}
@@ -260,17 +259,10 @@ struct FreeDNodeContext : public TrackNodeContext
             if(NSN_ZoomRange == pinName)
             {
                 ZoomRange = *(glm::vec2*)val.Data;
-                return;
             }
             if(NSN_FocusRange == pinName)
             {
                 FocusRange = *(glm::vec2*)val.Data;
-                return;
-            }
-            if(NSN_NeverStarve == pinName)
-            {
-                NeverStarve = *(bool*)val.Data;
-                return;
             }
 			if(NSN_InvertZoom == pinName)
 			{

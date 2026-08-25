@@ -350,6 +350,7 @@ public:
 			LoadField<glm::vec3>(pin, NSN_CameraPosition, Args.CameraPosition);
 			LoadField<glm::vec3>(pin, NSN_CameraRotation, Args.CameraRotation);
 			LoadField<bool>(pin, NSN_Enable, enable);
+			LoadField<bool>(pin, NSN_NeverStarve, NeverStarve);
 			LoadField<bool>(pin, NSN_TimeBased_Mode, UseTimedTrack);
 			LoadField<uint32_t>(pin, NSN_TimeBased_Delay, DelayInMs);
 			LoadField<bool>(pin, NSN_EncoderDelayOverride, EncoderDelayOverride);
@@ -634,7 +635,11 @@ public:
 
 		if (pinName == NSN_NeverStarve)
 		{
-			NeverStarve = *(bool*)val.Data;
+			// Executes start draining the queue again, so reconcile it against the frame timeline
+			bool newNeverStarve = *(bool*)val.Data;
+			if (NeverStarve && !newNeverStarve)
+				SignalRestart();
+			NeverStarve = newNeverStarve;
 			return;
 		}
 
