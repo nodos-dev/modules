@@ -298,6 +298,7 @@ public:
 		Jitter,
 		Feed,
 		UDP,
+		TimeBased,
 	};
 	bool SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
 	{
@@ -364,7 +365,17 @@ public:
 		Jitter.OnJitterStatusChanged = std::bind(&TrackNodeContext::JitterStatusChanged, this, std::placeholders::_1);
 		// NetworkJitter only reports level changes, so show the initial level ourselves
 		JitterStatusChanged(JitterLevel::LOW);
+		UpdateTimeBasedStatus();
 		return NOS_RESULT_SUCCESS;
+	}
+
+	void UpdateTimeBasedStatus()
+	{
+		if (UseTimedTrack)
+			SetStatus(StatusType::TimeBased, fb::NodeStatusMessageType::WARNING,
+			          "TimeBased mode: Track output is resampled by time, not raw received data");
+		else
+			ClearStatus(StatusType::TimeBased);
 	}
 
 	void JitterStatusChanged(JitterLevel jl)
@@ -646,6 +657,7 @@ public:
 		if (pinName == NSN_TimeBased_Mode)
 		{
 			UseTimedTrack = *(bool*)val.Data;
+			UpdateTimeBasedStatus();
 			SignalRestart();
 			return;
 		}
