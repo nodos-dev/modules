@@ -263,11 +263,6 @@ public:
 	std::atomic_bool EncoderDelayOverride = false;
 	std::atomic_uint EncoderDelayInMs = 1;
 
-	// Warn only on sustained starvation; the queue briefly running empty between a packet's arrival
-	// and the next execute is normal and would flip the status every frame. Guarded by QMutex.
-	static constexpr auto NO_TRACK_DATA_STATUS_DELAY = std::chrono::milliseconds(500);
-	std::optional<std::chrono::steady_clock::time_point> StarvedSince;
-
 	// Network-jitter measurement (ported from zd.track).
 	NetworkJitter Jitter;
 	std::chrono::time_point<std::chrono::steady_clock> JitterLastUpdatedTime = std::chrono::steady_clock::now();
@@ -296,10 +291,13 @@ public:
 	enum class StatusType
 	{
 		Jitter,
-		Feed,
 		UDP,
+		Parse,
 		TimeBased,
 	};
+	// Streams may legitimately mix valid track packets with other messages (heartbeats, other
+	// protocols); warn only when parsing fails this many times in a row.
+	static constexpr size_t PARSE_FAILURE_STATUS_THRESHOLD = 5;
 	bool SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
 	{
 		std::unique_lock lock(StatusMutex);
@@ -564,22 +562,13 @@ public:
 				return NOS_RESULT_SUCCESS;
 
 			if (IsRunning())
-			{
-				auto now = std::chrono::steady_clock::now();
-				if (!StarvedSince)
-					StarvedSince = now;
-				if (now - *StarvedSince >= NO_TRACK_DATA_STATUS_DELAY)
-					SetStatus(StatusType::Feed, fb::NodeStatusMessageType::WARNING, "No track data");
 				return NOS_RESULT_PENDING;
-			}
 			return NOS_RESULT_FAILED;
 		}
 
 		nos::Buffer trackBuf = UpdateTrackOut(DataQueue.front().track);
 		nosEngine.SetPinValueByName(NodeId, NSN_Track, { .Data = trackBuf.Data(), .Size = trackBuf.Size() });
 		DataQueue.pop_front();
-		StarvedSince.reset();
-		ClearStatus(StatusType::Feed);
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -820,10 +809,10 @@ public:
 			}
 			catch (const  asio::system_error& e)
 			{
-				std::string error = "Could not open UDP socket " + std::to_string(Port.load()) + ":\n\t" + e.what();
-				if (SetStatus(StatusType::UDP, fb::NodeStatusMessageType::FAILURE, error))
-					nosEngine.LogW("%s", error.c_str());
-				changeOrphanState(true, error);
+				std::string status = "Could not open UDP port " + std::to_string(Port.load());
+				if (SetStatus(StatusType::UDP, fb::NodeStatusMessageType::FAILURE, status))
+					nosEngine.LogW("%s: %s", status.c_str(), e.what());
+				changeOrphanState(true, status);
 				std::this_thread::sleep_for(std::chrono::seconds(2));
 				sock = nullptr;
 			}
@@ -832,6 +821,7 @@ public:
 		auto defaultTrackData = GetDefaultValueOfType(NOS_NAME_STATIC(nos::track::Track::GetFullyQualifiedName()));
 		auto defaultTrack = defaultTrackData->As<track::TTrack>();
 		bool reviveFromOrphanOnFirstSuccess = false;
+		size_t consecutiveParseFailures = 0;
 		while (!ShouldStop)
 		{
 			try
@@ -841,8 +831,16 @@ public:
 				Jitter.PacketArrived();
 				{
 					track::TTrack data = defaultTrack;
-					if (Parse(std::vector<uint8_t>{buf, buf + len}, data))
+					if (!Parse(std::vector<uint8_t>{buf, buf + len}, data))
 					{
+						if (++consecutiveParseFailures >= PARSE_FAILURE_STATUS_THRESHOLD)
+							SetStatus(StatusType::Parse, fb::NodeStatusMessageType::FAILURE,
+							          "Invalid track data received on UDP port " + std::to_string(Port.load()));
+					}
+					else
+					{
+						consecutiveParseFailures = 0;
+						ClearStatus(StatusType::Parse);
 						std::unique_lock<std::mutex> guard(QMutex);
 						TimedTrack tt;
 						tt.track = data;
@@ -861,8 +859,6 @@ public:
 							DataQueue.push_back(tt);
 							nosEngine.WatchLog((NodeName.AsString() + " Track Queue Size").c_str(), std::to_string(DataQueue.size()).c_str());
 						}
-						StarvedSince.reset();
-						ClearStatus(StatusType::Feed);
 						if (reviveFromOrphanOnFirstSuccess)
 						{
 							reviveFromOrphanOnFirstSuccess = false;
@@ -874,10 +870,11 @@ public:
 			}
 			catch (const  asio::system_error& e)
 			{
-				std::string error = "Exception when listening on port " + std::to_string(Port.load()) + ":\n\t" + e.what();
-				if (SetStatus(StatusType::UDP, fb::NodeStatusMessageType::FAILURE, error))
-					nosEngine.LogW("%s", error.c_str());
-				changeOrphanState(true, error);
+				bool timedOut = e.code() == asio::error::timed_out || e.code() == asio::error::would_block;
+				std::string status = (timedOut ? "No data received on UDP port " : "Cannot receive on UDP port ") + std::to_string(Port.load());
+				if (SetStatus(StatusType::UDP, fb::NodeStatusMessageType::FAILURE, status))
+					nosEngine.LogW("%s: %s", status.c_str(), e.what());
+				changeOrphanState(true, status);
 				reviveFromOrphanOnFirstSuccess = true;
 			}
 		}
@@ -891,6 +888,7 @@ public:
 			sock = nullptr;
 		}
 		ClearStatus(StatusType::UDP);
+		ClearStatus(StatusType::Parse);
 		changeOrphanState(true, "UDP thread is not active");
 	}
 
