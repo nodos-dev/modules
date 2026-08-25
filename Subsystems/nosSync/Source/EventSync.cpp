@@ -231,8 +231,6 @@ std::optional<uint64_t> GetCurrentPathGroupId()
 	return pathGroupId;
 }
 
-static_assert(NOS_SYNC_VERSION_MAJOR == 11, "Remove the template parameter");
-template<bool HasHealthNotificationSupport, bool HasExternallySynchronizedParam>
 nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 {
 	if (!params->WaitFn || !params->OutEventId)
@@ -247,35 +245,20 @@ nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 	auto& eventGroup = it->second;
 	auto nextId = GEventSync.NextEventId++;
 
-	nosNotifySyncGroupHealthPfn notifyHealthFn{};
-	if constexpr (HasHealthNotificationSupport)
-	{
-		notifyHealthFn = params->NotifyHealthFn;
-	}
-	bool isExternallySynchronized = false;
-	if constexpr (HasExternallySynchronizedParam)
-	{
-		isExternallySynchronized = params->IsExternallySynchronized;
-	}
-
 	eventGroup.Events[nextId] = {
 		.Id = nextId,
 		.PathGroupId = *pathGroupId,
 		.EventGroupId = eventGroup.Id,
 		.PfnReset = params->ResetFn,
 		.PfnWait = params->WaitFn,
-		.PfnNotifySyncGroupHealth = notifyHealthFn,
+		.PfnNotifySyncGroupHealth = params->NotifyHealthFn,
 		.UserData = params->UserData,
 		.DeltaSeconds = GetReducedDeltaSeconds(params->DeltaSeconds),
-		.IsExternallySynchronized = isExternallySynchronized
+		.IsExternallySynchronized = params->IsExternallySynchronized
 	};
 	*params->OutEventId = nextId;
 	return NOS_RESULT_SUCCESS;
 }
-
-// Explicit instantiations selected by Export() based on the requested minor version.
-template nosResult NOSAPI_CALL RegisterEvent<true, true>(const nosRegisterEventParams*);
-template nosResult NOSAPI_CALL RegisterEvent<false, false>(const nosRegisterEventParams*);
 
 nosResult NOSAPI_CALL UnregisterEvent(uint64_t eventId)
 {

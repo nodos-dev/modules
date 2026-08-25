@@ -23,7 +23,6 @@ namespace nos::sync
 std::unordered_map<uint32_t, nosSyncSubsystem*> GExportedSubsystemVersions;
 
 nosResult NOSAPI_CALL RegisterEventGroup(const nosRegisterEventGroupParams* params);
-template<bool HasHealthNotificationSupport, bool HasExternallySynchronizedParam>
 nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params);
 nosResult NOSAPI_CALL UnregisterEvent(uint64_t eventId);
 nosResult NOSAPI_CALL UnregisterEventGroup(uint32_t eventGroupId);
@@ -43,11 +42,8 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 	}
 	auto* subsystem = new nosSyncSubsystem();
 	subsystem->RegisterEventGroup = RegisterEventGroup;
-	static_assert(NOS_SYNC_VERSION_MAJOR == 11, "Update the exported subsystem versions if the major version changes");
-	if (minorVersion >= 1)
-		subsystem->RegisterEvent = RegisterEvent<true, true>;
-	else
-		subsystem->RegisterEvent = RegisterEvent<false, false>;
+	static_assert(NOS_SYNC_VERSION_MAJOR == 12, "Update the exported subsystem versions if the major version changes");
+	subsystem->RegisterEvent = RegisterEvent;
 	subsystem->UnregisterEvent = UnregisterEvent;
 	subsystem->WaitForConsensus = WaitForConsensus;
 	subsystem->UnregisterEventGroup = UnregisterEventGroup;

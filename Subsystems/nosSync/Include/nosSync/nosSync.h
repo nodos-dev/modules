@@ -91,8 +91,8 @@ typedef struct nosSyncSubsystem
 
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
-#define NOS_SYNC_VERSION_MAJOR 11
-#define NOS_SYNC_VERSION_MINOR 1
+#define NOS_SYNC_VERSION_MAJOR 12
+#define NOS_SYNC_VERSION_MINOR 0
 
 extern struct nosPluginInfo nosSyncPluginInfo;
 extern nosSyncSubsystem* nosSync;
