@@ -381,15 +381,13 @@ public:
 	TimedTrack InterpolateTimedTrack(const TimedTrack& t0, const TimedTrack& t1, std::chrono::high_resolution_clock::time_point time)
 	{
 		using namespace std::chrono;
-		auto timeDiff = duration_cast<milliseconds>(t1.time - t0.time).count();
-		auto mid = duration_cast<milliseconds>(t1.time - time).count();
+		float timeDiff = duration<float, std::milli>(t1.time - t0.time).count();
+		float mid = duration<float, std::milli>(t1.time - time).count();
 
-		if (timeDiff <= 1)
+		if (timeDiff < 0.001f)
 			return t0;
-		if (mid >= (timeDiff - 1))
-			return t1;
 
-		float midPoint = mid / (float)timeDiff;
+		float midPoint = glm::clamp(mid / timeDiff, 0.f, 1.f);
 
 		track::TTrack t = t0.track;
 		t.location.mutate_x(LinearInterpolation(t0.track.location.x(), t1.track.location.x(), midPoint));
@@ -456,14 +454,10 @@ public:
 				{
 					if (targetEncoderTime > DataVector[i].time && targetEncoderTime < DataVector[i - 1].time)
 					{
-						auto& t0 = DataVector[i];
-						auto& t1 = DataVector[i - 1];
-						auto x1 = std::chrono::duration_cast<std::chrono::milliseconds>(t1.time - t0.time).count();
-						auto mid = std::chrono::duration_cast<std::chrono::milliseconds>(t1.time - targetEncoderTime).count();
-						float midPoint = mid / (float)x1;
-						t.fov = LinearInterpolation(t0.track.fov, t1.track.fov, midPoint);
-						t.zoom = LinearInterpolation(t0.track.zoom, t1.track.zoom, midPoint);
-						t.focus = LinearInterpolation(t0.track.focus, t1.track.focus, midPoint);
+						auto encoderTrack = InterpolateTimedTrack(DataVector[i], DataVector[i - 1], targetEncoderTime).track;
+						t.fov = encoderTrack.fov;
+						t.zoom = encoderTrack.zoom;
+						t.focus = encoderTrack.focus;
 						break;
 					}
 				}
