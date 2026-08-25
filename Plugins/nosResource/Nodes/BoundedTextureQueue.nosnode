@@ -126,19 +126,6 @@
             "contents": { "source_id": "389fceed-9d5f-47bf-ae57-a8e269fb5b9e" },
             "orphan_state": { },
             "display_name": "Destination"
-          },
-          {
-            "id": "f0ecec75-1050-45a3-9ee5-563bf8d47ba9",
-            "name": "Capacity",
-            "type_name": "uint",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizers": [],
-            "data": 2,
-              "def": 2,
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "803f8bae-2f14-4326-8d6f-83a6f219bf63" },
-            "orphan_state": { }
           }
         ],
         "pos": { "x": 0.0, "y": 0.0 },
@@ -2539,7 +2526,7 @@
                   "id": "f2112c50-aab4-4320-b959-0fa574d00e2c",
                   "name": "Capacity",
                   "type_name": "uint",
-                  "show_as": "INPUT_PIN",
+                  "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
                   "data": 2,
@@ -2587,50 +2574,6 @@
               "description": "Queues data from a producer thread and outputs them to a consumer thread.\nStores only the references to the objects, not copies.",
               "display_name": "Bounded Object Queue",
               "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "4f86ab75-5aa8-4457-ad01-c410c8cbda9f",
-              "name": "Capacity",
-              "class_name": "nos.internal.GraphInput",
-              "pins": [
-                {
-                  "id": "1a4928f4-1a13-4a96-a9bc-ce9e28587829",
-                  "name": "Output",
-                  "type_name": "uint",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizers": [],
-                  "data": 2,
-                  "def": 2,
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { "message": "" }
-                },
-                {
-                  "id": "803f8bae-2f14-4326-8d6f-83a6f219bf63",
-                  "name": "Input",
-                  "type_name": "uint",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizers": [],
-                  "data": 2,
-                  "referred_by": [
-                    "f0ecec75-1050-45a3-9ee5-563bf8d47ba9"
-                  ],
-                  "def": 0,
-                  "meta_data_map": [
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { "message": "" }
-                }
-              ],
-              "pos": { "x": 1860.0, "y": 943.0 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
             },
             {
               "id": "acd020f9-3c08-4003-9392-8439ea97fe3e",
@@ -2841,8 +2784,7 @@
             { "from": "88fa82c5-2a3f-49ee-807e-de894eb4de26", "to": "8a878c96-293c-4c8d-8866-1ee358924473", "id": "dcf672f3-1082-4228-9439-d6335ed6afc8" },
             { "from": "a1087a10-2553-450d-80aa-c4652d110d95", "to": "db0c56a0-6aad-4b13-92c4-a683b8bd33b2", "id": "a5199cd9-fa03-420b-b1d6-30a84c4bbfaa" },
             { "from": "25da6aef-4607-486f-8386-c383e1af7c6a", "to": "9a6e71f5-85a0-46ad-acac-c71e86017e60", "id": "97bd4491-3471-48f7-8dbe-b7a8307d138e" },
-            { "from": "2268f430-a4fc-41c2-8c3d-55a2a8b27aa4", "to": "194cb729-cb84-4a87-a1e7-be5bf2bbb93e", "id": "9fae1581-cb28-4ee6-a63e-6abdacfa0e88" },
-            { "from": "1a4928f4-1a13-4a96-a9bc-ce9e28587829", "to": "f2112c50-aab4-4320-b959-0fa574d00e2c", "id": "803f3ff2-cd70-49b3-93ad-527ac5f7e1d6" }
+            { "from": "2268f430-a4fc-41c2-8c3d-55a2a8b27aa4", "to": "194cb729-cb84-4a87-a1e7-be5bf2bbb93e", "id": "9fae1581-cb28-4ee6-a63e-6abdacfa0e88" }
           ] },
         "function_category": "Default Node",
         "display_name": "Bounded Queue",
