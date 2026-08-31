@@ -170,8 +170,8 @@ struct PyNativeOnPinDisconnectedArgs {
 struct PyNativeContextMenuRequestInstigator
 {
 	uint32_t EditorId;
-	uint32_t RequestId;
-	PyNativeContextMenuRequestInstigator(uint32_t editorId, uint32_t requestId) : EditorId(editorId), RequestId(requestId) {}
+	uuid RequestId;
+	PyNativeContextMenuRequestInstigator(uint32_t editorId, uuid requestId) : EditorId(editorId), RequestId(requestId) {}
 };
 	
 struct PyNativeContextMenuRequest
@@ -245,7 +245,7 @@ PYBIND11_EMBEDDED_MODULE(__nodos_internal__, m)
 
 	pyb::class_<PyNativeContextMenuRequestInstigator>(m, "ContextMenuRequestInstigator")
 		.def_property("editor_id", [](const PyNativeContextMenuRequestInstigator& instigator) -> uint32_t { return instigator.EditorId; }, [](PyNativeContextMenuRequestInstigator& instigator, uint32_t id) { instigator.EditorId = id; })
-		.def_property("request_id", [](const PyNativeContextMenuRequestInstigator& instigator) -> uint32_t { return instigator.RequestId; }, [](PyNativeContextMenuRequestInstigator& instigator, uint32_t id) { instigator.RequestId = id; });
+		.def_property("request_id", [](const PyNativeContextMenuRequestInstigator& instigator) -> nosUUID { return instigator.RequestId; }, [](PyNativeContextMenuRequestInstigator& instigator, nosUUID id) { instigator.RequestId = id; });
 
 	// Engine Services
 	m.def("set_pin_value",

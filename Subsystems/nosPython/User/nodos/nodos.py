@@ -194,7 +194,7 @@ class ContextMenuRequestInstigator:
         return self.editor_id
 
     @property
-    def request_id(self) -> int:
+    def request_id(self) -> uuid:
         """
         :return: The unique identifier of the request
         """
