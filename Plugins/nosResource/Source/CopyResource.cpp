@@ -53,6 +53,7 @@ struct CopyResourceNode : NodeContext
 		auto destination = params.GetPinObject(NOS_NAME("Destination"));
 		auto inEventHolder = params.GetPinObject<sys::vulkan::GPUEventHolder>(NOS_NAME("InGPUEventHolder"));
 		bool preferTransferQueue = *params.GetPinValue<bool>(NOS_NAME("PreferTransferQueue"));
+		bool forceSubmit = *params.GetPinValue<bool>(NOS_NAME("ForceSubmit"));
 		nosCmd cmd{};
 		nosCmdBeginParams beginParams{
 			.Name = NOS_NAME("Resource Copy"),
@@ -62,7 +63,7 @@ struct CopyResourceNode : NodeContext
 		};
 		nosVulkan->Begin(&beginParams);
 		nosVulkan->Copy(cmd, source, destination, nullptr);
-		nosCmdEndParams endParams{};
+		nosCmdEndParams endParams{.ForceSubmit = forceSubmit};
 		if (inEventHolder)
 		{
 			nosGPUEvent* inEvent = nullptr;

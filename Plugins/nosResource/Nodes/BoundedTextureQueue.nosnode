@@ -564,6 +564,21 @@
                         "display_name": "Prefer Transfer Queue"
                       },
                       {
+                        "id": "f2424b3b-56a5-44af-8c81-e79de7babcce",
+                        "name": "ForceSubmit",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": true,
+                        "def": false,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "Submits the command buffer immediately after the copy. Use this at asynchronous resource handoff boundaries.",
+                        "display_name": "Force Submit"
+                      },
+                      {
                         "id": "0edbc06a-e237-43ee-b85b-947b0898d89f",
                         "name": "OutGPUEventHolder",
                         "type_name": "nos.sys.vulkan.GPUEventHolder",
@@ -1587,6 +1602,21 @@
                         "orphan_state": { },
                         "description": "If enabled, this copy will be performed using the Vulkan transfer queue if possible.",
                         "display_name": "Prefer Transfer Queue"
+                      },
+                      {
+                        "id": "4f575339-7b1c-4ad1-b800-91533142be69",
+                        "name": "ForceSubmit",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": true,
+                        "def": false,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "Submits the command buffer immediately after the copy. Use this at asynchronous resource handoff boundaries.",
+                        "display_name": "Force Submit"
                       },
                       {
                         "id": "a9e3273d-3c63-4683-a5bb-15b4ba9d440d",

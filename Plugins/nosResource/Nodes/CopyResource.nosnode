@@ -46,6 +46,15 @@
 						"description": "If enabled, this copy will be performed using the Vulkan transfer queue if possible."
 					},
 					{
+						"name": "ForceSubmit",
+						"display_name": "Force Submit",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false,
+						"description": "Submits the command buffer immediately after the copy. Use this at asynchronous resource handoff boundaries."
+					},
+					{
 						"name": "OutGPUEventHolder",
 						"display_name": "GPU Event Holder",
 						"type_name": "nos.sys.vulkan.GPUEventHolder",
