@@ -12,12 +12,12 @@
 				]
 			},
       "node": {
-        "id": "fc4aeaf4-9ebc-436d-ae90-9b8be036bab9",
+        "id": "f85c8607-4233-4aed-80a4-501034ef829b",
         "name": "BoundedQueue",
         "class_name": "nos.resource.BoundedTextureQueue",
         "pins": [
           {
-            "id": "b1dda5ec-f92d-40fc-91c9-a62f8f6df64c",
+            "id": "46e82a33-8e9c-41a5-8a1a-ee826863bbed",
             "name": "Run",
             "type_name": "nos.exe",
             "show_as": "INPUT_PIN",
@@ -26,24 +26,24 @@
             "data": { },
             "def": { },
             "contents_type": "PortalPin",
-            "contents": { "source_id": "5b0075d8-c87d-4eb8-9333-fe2e0433c1a0" },
+            "contents": { "source_id": "1a6b68c6-801e-4dc8-b02d-a5cff4d6f12d" },
             "orphan_state": { }
           },
           {
-            "id": "4dfa2fbe-bdaf-47d2-b8a2-7512fc480d80",
+            "id": "b0ce438b-f5d0-4dd6-93dc-cdfb1dadf3df",
             "name": "Resolution",
             "type_name": "nos.fb.vec2u",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizers": [],
             "data": { "x": 1920, "y": 1080 },
-              "def": { "x": 1920, "y": 1080 },
+            "def": { "x": 1024, "y": 1024 },
             "contents_type": "PortalPin",
-            "contents": { "source_id": "0c378f84-574f-46da-93b5-5437637e0030" },
+            "contents": { "source_id": "1f4b0865-3693-410a-b93c-b88c4fdae2e9" },
             "orphan_state": { }
           },
           {
-            "id": "d0ed5142-3bff-41f9-88eb-11336dfabcf4",
+            "id": "750f10aa-3fc6-46c7-8690-3b7e82dde817",
             "name": "Input",
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "INPUT_PIN",
@@ -53,9 +53,9 @@
               "size_in_bytes": 17694720,
               "external_memory": {
                 "handle_type": 2,
-                "handle": 8568,
+                "handle": 7604,
                 "allocation_size": 17694720,
-                "pid": 309480,
+                "pid": 59396,
                 "offset": 0
               },
               "width": 1920,
@@ -64,28 +64,20 @@
               "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
             },
             "def": {
-                "size_in_bytes": 17694720,
-                "external_memory": {
-                  "handle_type": 2,
-                  "handle": 8568,
-                  "allocation_size": 17694720,
-                  "pid": 309480,
-                  "offset": 0
-                },
               "width": 1920,
               "height": 1080,
-                "format": "R16G16B16A16_UNORM",
+              "format": "R16G16B16A16_SFLOAT",
               "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
             },
             "meta_data_map": [
               { "key": "AdvancedProperty", "value": "true" }
             ],
             "contents_type": "PortalPin",
-            "contents": { "source_id": "1ee1a56f-7f12-4ed3-9ced-0fbe22b35aae" },
+            "contents": { "source_id": "5d0d77e6-c600-4c4f-8fd1-5604b55cb73e" },
             "orphan_state": { }
           },
           {
-            "id": "bee970a0-dd2d-4275-9d25-0230f3365099",
+            "id": "d8df2728-fedb-47c9-9ba6-e828fd7f6fdc",
             "name": "OutDestination",
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "OUTPUT_PIN",
@@ -95,10 +87,10 @@
               "size_in_bytes": 17694720,
               "external_memory": {
                 "handle_type": 2,
-                "handle": 796,
+                "handle": 6976,
                 "allocation_size": 134217728,
-                "pid": 309480,
-                "offset": 35389440
+                "pid": 59396,
+                "offset": 17694720
               },
               "width": 1920,
               "height": 1080,
@@ -106,24 +98,16 @@
               "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
             },
             "def": {
-                "size_in_bytes": 17694720,
-                "external_memory": {
-                  "handle_type": 2,
-                  "handle": 796,
-                  "allocation_size": 134217728,
-                  "pid": 309480,
-                  "offset": 35389440
-                },
               "width": 1920,
               "height": 1080,
               "format": "R16G16B16A16_SFLOAT",
-                "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
+              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
             },
             "meta_data_map": [
               { "key": "AdvancedProperty", "value": "true" }
             ],
             "contents_type": "PortalPin",
-            "contents": { "source_id": "389fceed-9d5f-47bf-ae57-a8e269fb5b9e" },
+            "contents": { "source_id": "b63f492a-d627-478c-b91c-cb9305503d5b" },
             "orphan_state": { },
             "display_name": "Destination"
           }
@@ -132,95 +116,113 @@
         "contents_type": "Graph",
         "contents": { "nodes": [
             {
-              "id": "26fbeb3f-40e3-471b-b79d-614341122930",
-              "name": "Input",
-              "class_name": "nos.internal.GraphInput",
+              "id": "2c845167-a924-4f92-93f9-a19b65617518",
+              "name": "BoundedObjectQueue (1)",
+              "class_name": "nos.reflect.BoundedObjectQueue",
               "pins": [
                 {
-                  "id": "25da6aef-4607-486f-8386-c383e1af7c6a",
-                  "name": "Output",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizers": [],
-                  "data": {
-                    "size_in_bytes": 17694720,
-                    "external_memory": {
-                      "handle_type": 2,
-                      "handle": 8568,
-                      "allocation_size": 17694720,
-                      "pid": 309480,
-                      "offset": 0
-                    },
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_UNORM",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "def": {
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { "message": "" }
-                },
-                {
-                  "id": "1ee1a56f-7f12-4ed3-9ced-0fbe22b35aae",
-                  "name": "Input",
-                  "type_name": "nos.sys.vulkan.Texture",
+                  "id": "43178290-3e58-44c3-94e2-ba47335cbd18",
+                  "name": "Thread",
+                  "type_name": "nos.exe",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizers": [],
-                  "data": {
-                    "size_in_bytes": 17694720,
-                    "external_memory": {
-                      "handle_type": 2,
-                      "handle": 8568,
-                      "allocation_size": 17694720,
-                      "pid": 309480,
-                      "offset": 0
-                    },
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_UNORM",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "referred_by": [
-                    "d0ed5142-3bff-41f9-88eb-11336dfabcf4"
-                  ],
-                  "def": {
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
+                  "data": { },
+                  "def": { },
                   "contents_type": "JobPin",
                   "contents": { },
-                  "orphan_state": { "message": "" }
+                  "orphan_state": { }
+                },
+                {
+                  "id": "c8ed00f1-5c57-40c9-804b-eb50656ca9be",
+                  "name": "Input",
+                  "type_name": "nos.Dict",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_ONLY",
+                  "visualizers": [],
+                  "data": { "entries": [
+                      { "key": "texture", "type_name": "nos.sys.vulkan.Texture", "value": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                        } },
+                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                      { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
+                    ] },
+                  "def": { },
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "orphan_state": { }
+                },
+                {
+                  "id": "8c7f57ea-0230-4b92-923a-7632e1cb07b9",
+                  "name": "Capacity",
+                  "type_name": "uint",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizers": [],
+                  "data": 2,
+                  "min": 1,
+                  "def": 2,
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "orphan_state": { }
+                },
+                {
+                  "id": "bbd7bc76-dfff-4e1b-870b-37a4f0fc0baf",
+                  "name": "Output",
+                  "type_name": "nos.Dict",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizers": [],
+                  "data": { "entries": [
+                      { "key": "texture", "type_name": "nos.sys.vulkan.Texture", "value": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                        } },
+                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                      { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
+                    ] },
+                  "def": { },
+                  "live": true,
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "orphan_state": { }
                 }
               ],
-              "pos": { "x": 1049.0, "y": 918.0 },
+              "pos": { "x": 2055.0, "y": 842.0 },
               "contents_type": "Job",
               "contents": { "type": "" },
               "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+              "description": "Queues data from a producer thread and outputs them to a consumer thread.\nStores only the references to the objects, not copies.",
+              "display_name": "Bounded Object Queue",
+              "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
             },
             {
-              "id": "c89ccc79-2da5-48ac-bd7e-89b1f8c25cb7",
+              "id": "9c0228f7-8f43-4984-8851-a236f210ed2e",
               "name": "OutCopyTexture",
               "pins": [
                 {
-                  "id": "88fa82c5-2a3f-49ee-807e-de894eb4de26",
+                  "id": "15b28b82-3d4c-4c63-8bdf-2ec9dc7ea96b",
                   "name": "OutDestination",
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
@@ -230,10 +232,10 @@
                     "size_in_bytes": 17694720,
                     "external_memory": {
                       "handle_type": 2,
-                      "handle": 796,
+                      "handle": 6976,
                       "allocation_size": 134217728,
-                      "pid": 309480,
-                      "offset": 35389440
+                      "pid": 59396,
+                      "offset": 17694720
                     },
                     "width": 1920,
                     "height": 1080,
@@ -250,12 +252,12 @@
                     { "key": "AdvancedProperty", "value": "true" }
                   ],
                   "contents_type": "PortalPin",
-                  "contents": { "source_id": "3c4410ce-c48c-4456-9482-7b9f9968b914" },
+                  "contents": { "source_id": "62898173-0d3b-4159-a0a0-2db0ffb51cf2" },
                   "orphan_state": { },
                   "display_name": "Destination"
                 },
                 {
-                  "id": "e88cafb8-559b-4911-ae0c-04c07c1f522d",
+                  "id": "8ef4d2ed-d4c3-4d2d-b1ab-65360e9eed5a",
                   "name": "Input",
                   "type_name": "nos.Dict",
                   "show_as": "INPUT_PIN",
@@ -266,21 +268,22 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
                           "format": "R16G16B16A16_SFLOAT",
                           "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                         } },
-                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
+                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                      { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
                     ] },
                   "def": { },
                   "contents_type": "PortalPin",
-                  "contents": { "source_id": "0d6d43fc-3998-4720-abbf-32da7fdbcaf8" },
+                  "contents": { "source_id": "448178ed-ba60-4ac2-b83d-72d511a43099" },
                   "orphan_state": { }
                 }
               ],
@@ -288,12 +291,366 @@
               "contents_type": "Graph",
               "contents": { "nodes": [
                   {
-                    "id": "c0184704-2353-45c0-98ad-c44d443eae3f",
+                    "id": "4286ed5e-5a4f-4a9b-94fc-cb1680f2fb60",
+                    "name": "WaitGPUEvent",
+                    "class_name": "nos.sync.WaitGPUEvent",
+                    "pins": [
+                      {
+                        "id": "d1760869-287e-4b68-bdea-cadecc31730c",
+                        "name": "Run",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "ec74c7e8-0a70-474d-b3ee-5572341b9cec",
+                        "name": "Continue",
+                        "type_name": "nos.exe",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "17d7b8b8-62b5-4542-a6fe-d1d08daa6d0d",
+                        "name": "Event",
+                        "type_name": "nos.sys.vulkan.GPUEventHolder",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "695de93e-1b35-486b-8cb3-b32b542f1776",
+                        "name": "TimeoutMs",
+                        "type_name": "uint",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": 100,
+                        "def": 100,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      }
+                    ],
+                    "pos": { "x": 3137.0, "y": 768.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "display_name": "Wait GPU Event",
+                    "plugin_version": { "major": 12, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "16725f74-e24a-4226-b898-0ba0bcd8e4d3",
+                    "name": "OutDestination",
+                    "class_name": "nos.internal.GraphOutput",
+                    "pins": [
+                      {
+                        "id": "0365580b-4cdc-4114-aa37-8410b973031c",
+                        "name": "Input",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6976,
+                            "allocation_size": 134217728,
+                            "pid": 59396,
+                            "offset": 17694720
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
+                        },
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" },
+                        "display_name": "Destination"
+                      },
+                      {
+                        "id": "62898173-0d3b-4159-a0a0-2db0ffb51cf2",
+                        "name": "Output",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6976,
+                            "allocation_size": 134217728,
+                            "pid": 59396,
+                            "offset": 17694720
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
+                        },
+                        "referred_by": [
+                          "15b28b82-3d4c-4c63-8bdf-2ec9dc7ea96b"
+                        ],
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" },
+                          { "key": "PinHidden", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" },
+                        "display_name": "Destination"
+                      },
+                      {
+                        "id": "c34f4303-655f-47d8-996b-746ddbd6b9b0",
+                        "name": "__Nodos_InputExecutionPin",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "display_name": "In",
+                        "controller": "ENGINE"
+                      }
+                    ],
+                    "pos": { "x": 4446.0, "y": 328.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "display_name": "Output",
+                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "ba01372e-f278-45b3-b262-b2e9244ac8c6",
+                    "name": "TextureProvider (1)",
+                    "class_name": "nos.resource.TextureProvider",
+                    "pins": [
+                      {
+                        "id": "3c19c9a2-d396-41d2-85f2-d23b8ea7d7f5",
+                        "name": "Run",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "ce7fb7af-cfbe-4d81-8928-ea3b4f014fd4",
+                        "name": "Continue",
+                        "type_name": "nos.exe",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "ee3e1c46-1052-4682-8084-7c97643eddbe",
+                        "name": "OutputTexture",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6976,
+                            "allocation_size": 134217728,
+                            "pid": 59396,
+                            "offset": 17694720
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
+                        },
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "The destination texture that the download has started",
+                        "display_name": "Output Texture"
+                      },
+                      {
+                        "id": "c86e926f-74a7-4a23-810f-f8283ce854c1",
+                        "name": "GPUEventHolder",
+                        "type_name": "nos.sys.vulkan.GPUEventHolder",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "A GPU Event slot for synchronization",
+                        "display_name": "GPU Event Holder"
+                      },
+                      {
+                        "id": "59fe8594-d3ff-4c04-8143-d7c056b26905",
+                        "name": "Count",
+                        "type_name": "uint",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": 2,
+                        "def": 2,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "4458c46e-729f-4df3-bbb1-26e9de2945ec",
+                        "name": "Resolution",
+                        "type_name": "nos.fb.vec2u",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": { "x": 1920, "y": 1080 },
+                        "def": { "x": 1024, "y": 1024 },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "e8537d52-a633-41f7-9fe1-23817fa38155",
+                        "name": "Format",
+                        "type_name": "nos.sys.vulkan.Format",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": "R16G16B16A16_SFLOAT",
+                        "def": "R16G16B16A16_SFLOAT",
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "c14fd2e5-32c8-4964-a2c8-0104cfbfb1aa",
+                        "name": "Usage",
+                        "type_name": "nos.sys.vulkan.ImageUsage",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE",
+                        "def": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE",
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "1f4746e7-977c-4c4f-ae72-11e9cad75e0b",
+                        "name": "HostUseCompletePromise",
+                        "type_name": "nos.sync.Promise",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { "tag": "Untagged" },
+                        "def": { "tag": "" },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "type": "ORPHAN", "message": "Waiting on host use completion is disabled" },
+                        "description": "Host synchronization primitive for ensuring the use of the texture is finished",
+                        "display_name": "Host Use Complete Promise"
+                      },
+                      {
+                        "id": "8d06829f-610f-41b0-a313-473eaa0d8de4",
+                        "name": "RequireHostUseCompletion",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": false,
+                        "def": false,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "Whether to give & wait a host synchronization primitive to ensure the buffer is no longer in use by the host before re-providing it again",
+                        "display_name": "Require Host Use Completion"
+                      },
+                      {
+                        "id": "fe7bfedc-2cca-43f7-995f-e9f1f062fd2d",
+                        "name": "ResizeOnPathRingSizeChanged",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": true,
+                        "def": true,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "Whether to update texture count when there's a ring size update path command received along the path",
+                        "display_name": "Resize On Path Ring Size Changed"
+                      }
+                    ],
+                    "pos": { "x": 3512.0, "y": 569.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "display_name": "Texture Provider",
+                    "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "11deb246-db89-44e9-b506-f8ace44445ac",
                     "name": "Make (2)",
                     "class_name": "nos.reflect.MakeDynamic",
                     "pins": [
                       {
-                        "id": "3d09beeb-739f-4798-8acb-785e239975d2",
+                        "id": "e448ea67-2500-4ea5-9407-24463e3a205e",
                         "name": "Output",
                         "type_name": "nos.fb.vec2u",
                         "show_as": "OUTPUT_PIN",
@@ -307,7 +664,7 @@
                         "connection_conditions": "!resource"
                       },
                       {
-                        "id": "1489042e-0624-4842-9d3f-f81a54ebb592",
+                        "id": "4d606599-ad58-4285-b442-ac3d07cc7f0c",
                         "name": "x",
                         "type_name": "uint",
                         "show_as": "INPUT_PIN",
@@ -320,7 +677,7 @@
                         "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "df5b8db4-2851-4a23-bd1b-558dee4581c1",
+                        "id": "431ba4b1-9ff9-49da-8c0f-47e579bcfef3",
                         "name": "y",
                         "type_name": "uint",
                         "show_as": "INPUT_PIN",
@@ -333,7 +690,7 @@
                         "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "fed3dbb7-ef72-4e48-a203-ef4c5f4732cf",
+                        "id": "6e353922-2700-4d2c-84cb-b56f986e7134",
                         "name": "__Nodos_OutputExecutionPin",
                         "type_name": "nos.exe",
                         "show_as": "OUTPUT_PIN",
@@ -358,30 +715,30 @@
                     "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "b4f0f74e-3f80-46df-8679-f52986989278",
-                    "name": "OutDestination",
-                    "class_name": "nos.internal.GraphOutput",
+                    "id": "dd2a81d0-003a-45c6-914b-5c59b02a98d0",
+                    "name": "Break (2)",
+                    "class_name": "nos.reflect.Break",
                     "pins": [
                       {
-                        "id": "e3ab8d11-0e51-4d78-bf4d-02e8105e9b74",
+                        "id": "037bab6d-fd2a-40b3-9e85-8eade835798a",
                         "name": "Input",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizers": [],
                         "data": {
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 796,
-                            "allocation_size": 134217728,
-                            "pid": 309480,
-                            "offset": 35389440
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
                           "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                         },
                         "def": {
                           "width": 1920,
@@ -394,78 +751,118 @@
                         ],
                         "contents_type": "JobPin",
                         "contents": { },
-                        "orphan_state": { "message": "" },
-                        "display_name": "Destination"
+                        "orphan_state": { }
                       },
                       {
-                        "id": "3c4410ce-c48c-4456-9482-7b9f9968b914",
-                        "name": "Output",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "id": "f1f54fde-ff72-4e79-8b42-5fa10b9b26b9",
+                        "name": "size_in_bytes",
+                        "type_name": "ulong",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": 17694720,
+                        "max": 0,
+                        "def": 0,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" }
+                      },
+                      {
+                        "id": "3ae62568-d8e2-4c12-a804-6cdd50460792",
+                        "name": "external_memory",
+                        "type_name": "nos.sys.vulkan.ExternalMemory",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                         "visualizers": [],
                         "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 796,
-                            "allocation_size": 134217728,
-                            "pid": 309480,
-                            "offset": 35389440
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
+                          "handle_type": 2,
+                          "handle": 6968,
+                          "allocation_size": 67108864,
+                          "pid": 59396,
+                          "offset": 0
                         },
-                        "referred_by": [
-                          "88fa82c5-2a3f-49ee-807e-de894eb4de26"
-                        ],
                         "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                          "handle_type": 0,
+                          "handle": 0,
+                          "allocation_size": 0,
+                          "pid": 0,
+                          "offset": 0
                         },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" },
-                          { "key": "PinHidden", "value": "true" }
-                        ],
                         "contents_type": "JobPin",
                         "contents": { },
-                        "orphan_state": { "message": "" },
-                        "display_name": "Destination"
+                        "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "20763e0f-9501-40e9-afa1-19a4dcddd9d1",
-                        "name": "__Nodos_InputExecutionPin",
-                        "type_name": "nos.exe",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
+                        "id": "141b7cf0-293e-4902-b8f8-1437141217bd",
+                        "name": "width",
+                        "type_name": "uint",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                         "visualizers": [],
-                        "data": { },
-                        "def": { },
+                        "data": 1920,
+                        "max": 0,
+                        "def": 0,
                         "contents_type": "JobPin",
                         "contents": { },
-                        "orphan_state": { },
-                        "display_name": "In",
-                        "controller": "ENGINE"
+                        "orphan_state": { "message": "" }
+                      },
+                      {
+                        "id": "a89ab26b-a140-42d6-a81a-75e436a7affc",
+                        "name": "height",
+                        "type_name": "uint",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": 1080,
+                        "max": 0,
+                        "def": 0,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" }
+                      },
+                      {
+                        "id": "8b485c5e-30a1-4739-9fed-b3821fabe0a5",
+                        "name": "format",
+                        "type_name": "nos.sys.vulkan.Format",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": "R16G16B16A16_SFLOAT",
+                        "max": "NONE",
+                        "def": "NONE",
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" }
+                      },
+                      {
+                        "id": "796f1884-f22e-46c6-bb5f-2b62e7b3048a",
+                        "name": "usage",
+                        "type_name": "nos.sys.vulkan.ImageUsage",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                        "max": "NONE",
+                        "def": "NONE",
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" }
                       }
                     ],
-                    "pos": { "x": 4446.0, "y": 328.0 },
+                    "pos": { "x": 2914.0, "y": 570.0 },
                     "contents_type": "Job",
                     "contents": { "type": "" },
                     "function_category": "Default Node",
-                    "display_name": "Output",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+                    "display_name": "Break nos.sys.vulkan.Texture",
+                    "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "64fad7bf-f253-40ac-8ef7-9fe15f0cb34f",
+                    "id": "2d24b8da-5336-435c-9815-c50a645ac956",
                     "name": "CopyResource",
                     "class_name": "nos.resource.CopyResource",
                     "pins": [
                       {
-                        "id": "2bf1f17d-faef-440e-a133-cdb6e1254c96",
+                        "id": "88766a21-9304-40d1-ac09-8f4b4e9dd750",
                         "name": "Source",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -475,10 +872,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
@@ -500,7 +897,7 @@
                         "connection_conditions": "resource"
                       },
                       {
-                        "id": "970d002a-a4d6-4266-908a-d7800c24fbe7",
+                        "id": "1233f86c-b1f3-4957-8983-31c42800f195",
                         "name": "Destination",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -510,10 +907,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 796,
+                            "handle": 6976,
                             "allocation_size": 134217728,
-                            "pid": 309480,
-                            "offset": 35389440
+                            "pid": 59396,
+                            "offset": 17694720
                           },
                           "width": 1920,
                           "height": 1080,
@@ -535,7 +932,7 @@
                         "connection_conditions": "resource"
                       },
                       {
-                        "id": "dcebbd31-c90f-4982-ad70-1fca258c9fa0",
+                        "id": "431b40f6-009a-4c79-9c72-19e3afb39468",
                         "name": "InGPUEventHolder",
                         "type_name": "nos.sys.vulkan.GPUEventHolder",
                         "show_as": "INPUT_PIN",
@@ -549,7 +946,7 @@
                         "display_name": "GPU Event Holder"
                       },
                       {
-                        "id": "d6f1d292-a81d-42a8-a3fb-825684f12f5c",
+                        "id": "bb582d81-81ab-410d-bf86-9b1fbeff8ada",
                         "name": "PreferTransferQueue",
                         "type_name": "bool",
                         "show_as": "PROPERTY",
@@ -564,7 +961,7 @@
                         "display_name": "Prefer Transfer Queue"
                       },
                       {
-                        "id": "0edbc06a-e237-43ee-b85b-947b0898d89f",
+                        "id": "c8dc73fb-6c1d-497e-885e-c53c3c52b12f",
                         "name": "OutGPUEventHolder",
                         "type_name": "nos.sys.vulkan.GPUEventHolder",
                         "show_as": "OUTPUT_PIN",
@@ -578,7 +975,7 @@
                         "display_name": "GPU Event Holder"
                       },
                       {
-                        "id": "85f869fc-3160-4614-814d-5757ba1d9810",
+                        "id": "f7ff4df6-531f-4a29-a67c-faaaafa47ab2",
                         "name": "OutDestination",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "OUTPUT_PIN",
@@ -588,10 +985,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 796,
+                            "handle": 6976,
                             "allocation_size": 134217728,
-                            "pid": 309480,
-                            "offset": 35389440
+                            "pid": 59396,
+                            "offset": 17694720
                           },
                           "width": 1920,
                           "height": 1080,
@@ -613,7 +1010,7 @@
                         "display_name": "Destination"
                       },
                       {
-                        "id": "bf726b67-f249-4f1f-bfab-558bf22b0112",
+                        "id": "1118b7d2-2f34-48b4-a8ff-58461afd3c90",
                         "name": "__Nodos_OutputExecutionPin",
                         "type_name": "nos.exe",
                         "show_as": "OUTPUT_PIN",
@@ -636,401 +1033,12 @@
                     "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "eb88bcab-c038-4405-8db9-8253e08774d6",
-                    "name": "Break (2)",
-                    "class_name": "nos.reflect.Break",
-                    "pins": [
-                      {
-                        "id": "9af8fe40-5323-4925-8a73-de2742755938",
-                        "name": "Input",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        },
-                        "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "f06ab8af-ad1b-4c94-b2c7-82fd343b59b7",
-                        "name": "size_in_bytes",
-                        "type_name": "ulong",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": 17694720,
-                        "max": 0,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      },
-                      {
-                        "id": "cd468c02-8ed1-49ae-bc16-1ad8bfd51344",
-                        "name": "external_memory",
-                        "type_name": "nos.sys.vulkan.ExternalMemory",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": {
-                          "handle_type": 2,
-                          "handle": 8240,
-                          "allocation_size": 268435456,
-                          "pid": 309480,
-                          "offset": 47185920
-                        },
-                        "def": {
-                          "handle_type": 0,
-                          "handle": 0,
-                          "allocation_size": 0,
-                          "pid": 0,
-                          "offset": 0
-                        },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      },
-                      {
-                        "id": "91c0f5ee-1c33-417b-b971-957ee249f05d",
-                        "name": "width",
-                        "type_name": "uint",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": 1920,
-                        "max": 0,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      },
-                      {
-                        "id": "53ef578c-60ab-43ab-b790-8c599652aaf8",
-                        "name": "height",
-                        "type_name": "uint",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": 1080,
-                        "max": 0,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      },
-                      {
-                        "id": "74467585-94e9-4749-9636-957c3deb4617",
-                        "name": "format",
-                        "type_name": "nos.sys.vulkan.Format",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": "R16G16B16A16_SFLOAT",
-                        "max": "NONE",
-                        "def": "NONE",
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      },
-                      {
-                        "id": "debc3024-65d6-44ed-91fe-d2a626576195",
-                        "name": "usage",
-                        "type_name": "nos.sys.vulkan.ImageUsage",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "max": "NONE",
-                        "def": "NONE",
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      }
-                    ],
-                    "pos": { "x": 2914.0, "y": 570.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Break nos.sys.vulkan.Texture",
-                    "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "d889875b-d1aa-41f9-8094-7eaca3926d2a",
-                    "name": "TextureProvider (1)",
-                    "class_name": "nos.resource.TextureProvider",
-                    "pins": [
-                      {
-                        "id": "8f1cdede-cf09-477b-b693-d22df17cd0a8",
-                        "name": "Run",
-                        "type_name": "nos.exe",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "8436c763-e341-4977-9f09-7597e1961c25",
-                        "name": "Continue",
-                        "type_name": "nos.exe",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "8ae744ed-ed89-4bed-9f87-e6ea3a8ca5f2",
-                        "name": "OutputTexture",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 796,
-                            "allocation_size": 134217728,
-                            "pid": 309480,
-                            "offset": 35389440
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
-                        },
-                        "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "The destination texture that the download has started",
-                        "display_name": "Output Texture"
-                      },
-                      {
-                        "id": "449fc298-42fc-4d08-89c2-a82dc2a8bdcf",
-                        "name": "GPUEventHolder",
-                        "type_name": "nos.sys.vulkan.GPUEventHolder",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "A GPU Event slot for synchronization",
-                        "display_name": "GPU Event Holder"
-                      },
-                      {
-                        "id": "70928108-4c94-4d25-896d-da87a0df8827",
-                        "name": "Count",
-                        "type_name": "uint",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": 2,
-                        "def": 2,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "952e4d3b-c7cb-404f-a43b-d80a3881c133",
-                        "name": "Resolution",
-                        "type_name": "nos.fb.vec2u",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": { "x": 1920, "y": 1080 },
-                        "def": { "x": 1024, "y": 1024 },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "1aeeee9a-2585-41b6-be70-93b6b867525a",
-                        "name": "Format",
-                        "type_name": "nos.sys.vulkan.Format",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": "R16G16B16A16_SFLOAT",
-                        "def": "R16G16B16A16_SFLOAT",
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "cbb7b9e5-c20b-4077-b6c6-65dd91e98121",
-                        "name": "Usage",
-                        "type_name": "nos.sys.vulkan.ImageUsage",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE",
-                        "def": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE",
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "47ea48ff-f473-448b-9111-ca531e367e4b",
-                        "name": "HostUseCompletePromise",
-                        "type_name": "nos.sync.Promise",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { "tag": "Untagged" },
-                        "def": { "tag": "" },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "type": "ORPHAN", "message": "Waiting on host use completion is disabled" },
-                        "description": "Host synchronization primitive for ensuring the use of the texture is finished",
-                        "display_name": "Host Use Complete Promise"
-                      },
-                      {
-                        "id": "ad43724b-bdd7-4a30-8a54-14d944e80c43",
-                        "name": "RequireHostUseCompletion",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": false,
-                        "def": false,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "Whether to give & wait a host synchronization primitive to ensure the buffer is no longer in use by the host before re-providing it again",
-                        "display_name": "Require Host Use Completion"
-                      },
-                      {
-                        "id": "eabe7c30-70ae-40f3-b432-4d70357e0115",
-                        "name": "ResizeOnPathRingSizeChanged",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": true,
-                        "def": true,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "Whether to update texture count when there's a ring size update path command received along the path",
-                        "display_name": "Resize On Path Ring Size Changed"
-                      }
-                    ],
-                    "pos": { "x": 3512.0, "y": 569.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Texture Provider",
-                    "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "007a8b1d-aa56-4040-a25b-c8eea8726972",
-                    "name": "GetFieldType",
-                    "class_name": "nos.resource.GetFieldType",
-                    "pins": [
-                      {
-                        "id": "1a9275d0-66e4-4756-a021-b49425a0570b",
-                        "name": "Input",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        },
-                        "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "01216377-62da-4cab-a00f-fc0346efb990",
-                        "name": "FieldType",
-                        "type_name": "nos.sys.vulkan.FieldType",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": "PROGRESSIVE",
-                        "def": "UNKNOWN",
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      }
-                    ],
-                    "pos": { "x": 3415.0, "y": 703.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "description": "Gets the given resource's field type",
-                    "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "e8042feb-ae29-4e2f-bb35-22130cc67a95",
+                    "id": "2ed2ad6d-4306-490e-8802-9d6ea331417f",
                     "name": "Break",
                     "class_name": "nos.reflect.Break",
                     "pins": [
                       {
-                        "id": "b9813e00-30a5-453f-8b16-7d976e13a953",
+                        "id": "f4780cd1-9b9b-4bf3-8dfe-fd56a9e2b545",
                         "name": "Input",
                         "type_name": "nos.Dict",
                         "show_as": "INPUT_PIN",
@@ -1041,17 +1049,18 @@
                                 "size_in_bytes": 17694720,
                                 "external_memory": {
                                   "handle_type": 2,
-                                  "handle": 8240,
-                                  "allocation_size": 268435456,
-                                  "pid": 309480,
-                                  "offset": 47185920
+                                  "handle": 6968,
+                                  "allocation_size": 67108864,
+                                  "pid": 59396,
+                                  "offset": 0
                                 },
                                 "width": 1920,
                                 "height": 1080,
                                 "format": "R16G16B16A16_SFLOAT",
                                 "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                               } },
-                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
+                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                            { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
                           ] },
                         "def": { },
                         "contents_type": "JobPin",
@@ -1059,7 +1068,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "ac92f76b-3cf0-456c-ba80-9a971bda091d",
+                        "id": "15355dad-a2f2-4f69-958d-6d16e87e332a",
                         "name": "host_promise",
                         "type_name": "nos.sync.Promise",
                         "show_as": "OUTPUT_PIN",
@@ -1073,7 +1082,7 @@
                         "display_name": "host_promise"
                       },
                       {
-                        "id": "5b1226ec-a197-485a-8fa3-4579e188928f",
+                        "id": "11de6769-9f77-44ce-addb-de63ecc567fc",
                         "name": "texture",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "OUTPUT_PIN",
@@ -1083,10 +1092,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
@@ -1106,6 +1115,20 @@
                         "contents": { },
                         "orphan_state": { "message": "" },
                         "display_name": "texture"
+                      },
+                      {
+                        "id": "3f3bd9d3-c939-4352-8e55-917b0dbe382f",
+                        "name": "wait_gpu",
+                        "type_name": "nos.sys.vulkan.GPUEventHolder",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "display_name": "wait_gpu"
                       }
                     ],
                     "pos": { "x": 2558.0, "y": 453.0 },
@@ -1118,79 +1141,12 @@
                     "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "2e1fc025-9775-4ea5-b6b1-68edce7b4e4f",
-                    "name": "FulFillPromise (1)",
-                    "class_name": "nos.sync.FulFillPromise",
-                    "pins": [
-                      {
-                        "id": "6705a01c-4621-4ef5-bd0e-c07f8c7d2479",
-                        "name": "Trigger",
-                        "type_name": "nos.exe",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "11b02f33-1da0-4f8a-ad6b-ae70503617d3",
-                        "name": "Continue",
-                        "type_name": "nos.exe",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "afc44e42-0e24-46e1-a917-cec4feeef1fa",
-                        "name": "Promise",
-                        "type_name": "nos.sync.Promise",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { "tag": "Host Use Complete" },
-                        "def": { "tag": "" },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "b970ebcf-f5e7-4275-a811-3d5faf01f938",
-                        "name": "__Nodos_InputExecutionPin",
-                        "type_name": "nos.exe",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "display_name": "In",
-                        "controller": "ENGINE"
-                      }
-                    ],
-                    "pos": { "x": 4185.0, "y": 454.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Fulfill Promise",
-                    "plugin_version": { "major": 11, "minor": 1, "patch": 0 }
-                  },
-                  {
-                    "id": "7049f3a9-37ba-4a09-a88d-a4d8eeb53478",
+                    "id": "4078fbdd-7844-4941-90c0-810613a71f66",
                     "name": "SetFieldType (1)",
                     "class_name": "nos.resource.SetFieldType",
                     "pins": [
                       {
-                        "id": "4d214b87-5ea3-43e5-b64a-57a1c744e124",
+                        "id": "c2664c4a-a137-45cd-baa5-835e00668fe7",
                         "name": "Input",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -1200,10 +1156,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 796,
+                            "handle": 6976,
                             "allocation_size": 134217728,
-                            "pid": 309480,
-                            "offset": 35389440
+                            "pid": 59396,
+                            "offset": 17694720
                           },
                           "width": 1920,
                           "height": 1080,
@@ -1224,7 +1180,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "9136c5ff-962b-4e43-8d38-b68c6dcf1e4d",
+                        "id": "bde29db0-f65b-4f21-bdff-cad1cd7b7501",
                         "name": "FieldType",
                         "type_name": "nos.sys.vulkan.FieldType",
                         "show_as": "INPUT_PIN",
@@ -1237,7 +1193,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "0f9bde9a-929c-40b5-871f-4becc66c9743",
+                        "id": "e13879cf-a481-4147-80a4-72fa953426ee",
                         "name": "Output",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "OUTPUT_PIN",
@@ -1247,10 +1203,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 796,
+                            "handle": 6976,
                             "allocation_size": 134217728,
-                            "pid": 309480,
-                            "offset": 35389440
+                            "pid": 59396,
+                            "offset": 17694720
                           },
                           "width": 1920,
                           "height": 1080,
@@ -1279,12 +1235,139 @@
                     "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "114ed9d6-497a-444c-8fb3-d94ede26498c",
+                    "id": "233a99a9-dea7-43ab-a7f3-40f5f06314cc",
+                    "name": "GetFieldType",
+                    "class_name": "nos.resource.GetFieldType",
+                    "pins": [
+                      {
+                        "id": "32b2ba0d-b244-4997-a6ea-583b9a6b0996",
+                        "name": "Input",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6976,
+                            "allocation_size": 134217728,
+                            "pid": 59396,
+                            "offset": 88473600
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                        },
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "e0dd96ff-4672-4a4f-ae0c-bdd571de39ee",
+                        "name": "FieldType",
+                        "type_name": "nos.sys.vulkan.FieldType",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": "PROGRESSIVE",
+                        "def": "UNKNOWN",
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      }
+                    ],
+                    "pos": { "x": 3415.0, "y": 703.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "description": "Gets the given resource's field type",
+                    "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "a13f94fc-d940-4e5f-921c-7252425b82e3",
+                    "name": "FulFillPromise (1)",
+                    "class_name": "nos.sync.FulFillPromise",
+                    "pins": [
+                      {
+                        "id": "6e62d18b-7eec-47ef-8b1e-3ad9e36f7f18",
+                        "name": "Trigger",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "96825030-087f-428f-b7ae-0093f7c1073f",
+                        "name": "Continue",
+                        "type_name": "nos.exe",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "cc283002-8306-4576-86b4-83c30001f3a9",
+                        "name": "Promise",
+                        "type_name": "nos.sync.Promise",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { "tag": "Host Use Complete" },
+                        "def": { "tag": "" },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "0a789aed-fba7-412e-acfd-6b0e3e5bca6a",
+                        "name": "__Nodos_InputExecutionPin",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "display_name": "In",
+                        "controller": "ENGINE"
+                      }
+                    ],
+                    "pos": { "x": 4185.0, "y": 454.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "display_name": "Fulfill Promise",
+                    "plugin_version": { "major": 12, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "211b9a97-1cb5-4309-9e5e-c51d40348cc5",
                     "name": "Input",
                     "class_name": "nos.internal.GraphInput",
                     "pins": [
                       {
-                        "id": "c742207a-0af5-436c-84da-88361e1615d4",
+                        "id": "e87ba136-5f99-430a-bd9b-32fef0e2fece",
                         "name": "Output",
                         "type_name": "nos.Dict",
                         "show_as": "OUTPUT_PIN",
@@ -1295,17 +1378,18 @@
                                 "size_in_bytes": 17694720,
                                 "external_memory": {
                                   "handle_type": 2,
-                                  "handle": 8240,
-                                  "allocation_size": 268435456,
-                                  "pid": 309480,
-                                  "offset": 47185920
+                                  "handle": 6968,
+                                  "allocation_size": 67108864,
+                                  "pid": 59396,
+                                  "offset": 0
                                 },
                                 "width": 1920,
                                 "height": 1080,
                                 "format": "R16G16B16A16_SFLOAT",
                                 "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                               } },
-                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
+                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                            { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
                           ] },
                         "def": { },
                         "contents_type": "JobPin",
@@ -1313,7 +1397,7 @@
                         "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "0d6d43fc-3998-4720-abbf-32da7fdbcaf8",
+                        "id": "448178ed-ba60-4ac2-b83d-72d511a43099",
                         "name": "Input",
                         "type_name": "nos.Dict",
                         "show_as": "INPUT_PIN",
@@ -1324,20 +1408,21 @@
                                 "size_in_bytes": 17694720,
                                 "external_memory": {
                                   "handle_type": 2,
-                                  "handle": 8240,
-                                  "allocation_size": 268435456,
-                                  "pid": 309480,
-                                  "offset": 47185920
+                                  "handle": 6968,
+                                  "allocation_size": 67108864,
+                                  "pid": 59396,
+                                  "offset": 0
                                 },
                                 "width": 1920,
                                 "height": 1080,
                                 "format": "R16G16B16A16_SFLOAT",
                                 "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                               } },
-                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
+                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                            { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
                           ] },
                         "referred_by": [
-                          "e88cafb8-559b-4911-ae0c-04c07c1f522d"
+                          "8ef4d2ed-d4c3-4d2d-b1ab-65360e9eed5a"
                         ],
                         "def": { },
                         "meta_data_map": [
@@ -1355,72 +1440,70 @@
                     "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                   }
                 ], "connections": [
-                  { "from": "ac92f76b-3cf0-456c-ba80-9a971bda091d", "to": "afc44e42-0e24-46e1-a917-cec4feeef1fa", "id": "23a7933b-f163-42c0-a5bb-aad98474fc75" },
-                  { "from": "91c0f5ee-1c33-417b-b971-957ee249f05d", "to": "1489042e-0624-4842-9d3f-f81a54ebb592", "id": "658b2363-56ed-4e36-b6bc-5ce03c722f3e" },
-                  { "from": "bf726b67-f249-4f1f-bfab-558bf22b0112", "to": "6705a01c-4621-4ef5-bd0e-c07f8c7d2479", "id": "88f55f49-5271-4645-8a11-ff31da6db136" },
-                  { "from": "8436c763-e341-4977-9f09-7597e1961c25", "to": "b970ebcf-f5e7-4275-a811-3d5faf01f938", "id": "0b511fb0-8331-42c3-a114-122336855348" },
-                  { "from": "0f9bde9a-929c-40b5-871f-4becc66c9743", "to": "970d002a-a4d6-4266-908a-d7800c24fbe7", "id": "6daa0445-698a-402f-8f19-42d572387261" },
-                  { "from": "01216377-62da-4cab-a00f-fc0346efb990", "to": "9136c5ff-962b-4e43-8d38-b68c6dcf1e4d", "id": "4c312c62-40c7-4656-a1c4-65099139a051" },
-                  { "from": "53ef578c-60ab-43ab-b790-8c599652aaf8", "to": "df5b8db4-2851-4a23-bd1b-558dee4581c1", "id": "d8b5bff9-6acc-410b-a8d3-4151dc824cc7" },
-                  { "from": "3d09beeb-739f-4798-8acb-785e239975d2", "to": "952e4d3b-c7cb-404f-a43b-d80a3881c133", "id": "1ba92c52-7751-42c1-a54b-75a7852508f5" },
-                  { "from": "5b1226ec-a197-485a-8fa3-4579e188928f", "to": "2bf1f17d-faef-440e-a133-cdb6e1254c96", "id": "c4cb1425-2432-4995-91f9-caa2792bf1df" },
-                  { "from": "8ae744ed-ed89-4bed-9f87-e6ea3a8ca5f2", "to": "4d214b87-5ea3-43e5-b64a-57a1c744e124", "id": "9b98bf4c-e1be-4b5f-b84a-e07e8ae24733" },
-                  { "from": "c742207a-0af5-436c-84da-88361e1615d4", "to": "b9813e00-30a5-453f-8b16-7d976e13a953", "id": "26c7e638-ac81-4605-b7ba-b18be4847b93" },
-                  { "from": "11b02f33-1da0-4f8a-ad6b-ae70503617d3", "to": "20763e0f-9501-40e9-afa1-19a4dcddd9d1", "id": "94d1dbac-dd31-45fd-a36c-678e2edc72eb" },
-                  { "from": "fed3dbb7-ef72-4e48-a203-ef4c5f4732cf", "to": "8f1cdede-cf09-477b-b693-d22df17cd0a8", "id": "5a80be19-4551-4e0c-bec0-1afa8148ce5a" },
-                  { "from": "85f869fc-3160-4614-814d-5757ba1d9810", "to": "e3ab8d11-0e51-4d78-bf4d-02e8105e9b74", "id": "bcd49b80-b90f-4a86-a2fb-7a1bd98b4dfc" },
-                  { "from": "5b1226ec-a197-485a-8fa3-4579e188928f", "to": "9af8fe40-5323-4925-8a73-de2742755938", "id": "0c85dece-596f-41bc-b8c8-79a49280a245" },
-                  { "from": "5b1226ec-a197-485a-8fa3-4579e188928f", "to": "1a9275d0-66e4-4756-a021-b49425a0570b", "id": "a2c7f549-4e73-42b2-823a-03387ce852ab" }
+                  { "from": "141b7cf0-293e-4902-b8f8-1437141217bd", "to": "4d606599-ad58-4285-b442-ac3d07cc7f0c", "id": "57e2e4d1-4a8a-43a1-8511-8594b121bbce" },
+                  { "from": "15355dad-a2f2-4f69-958d-6d16e87e332a", "to": "cc283002-8306-4576-86b4-83c30001f3a9", "id": "f9de8bc0-de76-4fd0-8cb1-1ba15221f347" },
+                  { "from": "ce7fb7af-cfbe-4d81-8928-ea3b4f014fd4", "to": "0a789aed-fba7-412e-acfd-6b0e3e5bca6a", "id": "eb6a0ab4-ef7d-43cd-a619-97a9e7bd8bc3" },
+                  { "from": "1118b7d2-2f34-48b4-a8ff-58461afd3c90", "to": "6e62d18b-7eec-47ef-8b1e-3ad9e36f7f18", "id": "60c73000-9d93-4114-8e5e-e64d16cd6874" },
+                  { "from": "e13879cf-a481-4147-80a4-72fa953426ee", "to": "1233f86c-b1f3-4957-8983-31c42800f195", "id": "5948ffda-3ac5-4c64-bf7a-4c91862bffa5" },
+                  { "from": "e448ea67-2500-4ea5-9407-24463e3a205e", "to": "4458c46e-729f-4df3-bbb1-26e9de2945ec", "id": "bc3e3eff-3abc-4c19-8433-fa77dbed40a2" },
+                  { "from": "e0dd96ff-4672-4a4f-ae0c-bdd571de39ee", "to": "bde29db0-f65b-4f21-bdff-cad1cd7b7501", "id": "f41a699a-6997-41a6-935b-ab651880ed05" },
+                  { "from": "a89ab26b-a140-42d6-a81a-75e436a7affc", "to": "431ba4b1-9ff9-49da-8c0f-47e579bcfef3", "id": "a0038e23-e972-4756-8833-8dcf11e7b43c" },
+                  { "from": "11de6769-9f77-44ce-addb-de63ecc567fc", "to": "88766a21-9304-40d1-ac09-8f4b4e9dd750", "id": "37fabfd6-9c90-40c9-ae41-546b01bdfeb9" },
+                  { "from": "ee3e1c46-1052-4682-8084-7c97643eddbe", "to": "c2664c4a-a137-45cd-baa5-835e00668fe7", "id": "c7a28925-6bf5-47be-8450-9f99a15dbbc9" },
+                  { "from": "6e353922-2700-4d2c-84cb-b56f986e7134", "to": "d1760869-287e-4b68-bdea-cadecc31730c", "id": "8b49b48b-8282-4028-98e3-534c1edafdcf" },
+                  { "from": "96825030-087f-428f-b7ae-0093f7c1073f", "to": "c34f4303-655f-47d8-996b-746ddbd6b9b0", "id": "842c4487-1076-4ab0-8c35-6d34dca97605" },
+                  { "from": "e87ba136-5f99-430a-bd9b-32fef0e2fece", "to": "f4780cd1-9b9b-4bf3-8dfe-fd56a9e2b545", "id": "839ca5bc-ea48-4fe6-ab22-d6c8aa11924e" },
+                  { "from": "ec74c7e8-0a70-474d-b3ee-5572341b9cec", "to": "3c19c9a2-d396-41d2-85f2-d23b8ea7d7f5", "id": "f565fdde-8ad0-439d-9262-ca073d2ad80c" },
+                  { "from": "f7ff4df6-531f-4a29-a67c-faaaafa47ab2", "to": "0365580b-4cdc-4114-aa37-8410b973031c", "id": "515b28cd-e912-4162-9d4f-122709fad132" },
+                  { "from": "11de6769-9f77-44ce-addb-de63ecc567fc", "to": "32b2ba0d-b244-4997-a6ea-583b9a6b0996", "id": "3db2de8f-6aca-473b-8e56-ab7d746aaf45" },
+                  { "from": "11de6769-9f77-44ce-addb-de63ecc567fc", "to": "037bab6d-fd2a-40b3-9e85-8eade835798a", "id": "e10155a5-0865-458c-95a5-3c9aee0c4232" },
+                  { "from": "3f3bd9d3-c939-4352-8e55-917b0dbe382f", "to": "17d7b8b8-62b5-4542-a6fe-d1d08daa6d0d", "id": "0a4279d3-e3ce-4030-942f-dc753318d186" }
                 ] },
               "function_category": "Default Node",
               "display_name": "Copy And Signal Host Use Completed",
               "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
             },
             {
-              "id": "c17562c6-ce3b-4191-9078-f951500c2828",
-              "name": "Copying Texture Cycler",
+              "id": "1ebffb22-91c1-4d43-b0cc-0b82d1141dde",
+              "name": "Input",
+              "class_name": "nos.internal.GraphInput",
               "pins": [
                 {
-                  "id": "194cb729-cb84-4a87-a1e7-be5bf2bbb93e",
-                  "name": "Run",
-                  "type_name": "nos.exe",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizers": [],
-                  "data": { },
-                  "def": { },
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "5dccf8a6-d0f2-4175-8bb5-93a010545991" },
-                  "orphan_state": { }
-                },
-                {
-                  "id": "a1087a10-2553-450d-80aa-c4652d110d95",
-                  "name": "Continue",
-                  "type_name": "nos.exe",
+                  "id": "744a985c-9395-4aeb-a4ec-16303b9b0289",
+                  "name": "Output",
+                  "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizers": [],
-                  "data": { },
-                  "def": { },
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "e6f59ddf-2d6c-48ac-9027-a15e95d8ca4d" },
-                  "orphan_state": { }
+                  "data": {
+                    "size_in_bytes": 17694720,
+                    "external_memory": {
+                      "handle_type": 2,
+                      "handle": 7604,
+                      "allocation_size": 17694720,
+                      "pid": 59396,
+                      "offset": 0
+                    },
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_UNORM",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "def": {
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "orphan_state": { "message": "" }
                 },
                 {
-                  "id": "843f44c2-7c84-4ae0-9dcb-a247ca7eb7c7",
-                  "name": "Resolution",
-                  "type_name": "nos.fb.vec2u",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizers": [],
-                  "data": { "x": 1920, "y": 1080 },
-                  "def": { "x": 1024, "y": 1024 },
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "dcb8f327-0ce6-4785-9605-397b78eb736a" },
-                  "orphan_state": { }
-                },
-                {
-                  "id": "9a6e71f5-85a0-46ad-acac-c71e86017e60",
+                  "id": "5d0d77e6-c600-4c4f-8fd1-5604b55cb73e",
                   "name": "Input",
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
@@ -1430,9 +1513,141 @@
                     "size_in_bytes": 17694720,
                     "external_memory": {
                       "handle_type": 2,
-                      "handle": 8568,
+                      "handle": 7604,
                       "allocation_size": 17694720,
-                      "pid": 309480,
+                      "pid": 59396,
+                      "offset": 0
+                    },
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_UNORM",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "referred_by": [
+                    "750f10aa-3fc6-46c7-8690-3b7e82dde817"
+                  ],
+                  "def": {
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" },
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "orphan_state": { "message": "" }
+                }
+              ],
+              "pos": { "x": 1049.0, "y": 918.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "0286ec8d-c7ad-4ef3-8cbd-62d3f04f6f5a",
+              "name": "Resolution",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "977dd7c9-fa0d-491e-abc0-9e69f119e9db",
+                  "name": "Output",
+                  "type_name": "nos.fb.vec2u",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizers": [],
+                  "data": { "x": 1920, "y": 1080 },
+                  "def": { "x": 1024, "y": 1024 },
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "orphan_state": { "message": "" }
+                },
+                {
+                  "id": "1f4b0865-3693-410a-b93c-b88c4fdae2e9",
+                  "name": "Input",
+                  "type_name": "nos.fb.vec2u",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizers": [],
+                  "data": { "x": 1920, "y": 1080 },
+                  "referred_by": [
+                    "b0ce438b-f5d0-4dd6-93dc-cdfb1dadf3df"
+                  ],
+                  "def": { "x": 1024, "y": 1024 },
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "orphan_state": { "message": "" }
+                }
+              ],
+              "pos": { "x": 1049.0, "y": 843.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "5b197e0c-facf-4d78-bbb3-8ce16440e799",
+              "name": "Copying Texture Cycler",
+              "pins": [
+                {
+                  "id": "0c8a0769-beca-4455-b1c6-2383f72ac19b",
+                  "name": "Run",
+                  "type_name": "nos.exe",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_ONLY",
+                  "visualizers": [],
+                  "data": { },
+                  "def": { },
+                  "contents_type": "PortalPin",
+                  "contents": { "source_id": "c37b6cf0-0641-4d80-825d-54118c0debed" },
+                  "orphan_state": { }
+                },
+                {
+                  "id": "fde022ba-859f-4b9f-b0f3-adbbe62c1be7",
+                  "name": "Continue",
+                  "type_name": "nos.exe",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizers": [],
+                  "data": { },
+                  "def": { },
+                  "contents_type": "PortalPin",
+                  "contents": { "source_id": "870c4707-db33-49a7-bc60-23580c5fb438" },
+                  "orphan_state": { }
+                },
+                {
+                  "id": "3f590d36-fbd9-414e-b801-3c7faa2e7428",
+                  "name": "Resolution",
+                  "type_name": "nos.fb.vec2u",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizers": [],
+                  "data": { "x": 1920, "y": 1080 },
+                  "def": { "x": 1024, "y": 1024 },
+                  "contents_type": "PortalPin",
+                  "contents": { "source_id": "b2848e50-be07-4d29-8291-f88339165558" },
+                  "orphan_state": { }
+                },
+                {
+                  "id": "2640b81c-67b6-480a-8d43-7e5ac01aaaa0",
+                  "name": "Input",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_ONLY",
+                  "visualizers": [],
+                  "data": {
+                    "size_in_bytes": 17694720,
+                    "external_memory": {
+                      "handle_type": 2,
+                      "handle": 7604,
+                      "allocation_size": 17694720,
+                      "pid": 59396,
                       "offset": 0
                     },
                     "width": 1920,
@@ -1450,11 +1665,11 @@
                     { "key": "AdvancedProperty", "value": "true" }
                   ],
                   "contents_type": "PortalPin",
-                  "contents": { "source_id": "e682630e-1601-48bf-856c-34d9d7827d84" },
+                  "contents": { "source_id": "d5f94ebe-cd83-4a7e-9f17-036995205d77" },
                   "orphan_state": { }
                 },
                 {
-                  "id": "4dec2d32-cfbd-41d5-bb10-99d597828832",
+                  "id": "ebfb8878-6f4f-457a-b8a3-d3caaa2ca012",
                   "name": "Output",
                   "type_name": "nos.Dict",
                   "show_as": "OUTPUT_PIN",
@@ -1465,21 +1680,22 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
                           "format": "R16G16B16A16_SFLOAT",
                           "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                         } },
-                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
+                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                      { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
                     ] },
                   "def": { },
                   "contents_type": "PortalPin",
-                  "contents": { "source_id": "b3a5a4e5-e4d7-4eb5-8e77-67d171ac16e8" },
+                  "contents": { "source_id": "44465d0f-ca49-4b71-a6c6-5e915b7762bf" },
                   "orphan_state": { }
                 }
               ],
@@ -1487,12 +1703,121 @@
               "contents_type": "Graph",
               "contents": { "nodes": [
                   {
-                    "id": "380649ae-6ec0-457c-aba2-7cbf58b9cfd9",
+                    "id": "948bc515-0567-4ddd-95a0-0a1fae252abe",
+                    "name": "Make",
+                    "class_name": "nos.reflect.Make",
+                    "pins": [
+                      {
+                        "id": "353d97fe-35ee-4146-918f-01cee75d8bc2",
+                        "name": "Output",
+                        "type_name": "nos.Dict",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { "entries": [
+                            { "key": "texture", "type_name": "nos.sys.vulkan.Texture", "value": {
+                                "size_in_bytes": 17694720,
+                                "external_memory": {
+                                  "handle_type": 2,
+                                  "handle": 6968,
+                                  "allocation_size": 67108864,
+                                  "pid": 59396,
+                                  "offset": 0
+                                },
+                                "width": 1920,
+                                "height": 1080,
+                                "format": "R16G16B16A16_SFLOAT",
+                                "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                              } },
+                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                            { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
+                          ] },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" },
+                        "display_name": "Output"
+                      },
+                      {
+                        "id": "b15bac14-6394-407c-bb5b-4ad96d4fe1f2",
+                        "name": "Field 0",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                        },
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" },
+                        "display_name": "texture"
+                      },
+                      {
+                        "id": "0adb704b-52e1-4b54-9a4d-f7f1726ffc53",
+                        "name": "Field 1",
+                        "type_name": "nos.sync.Promise",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": { "tag": "Host Use Complete" },
+                        "def": { "tag": "" },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" },
+                        "display_name": "host_promise"
+                      },
+                      {
+                        "id": "ef4f82ae-7b99-43b2-9544-98596fbe7fb5",
+                        "name": "Field 2",
+                        "type_name": "nos.sys.vulkan.GPUEventHolder",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" },
+                        "display_name": "wait_gpu"
+                      }
+                    ],
+                    "pos": { "x": 2174.0, "y": 817.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "template_parameters": [
+                      { "name": "Type", "type_name": "string", "value": "nos.Dict" }
+                    ],
+                    "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "d028c01a-fcc6-47fa-8331-e053085240c9",
                     "name": "CopyTexture",
                     "class_name": "nos.resource.CopyResource",
                     "pins": [
                       {
-                        "id": "979c5604-340b-4fed-87a7-2f6255b19a47",
+                        "id": "979f1d4a-da7a-413a-a32e-3b2214b4540e",
                         "name": "Source",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -1502,9 +1827,9 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8568,
+                            "handle": 7604,
                             "allocation_size": 17694720,
-                            "pid": 309480,
+                            "pid": 59396,
                             "offset": 0
                           },
                           "width": 1920,
@@ -1526,7 +1851,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "382982f5-bcfe-4469-9e65-4999d3d77402",
+                        "id": "2816ea36-6615-469e-885d-77424d49fb4f",
                         "name": "Destination",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -1536,10 +1861,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
@@ -1560,12 +1885,13 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "95f89fb6-626c-47a6-9998-ed1d89c3b472",
+                        "id": "cff4041f-ec1f-40e2-a8f3-f70a75f934d7",
                         "name": "InGPUEventHolder",
                         "type_name": "nos.sys.vulkan.GPUEventHolder",
                         "show_as": "INPUT_PIN",
                         "can_show_as": "INPUT_PIN_ONLY",
                         "visualizers": [],
+                        "data": { },
                         "def": { },
                         "contents_type": "JobPin",
                         "contents": { },
@@ -1574,7 +1900,7 @@
                         "display_name": "GPU Event Holder"
                       },
                       {
-                        "id": "e9677bff-99f5-44f5-ae8f-e49aa7926d91",
+                        "id": "a1ea3e61-bcc7-4d48-9ae2-b97592fbf293",
                         "name": "PreferTransferQueue",
                         "type_name": "bool",
                         "show_as": "PROPERTY",
@@ -1589,12 +1915,13 @@
                         "display_name": "Prefer Transfer Queue"
                       },
                       {
-                        "id": "a9e3273d-3c63-4683-a5bb-15b4ba9d440d",
+                        "id": "cb5cdf83-4613-4d58-8e8d-a6da7872c2db",
                         "name": "OutGPUEventHolder",
                         "type_name": "nos.sys.vulkan.GPUEventHolder",
                         "show_as": "OUTPUT_PIN",
                         "can_show_as": "OUTPUT_PIN_ONLY",
                         "visualizers": [],
+                        "data": { },
                         "def": { },
                         "contents_type": "JobPin",
                         "contents": { },
@@ -1603,7 +1930,7 @@
                         "display_name": "GPU Event Holder"
                       },
                       {
-                        "id": "c015d4a2-b54a-4864-8688-2ce12fef801a",
+                        "id": "8d2c0b82-1c0f-4b7f-9280-2b193be1a15f",
                         "name": "OutDestination",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "OUTPUT_PIN",
@@ -1613,10 +1940,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
@@ -1646,190 +1973,12 @@
                     "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "8575fb8f-5b3b-4fe5-adcf-f20e54b0e880",
-                    "name": "Make",
-                    "class_name": "nos.reflect.Make",
-                    "pins": [
-                      {
-                        "id": "881cc11a-f506-486d-8991-54b9a225b410",
-                        "name": "Output",
-                        "type_name": "nos.Dict",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { "entries": [
-                            { "key": "texture", "type_name": "nos.sys.vulkan.Texture", "value": {
-                                "size_in_bytes": 17694720,
-                                "external_memory": {
-                                  "handle_type": 2,
-                                  "handle": 8240,
-                                  "allocation_size": 268435456,
-                                  "pid": 309480,
-                                  "offset": 47185920
-                                },
-                                "width": 1920,
-                                "height": 1080,
-                                "format": "R16G16B16A16_SFLOAT",
-                                "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                              } },
-                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
-                          ] },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" },
-                        "display_name": "Output"
-                      },
-                      {
-                        "id": "24b6860f-12af-4d3b-a58f-da9561c94cea",
-                        "name": "Field 0",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        },
-                        "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" },
-                        "display_name": "texture"
-                      },
-                      {
-                        "id": "0a41122b-d53d-47a3-b802-95f9a5aedc20",
-                        "name": "Field 1",
-                        "type_name": "nos.sync.Promise",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": { "tag": "Host Use Complete" },
-                        "def": { "tag": "" },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" },
-                        "display_name": "host_promise"
-                      }
-                    ],
-                    "pos": { "x": 2174.0, "y": 817.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "template_parameters": [
-                      { "name": "Type", "type_name": "string", "value": "nos.Dict" }
-                    ],
-                    "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "5f73ca73-2042-4bd7-b874-69c697cdaaee",
-                    "name": "Input",
-                    "class_name": "nos.internal.GraphInput",
-                    "pins": [
-                      {
-                        "id": "4e3bb327-3e1f-4b43-a50c-913a5155bf20",
-                        "name": "Output",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8568,
-                            "allocation_size": 17694720,
-                            "pid": 309480,
-                            "offset": 0
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_UNORM",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      },
-                      {
-                        "id": "e682630e-1601-48bf-856c-34d9d7827d84",
-                        "name": "Input",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8568,
-                            "allocation_size": 17694720,
-                            "pid": 309480,
-                            "offset": 0
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_UNORM",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "referred_by": [
-                          "9a6e71f5-85a0-46ad-acac-c71e86017e60"
-                        ],
-                        "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" },
-                          { "key": "PinHidden", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { "message": "" }
-                      }
-                    ],
-                    "pos": { "x": 1085.0, "y": 1078.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "8e2a596c-b37e-43dd-92a9-47b6affa9904",
+                    "id": "36dd9405-eb3d-4025-827a-e8865cb9a20d",
                     "name": "Run",
                     "class_name": "nos.internal.GraphInput",
                     "pins": [
                       {
-                        "id": "d0417f46-2e6b-427e-a85b-708d40f83ff3",
+                        "id": "5ce6e3e9-ced1-443c-afd8-eb11ab4784f6",
                         "name": "Output",
                         "type_name": "nos.exe",
                         "show_as": "OUTPUT_PIN",
@@ -1842,7 +1991,7 @@
                         "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "5dccf8a6-d0f2-4175-8bb5-93a010545991",
+                        "id": "c37b6cf0-0641-4d80-825d-54118c0debed",
                         "name": "Input",
                         "type_name": "nos.exe",
                         "show_as": "INPUT_PIN",
@@ -1850,7 +1999,7 @@
                         "visualizers": [],
                         "data": { },
                         "referred_by": [
-                          "194cb729-cb84-4a87-a1e7-be5bf2bbb93e"
+                          "0c8a0769-beca-4455-b1c6-2383f72ac19b"
                         ],
                         "def": { },
                         "meta_data_map": [
@@ -1868,12 +2017,12 @@
                     "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "4e624926-c14a-45f9-8ac5-11f0d219cef0",
+                    "id": "f5168705-339b-4c9b-b030-5f059103cc83",
                     "name": "Reroute (5)",
                     "class_name": "nos.internal.Reroute",
                     "pins": [
                       {
-                        "id": "5b6a3c78-482c-421e-b419-33be087ca0a1",
+                        "id": "f7ad99ef-e3ab-461a-a06b-69761d661ce4",
                         "name": "Input",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -1883,9 +2032,9 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8568,
+                            "handle": 7604,
                             "allocation_size": 17694720,
-                            "pid": 309480,
+                            "pid": 59396,
                             "offset": 0
                           },
                           "width": 1920,
@@ -1908,7 +2057,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "03201b21-13ce-401a-b636-25283c311d5d",
+                        "id": "1e67020f-df6b-4670-96db-f636202891ba",
                         "name": "Output",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "OUTPUT_PIN",
@@ -1918,9 +2067,9 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8568,
+                            "handle": 7604,
                             "allocation_size": 17694720,
-                            "pid": 309480,
+                            "pid": 59396,
                             "offset": 0
                           },
                           "width": 1920,
@@ -1950,12 +2099,12 @@
                     "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "add29708-b245-4ac6-8bde-bae431952a67",
+                    "id": "6803436c-c900-404f-985e-be2c78efc737",
                     "name": "Continue",
                     "class_name": "nos.internal.GraphOutput",
                     "pins": [
                       {
-                        "id": "14ee0d46-de98-44c0-89dc-9536cca2520a",
+                        "id": "c43b1028-becb-4206-b741-bd0e5dc749d9",
                         "name": "Input",
                         "type_name": "nos.exe",
                         "show_as": "INPUT_PIN",
@@ -1968,7 +2117,7 @@
                         "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "e6f59ddf-2d6c-48ac-9027-a15e95d8ca4d",
+                        "id": "870c4707-db33-49a7-bc60-23580c5fb438",
                         "name": "Output",
                         "type_name": "nos.exe",
                         "show_as": "OUTPUT_PIN",
@@ -1976,7 +2125,7 @@
                         "visualizers": [],
                         "data": { },
                         "referred_by": [
-                          "a1087a10-2553-450d-80aa-c4652d110d95"
+                          "fde022ba-859f-4b9f-b0f3-adbbe62c1be7"
                         ],
                         "def": { },
                         "meta_data_map": [
@@ -1994,199 +2143,12 @@
                     "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "74c2eb30-47b1-4bc2-b75e-126ee45220e9",
-                    "name": "TextureProvider",
-                    "class_name": "nos.resource.TextureProvider",
-                    "pins": [
-                      {
-                        "id": "c1f43452-bdad-41e6-826f-ff540135111a",
-                        "name": "Run",
-                        "type_name": "nos.exe",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "a2b66eda-6764-4f54-8677-12cde94ebc7d",
-                        "name": "Continue",
-                        "type_name": "nos.exe",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "cf7a3a4a-a183-4418-8826-97ff5b18b1e0",
-                        "name": "OutputTexture",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        },
-                        "def": {
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "The destination texture that the download has started",
-                        "display_name": "Output Texture"
-                      },
-                      {
-                        "id": "0dad4b32-73db-4b00-bad1-0f386d6da628",
-                        "name": "GPUEventHolder",
-                        "type_name": "nos.sys.vulkan.GPUEventHolder",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { },
-                        "def": { },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "A GPU Event slot for synchronization",
-                        "display_name": "GPU Event Holder"
-                      },
-                      {
-                        "id": "c0fc23fc-f911-4cd9-a8fd-72917b59275a",
-                        "name": "Count",
-                        "type_name": "uint",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": 2,
-                        "def": 2,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "1b529778-34f2-4a72-b658-665c9ebbd00b",
-                        "name": "Resolution",
-                        "type_name": "nos.fb.vec2u",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": { "x": 1920, "y": 1080 },
-                        "def": { "x": 1024, "y": 1024 },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "d151f1ab-d0ef-4677-83b9-423eee75b97d",
-                        "name": "Format",
-                        "type_name": "nos.sys.vulkan.Format",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": "R16G16B16A16_SFLOAT",
-                        "def": "R16G16B16A16_SFLOAT",
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "99de8e26-0c13-4cd8-89c3-58f6ac8af5ff",
-                        "name": "Usage",
-                        "type_name": "nos.sys.vulkan.ImageUsage",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "def": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE",
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { }
-                      },
-                      {
-                        "id": "b27335fe-df58-43bc-b1c7-42a7704e0b86",
-                        "name": "HostUseCompletePromise",
-                        "type_name": "nos.sync.Promise",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizers": [],
-                        "data": { "tag": "Host Use Complete" },
-                        "def": { "tag": "" },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "Host synchronization primitive for ensuring the use of the texture is finished",
-                        "display_name": "Host Use Complete Promise"
-                      },
-                      {
-                        "id": "460be8a4-7a8d-4c9a-846f-834fca174d1b",
-                        "name": "RequireHostUseCompletion",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": true,
-                        "def": false,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "Whether to give & wait a host synchronization primitive to ensure the buffer is no longer in use by the host before re-providing it again",
-                        "display_name": "Require Host Use Completion"
-                      },
-                      {
-                        "id": "70c97435-9e7e-4d10-ad1c-fc5e6232d6db",
-                        "name": "ResizeOnPathRingSizeChanged",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizers": [],
-                        "data": true,
-                        "def": true,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "orphan_state": { },
-                        "description": "Whether to update texture count when there's a ring size update path command received along the path",
-                        "display_name": "Resize On Path Ring Size Changed"
-                      }
-                    ],
-                    "pos": { "x": 1388.0, "y": 856.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Texture Provider",
-                    "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "1484fa76-ad94-4443-89f7-2d5cef675a9b",
+                    "id": "9da71d4e-8141-4407-a546-f01c7be7b498",
                     "name": "SetFieldType",
                     "class_name": "nos.resource.SetFieldType",
                     "pins": [
                       {
-                        "id": "dbe4f0ed-cb8e-4761-a50a-da879a79e47e",
+                        "id": "1ce59d78-b84c-4b62-b423-6310e7165911",
                         "name": "Input",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -2196,10 +2158,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
@@ -2220,7 +2182,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "8e82e9a0-17d7-4b3c-a863-8a6b3a19c515",
+                        "id": "686f68a2-e679-4b66-a349-05a96fe4d0a2",
                         "name": "FieldType",
                         "type_name": "nos.sys.vulkan.FieldType",
                         "show_as": "INPUT_PIN",
@@ -2233,7 +2195,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "ca4cf30d-2190-4697-93f1-7ccb353dd85b",
+                        "id": "6488eadd-8e3e-4c96-94d4-4a17c2e7ead6",
                         "name": "Output",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "OUTPUT_PIN",
@@ -2243,10 +2205,10 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
                           },
                           "width": 1920,
                           "height": 1080,
@@ -2278,12 +2240,46 @@
                     "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "36fd0003-ea73-465d-84d5-e497d3293950",
-                    "name": "GetFieldType (1)",
-                    "class_name": "nos.resource.GetFieldType",
+                    "id": "edf797aa-890f-443c-ba77-e24931b9d5db",
+                    "name": "Input",
+                    "class_name": "nos.internal.GraphInput",
                     "pins": [
                       {
-                        "id": "483e16ac-fbd7-4344-b235-7dfef5f8d985",
+                        "id": "ff4c15e6-7407-4d1e-842b-181a6a867d92",
+                        "name": "Output",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 7604,
+                            "allocation_size": 17694720,
+                            "pid": 59396,
+                            "offset": 0
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_UNORM",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" }
+                      },
+                      {
+                        "id": "d5f94ebe-cd83-4a7e-9f17-036995205d77",
                         "name": "Input",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
@@ -2293,9 +2289,246 @@
                           "size_in_bytes": 17694720,
                           "external_memory": {
                             "handle_type": 2,
-                            "handle": 8568,
+                            "handle": 7604,
                             "allocation_size": 17694720,
-                            "pid": 309480,
+                            "pid": 59396,
+                            "offset": 0
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_UNORM",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "referred_by": [
+                          "2640b81c-67b6-480a-8d43-7e5ac01aaaa0"
+                        ],
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" },
+                          { "key": "PinHidden", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { "message": "" }
+                      }
+                    ],
+                    "pos": { "x": 1085.0, "y": 1078.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "85f4e851-8792-4953-8fef-0fae4e28e48d",
+                    "name": "TextureProvider",
+                    "class_name": "nos.resource.TextureProvider",
+                    "pins": [
+                      {
+                        "id": "9bbfcc0e-731c-401e-8b2c-0072d077f0ad",
+                        "name": "Run",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "2e058dd1-aa4c-47e2-bd2b-02bbc4520cf4",
+                        "name": "Continue",
+                        "type_name": "nos.exe",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "d009a39b-81c8-43df-b1fb-830430931242",
+                        "name": "OutputTexture",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 6968,
+                            "allocation_size": 67108864,
+                            "pid": 59396,
+                            "offset": 0
+                          },
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                        },
+                        "def": {
+                          "width": 1920,
+                          "height": 1080,
+                          "format": "R16G16B16A16_SFLOAT",
+                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                        },
+                        "meta_data_map": [
+                          { "key": "AdvancedProperty", "value": "true" }
+                        ],
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "The destination texture that the download has started",
+                        "display_name": "Output Texture"
+                      },
+                      {
+                        "id": "c333f242-9daa-46c6-9bca-78708b75b9b2",
+                        "name": "GPUEventHolder",
+                        "type_name": "nos.sys.vulkan.GPUEventHolder",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { },
+                        "def": { },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "A GPU Event slot for synchronization",
+                        "display_name": "GPU Event Holder"
+                      },
+                      {
+                        "id": "47f80628-d1b5-45b1-905c-dd071dca9100",
+                        "name": "Count",
+                        "type_name": "uint",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": 2,
+                        "def": 2,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "95cd8c80-895a-4d08-8779-e7b8db78259a",
+                        "name": "Resolution",
+                        "type_name": "nos.fb.vec2u",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": { "x": 1920, "y": 1080 },
+                        "def": { "x": 1024, "y": 1024 },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "aaf50eeb-9d55-4550-9b68-42d59d31c103",
+                        "name": "Format",
+                        "type_name": "nos.sys.vulkan.Format",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": "R16G16B16A16_SFLOAT",
+                        "def": "R16G16B16A16_SFLOAT",
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "02ce7356-4da2-45a0-9323-538ba60511ba",
+                        "name": "Usage",
+                        "type_name": "nos.sys.vulkan.ImageUsage",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                        "def": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE",
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { }
+                      },
+                      {
+                        "id": "753974ea-1e1c-4caf-b6bc-ca137686c8ec",
+                        "name": "HostUseCompletePromise",
+                        "type_name": "nos.sync.Promise",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": { "tag": "Host Use Complete" },
+                        "def": { "tag": "" },
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "Host synchronization primitive for ensuring the use of the texture is finished",
+                        "display_name": "Host Use Complete Promise"
+                      },
+                      {
+                        "id": "4bd5eee4-198c-41e4-83e7-871f3bf9c690",
+                        "name": "RequireHostUseCompletion",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": true,
+                        "def": false,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "Whether to give & wait a host synchronization primitive to ensure the buffer is no longer in use by the host before re-providing it again",
+                        "display_name": "Require Host Use Completion"
+                      },
+                      {
+                        "id": "5de2ded5-d6cb-4fe5-942e-3916677b255c",
+                        "name": "ResizeOnPathRingSizeChanged",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "visualizers": [],
+                        "data": true,
+                        "def": true,
+                        "contents_type": "JobPin",
+                        "contents": { },
+                        "orphan_state": { },
+                        "description": "Whether to update texture count when there's a ring size update path command received along the path",
+                        "display_name": "Resize On Path Ring Size Changed"
+                      }
+                    ],
+                    "pos": { "x": 1388.0, "y": 856.0 },
+                    "contents_type": "Job",
+                    "contents": { "type": "" },
+                    "function_category": "Default Node",
+                    "display_name": "Texture Provider",
+                    "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
+                  },
+                  {
+                    "id": "6ac79538-c6d6-401c-b3d7-97cf1087f166",
+                    "name": "GetFieldType (1)",
+                    "class_name": "nos.resource.GetFieldType",
+                    "pins": [
+                      {
+                        "id": "a77f3605-72fa-4c4a-9f43-f947ae3e8687",
+                        "name": "Input",
+                        "type_name": "nos.sys.vulkan.Texture",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY",
+                        "visualizers": [],
+                        "data": {
+                          "size_in_bytes": 17694720,
+                          "external_memory": {
+                            "handle_type": 2,
+                            "handle": 7604,
+                            "allocation_size": 17694720,
+                            "pid": 59396,
                             "offset": 0
                           },
                           "width": 1920,
@@ -2317,7 +2550,7 @@
                         "orphan_state": { }
                       },
                       {
-                        "id": "ebec5eb8-11d8-4641-9f5c-c9e102e8e455",
+                        "id": "b0309136-4459-4f02-9812-f35f5c53e3ba",
                         "name": "FieldType",
                         "type_name": "nos.sys.vulkan.FieldType",
                         "show_as": "OUTPUT_PIN",
@@ -2339,12 +2572,12 @@
                     "plugin_version": { "major": 1, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "c71f6283-768f-43d4-8a96-5176e1c4e173",
+                    "id": "6067ebad-704c-45f0-a576-4d8442d2da8f",
                     "name": "Resolution",
                     "class_name": "nos.internal.GraphInput",
                     "pins": [
                       {
-                        "id": "b763b837-a2f3-4249-9fc6-4eb50ee44e62",
+                        "id": "7b036058-92a6-4717-b9d5-6d42e2b3005f",
                         "name": "Output",
                         "type_name": "nos.fb.vec2u",
                         "show_as": "OUTPUT_PIN",
@@ -2357,7 +2590,7 @@
                         "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "dcb8f327-0ce6-4785-9605-397b78eb736a",
+                        "id": "b2848e50-be07-4d29-8291-f88339165558",
                         "name": "Input",
                         "type_name": "nos.fb.vec2u",
                         "show_as": "INPUT_PIN",
@@ -2365,7 +2598,7 @@
                         "visualizers": [],
                         "data": { "x": 1920, "y": 1080 },
                         "referred_by": [
-                          "843f44c2-7c84-4ae0-9dcb-a247ca7eb7c7"
+                          "3f590d36-fbd9-414e-b801-3c7faa2e7428"
                         ],
                         "def": { "x": 1024, "y": 1024 },
                         "meta_data_map": [
@@ -2383,12 +2616,12 @@
                     "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                   },
                   {
-                    "id": "c913f3da-5241-4078-a468-640d1e32cad7",
+                    "id": "0a4bd540-ab79-41f4-bcf7-eed169cd6e0d",
                     "name": "Output",
                     "class_name": "nos.internal.GraphOutput",
                     "pins": [
                       {
-                        "id": "cecd0e0b-31ac-4604-b8f3-8e9c936073dc",
+                        "id": "469bcc04-8639-47a8-97fc-dc0bdea91733",
                         "name": "Input",
                         "type_name": "nos.Dict",
                         "show_as": "INPUT_PIN",
@@ -2399,17 +2632,18 @@
                                 "size_in_bytes": 17694720,
                                 "external_memory": {
                                   "handle_type": 2,
-                                  "handle": 8240,
-                                  "allocation_size": 268435456,
-                                  "pid": 309480,
-                                  "offset": 47185920
+                                  "handle": 6968,
+                                  "allocation_size": 67108864,
+                                  "pid": 59396,
+                                  "offset": 0
                                 },
                                 "width": 1920,
                                 "height": 1080,
                                 "format": "R16G16B16A16_SFLOAT",
                                 "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                               } },
-                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
+                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                            { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
                           ] },
                         "def": { },
                         "contents_type": "JobPin",
@@ -2417,7 +2651,7 @@
                         "orphan_state": { "message": "" }
                       },
                       {
-                        "id": "b3a5a4e5-e4d7-4eb5-8e77-67d171ac16e8",
+                        "id": "44465d0f-ca49-4b71-a6c6-5e915b7762bf",
                         "name": "Output",
                         "type_name": "nos.Dict",
                         "show_as": "OUTPUT_PIN",
@@ -2428,20 +2662,21 @@
                                 "size_in_bytes": 17694720,
                                 "external_memory": {
                                   "handle_type": 2,
-                                  "handle": 8240,
-                                  "allocation_size": 268435456,
-                                  "pid": 309480,
-                                  "offset": 47185920
+                                  "handle": 6968,
+                                  "allocation_size": 67108864,
+                                  "pid": 59396,
+                                  "offset": 0
                                 },
                                 "width": 1920,
                                 "height": 1080,
                                 "format": "R16G16B16A16_SFLOAT",
                                 "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                               } },
-                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
+                            { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } },
+                            { "key": "wait_gpu", "type_name": "nos.sys.vulkan.GPUEventHolder", "value": { } }
                           ] },
                         "referred_by": [
-                          "4dec2d32-cfbd-41d5-bb10-99d597828832"
+                          "ebfb8878-6f4f-457a-b8a3-d3caaa2ca012"
                         ],
                         "def": { },
                         "meta_data_map": [
@@ -2459,129 +2694,31 @@
                     "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                   }
                 ], "connections": [
-                  { "from": "d0417f46-2e6b-427e-a85b-708d40f83ff3", "to": "c1f43452-bdad-41e6-826f-ff540135111a", "id": "890e0c3f-446a-4072-ab5d-3bf022ce352c" },
-                  { "from": "881cc11a-f506-486d-8991-54b9a225b410", "to": "cecd0e0b-31ac-4604-b8f3-8e9c936073dc", "id": "2b2fd719-94b1-444b-bf9a-3be38200ffad" },
-                  { "from": "b763b837-a2f3-4249-9fc6-4eb50ee44e62", "to": "1b529778-34f2-4a72-b658-665c9ebbd00b", "id": "31461697-62da-4636-a259-cdd6f527cda4" },
-                  { "from": "4e3bb327-3e1f-4b43-a50c-913a5155bf20", "to": "5b6a3c78-482c-421e-b419-33be087ca0a1", "id": "396af64b-f905-4feb-a012-a23adb2a8bf9" },
-                  { "from": "ebec5eb8-11d8-4641-9f5c-c9e102e8e455", "to": "8e82e9a0-17d7-4b3c-a863-8a6b3a19c515", "id": "fa21f76c-eb61-4ad7-8485-be838e0aac5f" },
-                  { "from": "a2b66eda-6764-4f54-8677-12cde94ebc7d", "to": "14ee0d46-de98-44c0-89dc-9536cca2520a", "id": "e141c360-54c1-4d88-9ef7-4d1d6f6735b4" },
-                  { "from": "ca4cf30d-2190-4697-93f1-7ccb353dd85b", "to": "382982f5-bcfe-4469-9e65-4999d3d77402", "id": "e7e3787a-cc39-4f10-affc-13418f86aec4" },
-                  { "from": "cf7a3a4a-a183-4418-8826-97ff5b18b1e0", "to": "dbe4f0ed-cb8e-4761-a50a-da879a79e47e", "id": "962bd9d4-4097-4e6a-9c29-651ebd74645b" },
-                  { "from": "03201b21-13ce-401a-b636-25283c311d5d", "to": "979c5604-340b-4fed-87a7-2f6255b19a47", "id": "c410f30f-cc7c-454b-ada4-b00afc10e8c6" },
-                  { "from": "03201b21-13ce-401a-b636-25283c311d5d", "to": "483e16ac-fbd7-4344-b235-7dfef5f8d985", "id": "69c90571-cc8f-4529-b7b8-dbdb44ce70f2" },
-                  { "from": "c015d4a2-b54a-4864-8688-2ce12fef801a", "to": "24b6860f-12af-4d3b-a58f-da9561c94cea", "id": "c91be890-36ab-4518-a650-d07c71eed67f" },
-                  { "from": "b27335fe-df58-43bc-b1c7-42a7704e0b86", "to": "0a41122b-d53d-47a3-b802-95f9a5aedc20", "id": "7229a0da-67ac-4ea4-835f-866754f121f2" }
+                  { "from": "b0309136-4459-4f02-9812-f35f5c53e3ba", "to": "686f68a2-e679-4b66-a349-05a96fe4d0a2", "id": "f3418b0f-fad9-41a7-bb94-a4ba96f7646a" },
+                  { "from": "353d97fe-35ee-4146-918f-01cee75d8bc2", "to": "469bcc04-8639-47a8-97fc-dc0bdea91733", "id": "2954be76-4cde-4b59-8d43-758b009924c4" },
+                  { "from": "d009a39b-81c8-43df-b1fb-830430931242", "to": "1ce59d78-b84c-4b62-b423-6310e7165911", "id": "03c979db-1d37-4419-8ef7-963a59c252dd" },
+                  { "from": "2e058dd1-aa4c-47e2-bd2b-02bbc4520cf4", "to": "c43b1028-becb-4206-b741-bd0e5dc749d9", "id": "a10cd00a-b313-4c3a-8ab3-55045aada236" },
+                  { "from": "ff4c15e6-7407-4d1e-842b-181a6a867d92", "to": "f7ad99ef-e3ab-461a-a06b-69761d661ce4", "id": "86f53e5e-d62b-43a2-b5a8-b7aee99d7db6" },
+                  { "from": "5ce6e3e9-ced1-443c-afd8-eb11ab4784f6", "to": "9bbfcc0e-731c-401e-8b2c-0072d077f0ad", "id": "47d0f6ec-5854-4d4a-a879-f44ec3d812ae" },
+                  { "from": "7b036058-92a6-4717-b9d5-6d42e2b3005f", "to": "95cd8c80-895a-4d08-8779-e7b8db78259a", "id": "ab388787-4a5b-4aa9-804e-073e01f4d2da" },
+                  { "from": "1e67020f-df6b-4670-96db-f636202891ba", "to": "979f1d4a-da7a-413a-a32e-3b2214b4540e", "id": "ac942d93-d6fe-4746-9f3f-a3a96d89cf59" },
+                  { "from": "6488eadd-8e3e-4c96-94d4-4a17c2e7ead6", "to": "2816ea36-6615-469e-885d-77424d49fb4f", "id": "eff95e91-4278-4af0-9469-efcf3b99006f" },
+                  { "from": "1e67020f-df6b-4670-96db-f636202891ba", "to": "a77f3605-72fa-4c4a-9f43-f947ae3e8687", "id": "6da7a157-6226-4020-8e20-437d1008b322" },
+                  { "from": "8d2c0b82-1c0f-4b7f-9280-2b193be1a15f", "to": "b15bac14-6394-407c-bb5b-4ad96d4fe1f2", "id": "10b0e272-0deb-42d4-8f5f-316c38f9d029" },
+                  { "from": "753974ea-1e1c-4caf-b6bc-ca137686c8ec", "to": "0adb704b-52e1-4b54-9a4d-f7f1726ffc53", "id": "f3cb432f-1f2d-492e-b6db-2c4d4d4b04b7" },
+                  { "from": "c333f242-9daa-46c6-9bca-78708b75b9b2", "to": "cff4041f-ec1f-40e2-a8f3-f70a75f934d7", "id": "200b98a7-70fe-4e08-9a23-bdd802904916" },
+                  { "from": "cb5cdf83-4613-4d58-8e8d-a6da7872c2db", "to": "ef4f82ae-7b99-43b2-9544-98596fbe7fb5", "id": "e777d60a-6650-46b7-a53a-399b40fca677" }
                 ] },
               "function_category": "Default Node",
               "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
             },
             {
-              "id": "bd17cdea-170d-4947-a381-b7dd44580596",
-              "name": "BoundedObjectQueue (1)",
-              "class_name": "nos.reflect.BoundedObjectQueue",
-              "pins": [
-                {
-                  "id": "db0c56a0-6aad-4b13-92c4-a683b8bd33b2",
-                  "name": "Thread",
-                  "type_name": "nos.exe",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizers": [],
-                  "data": { },
-                  "def": { },
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { }
-                },
-                {
-                  "id": "735f64e6-cdac-4c42-a9ae-32dba53672c9",
-                  "name": "Input",
-                  "type_name": "nos.Dict",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizers": [],
-                  "data": { "entries": [
-                      { "key": "texture", "type_name": "nos.sys.vulkan.Texture", "value": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 47185920
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        } },
-                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
-                    ] },
-                  "def": { },
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { }
-                },
-                {
-                  "id": "f2112c50-aab4-4320-b959-0fa574d00e2c",
-                  "name": "Capacity",
-                  "type_name": "uint",
-                  "show_as": "PROPERTY",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizers": [],
-                  "data": 2,
-                  "min": 1,
-                  "def": 2,
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { }
-                },
-                {
-                  "id": "94b7c9cb-6b65-45f7-86c6-0264558edef5",
-                  "name": "Output",
-                  "type_name": "nos.Dict",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizers": [],
-                  "data": { "entries": [
-                      { "key": "texture", "type_name": "nos.sys.vulkan.Texture", "value": {
-                          "size_in_bytes": 17694720,
-                          "external_memory": {
-                            "handle_type": 2,
-                            "handle": 8240,
-                            "allocation_size": 268435456,
-                            "pid": 309480,
-                            "offset": 88473600
-                          },
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        } },
-                      { "key": "host_promise", "type_name": "nos.sync.Promise", "value": { "tag": "Host Use Complete" } }
-                    ] },
-                  "def": { },
-                  "live": true,
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { }
-                }
-              ],
-              "pos": { "x": 2055.0, "y": 842.0 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "description": "Queues data from a producer thread and outputs them to a consumer thread.\nStores only the references to the objects, not copies.",
-              "display_name": "Bounded Object Queue",
-              "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "acd020f9-3c08-4003-9392-8439ea97fe3e",
+              "id": "08d6f6a3-319d-4280-86e0-d374a68a4b18",
               "name": "OutDestination",
               "class_name": "nos.internal.GraphOutput",
               "pins": [
                 {
-                  "id": "8a878c96-293c-4c8d-8866-1ee358924473",
+                  "id": "c5c1c3d0-cf7b-421a-8535-76c3f90cf965",
                   "name": "Input",
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
@@ -2591,10 +2728,10 @@
                     "size_in_bytes": 17694720,
                     "external_memory": {
                       "handle_type": 2,
-                      "handle": 796,
+                      "handle": 6976,
                       "allocation_size": 134217728,
-                      "pid": 309480,
-                      "offset": 35389440
+                      "pid": 59396,
+                      "offset": 17694720
                     },
                     "width": 1920,
                     "height": 1080,
@@ -2616,7 +2753,7 @@
                   "display_name": "Destination"
                 },
                 {
-                  "id": "389fceed-9d5f-47bf-ae57-a8e269fb5b9e",
+                  "id": "b63f492a-d627-478c-b91c-cb9305503d5b",
                   "name": "Output",
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "OUTPUT_PIN",
@@ -2626,10 +2763,10 @@
                     "size_in_bytes": 17694720,
                     "external_memory": {
                       "handle_type": 2,
-                      "handle": 796,
+                      "handle": 6976,
                       "allocation_size": 134217728,
-                      "pid": 309480,
-                      "offset": 35389440
+                      "pid": 59396,
+                      "offset": 17694720
                     },
                     "width": 1920,
                     "height": 1080,
@@ -2637,7 +2774,7 @@
                     "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE"
                   },
                   "referred_by": [
-                    "bee970a0-dd2d-4275-9d25-0230f3365099"
+                    "d8df2728-fedb-47c9-9ba6-e828fd7f6fdc"
                   ],
                   "def": {
                     "width": 1920,
@@ -2662,56 +2799,12 @@
               "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
             },
             {
-              "id": "4da08e65-4166-4f8a-8ef5-a7a581e5b5c7",
-              "name": "Resolution",
-              "class_name": "nos.internal.GraphInput",
-              "pins": [
-                {
-                  "id": "8530752d-2c91-4292-bd67-027607fbe22b",
-                  "name": "Output",
-                  "type_name": "nos.fb.vec2u",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizers": [],
-                  "data": { "x": 1920, "y": 1080 },
-                  "def": { "x": 1024, "y": 1024 },
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { "message": "" }
-                },
-                {
-                  "id": "0c378f84-574f-46da-93b5-5437637e0030",
-                  "name": "Input",
-                  "type_name": "nos.fb.vec2u",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizers": [],
-                  "data": { "x": 1920, "y": 1080 },
-                  "referred_by": [
-                    "4dfa2fbe-bdaf-47d2-b8a2-7512fc480d80"
-                  ],
-                  "def": { "x": 1024, "y": 1024 },
-                  "meta_data_map": [
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { "message": "" }
-                }
-              ],
-              "pos": { "x": 1049.0, "y": 843.0 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "f0504049-3368-45b2-a222-89188aa0c245",
+              "id": "c447aa20-1962-4918-a58c-acca061d4fb4",
               "name": "Run",
               "class_name": "nos.internal.GraphInput",
               "pins": [
                 {
-                  "id": "2268f430-a4fc-41c2-8c3d-55a2a8b27aa4",
+                  "id": "22601579-e395-4b9d-a14f-d81c1b984f23",
                   "name": "Output",
                   "type_name": "nos.exe",
                   "show_as": "OUTPUT_PIN",
@@ -2724,7 +2817,7 @@
                   "orphan_state": { "message": "" }
                 },
                 {
-                  "id": "5b0075d8-c87d-4eb8-9333-fe2e0433c1a0",
+                  "id": "1a6b68c6-801e-4dc8-b02d-a5cff4d6f12d",
                   "name": "Input",
                   "type_name": "nos.exe",
                   "show_as": "INPUT_PIN",
@@ -2732,7 +2825,7 @@
                   "visualizers": [],
                   "data": { },
                   "referred_by": [
-                    "b1dda5ec-f92d-40fc-91c9-a62f8f6df64c"
+                    "46e82a33-8e9c-41a5-8a1a-ee826863bbed"
                   ],
                   "def": { },
                   "meta_data_map": [
@@ -2751,7 +2844,7 @@
             }
           ], "comments": [
             {
-              "id": "f56c2828-78f8-4dcf-9653-4aced08f0a60",
+              "id": "6dce16dd-7253-4382-96b2-64a9178c91f5",
               "name": "Comment (8)",
               "hint": "Hint",
               "content": "Copy output texture to different texture every frame provided by the texture provider node\ninside the graph. They are then pushed to the object queue at the end of the DMA thread.",
@@ -2760,7 +2853,7 @@
               "bg_color": { "x": 0.0, "y": 0.548673, "z": 1.0, "w": 0.3 }
             },
             {
-              "id": "7d9ffa37-76fe-4649-be80-e61d08bddf89",
+              "id": "5c7eeee1-5cdb-43f8-96ea-3ec78d4a5c08",
               "name": "Comment (9)",
               "hint": "Hint",
               "content": "Starts the GPU copy of texture object pulled from bounded\nqueue to a new texture object and signals the texture providers\nthat host use of this texture object is finished.",
@@ -2769,7 +2862,7 @@
               "bg_color": { "x": 0.60177, "y": 0.575143, "z": 0.0, "w": 0.3 }
             },
             {
-              "id": "21e27da0-5fef-4f4f-a50a-cc7ef0f69231",
+              "id": "db858fd9-fda7-4e9a-ab72-35d1891b21b6",
               "name": "Comment (5)",
               "hint": "Hint",
               "content": "Queues texture composite objects into the bounded queue to be used by the consumer thread. Schedules DMA thread execution when a slot is available in the bounded queue.",
@@ -2778,13 +2871,13 @@
               "bg_color": { "x": 0.884955, "y": 0.0, "z": 1.0, "w": 0.3 }
             }
           ], "connections": [
-            { "from": "8530752d-2c91-4292-bd67-027607fbe22b", "to": "843f44c2-7c84-4ae0-9dcb-a247ca7eb7c7", "id": "4af1bc03-fa9a-4ca9-bcc2-0b041410edd9" },
-            { "from": "4dec2d32-cfbd-41d5-bb10-99d597828832", "to": "735f64e6-cdac-4c42-a9ae-32dba53672c9", "id": "14e4b941-a9c4-4ee6-8da0-b6e8a5fe97de" },
-            { "from": "94b7c9cb-6b65-45f7-86c6-0264558edef5", "to": "e88cafb8-559b-4911-ae0c-04c07c1f522d", "id": "7828387f-79a6-4973-9ea3-86f62d9e01e3" },
-            { "from": "88fa82c5-2a3f-49ee-807e-de894eb4de26", "to": "8a878c96-293c-4c8d-8866-1ee358924473", "id": "dcf672f3-1082-4228-9439-d6335ed6afc8" },
-            { "from": "a1087a10-2553-450d-80aa-c4652d110d95", "to": "db0c56a0-6aad-4b13-92c4-a683b8bd33b2", "id": "a5199cd9-fa03-420b-b1d6-30a84c4bbfaa" },
-            { "from": "25da6aef-4607-486f-8386-c383e1af7c6a", "to": "9a6e71f5-85a0-46ad-acac-c71e86017e60", "id": "97bd4491-3471-48f7-8dbe-b7a8307d138e" },
-            { "from": "2268f430-a4fc-41c2-8c3d-55a2a8b27aa4", "to": "194cb729-cb84-4a87-a1e7-be5bf2bbb93e", "id": "9fae1581-cb28-4ee6-a63e-6abdacfa0e88" }
+            { "from": "744a985c-9395-4aeb-a4ec-16303b9b0289", "to": "2640b81c-67b6-480a-8d43-7e5ac01aaaa0", "id": "87af755d-af04-4b39-9c58-59ac562fbd2f" },
+            { "from": "15b28b82-3d4c-4c63-8bdf-2ec9dc7ea96b", "to": "c5c1c3d0-cf7b-421a-8535-76c3f90cf965", "id": "76fcb50e-fb52-4336-9b22-54141c13ac50" },
+            { "from": "bbd7bc76-dfff-4e1b-870b-37a4f0fc0baf", "to": "8ef4d2ed-d4c3-4d2d-b1ab-65360e9eed5a", "id": "36052b7c-b5b8-48e6-b4f9-90ad67a45387" },
+            { "from": "22601579-e395-4b9d-a14f-d81c1b984f23", "to": "0c8a0769-beca-4455-b1c6-2383f72ac19b", "id": "ff92e1d7-0710-4a9d-9869-8767563050d8" },
+            { "from": "ebfb8878-6f4f-457a-b8a3-d3caaa2ca012", "to": "c8ed00f1-5c57-40c9-804b-eb50656ca9be", "id": "3c46a076-90c5-4d35-8256-0a545c412278" },
+            { "from": "977dd7c9-fa0d-491e-abc0-9e69f119e9db", "to": "3f590d36-fbd9-414e-b801-3c7faa2e7428", "id": "d2d9beab-98a6-4918-bfe3-27e723be0498" },
+            { "from": "fde022ba-859f-4b9f-b0f3-adbbe62c1be7", "to": "43178290-3e58-44c3-94e2-ba47335cbd18", "id": "5287280b-ef0d-41ff-9713-31503dd28ac8" }
           ] },
         "function_category": "Default Node",
         "display_name": "Bounded Queue",
