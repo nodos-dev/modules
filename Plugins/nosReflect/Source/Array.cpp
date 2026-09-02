@@ -156,8 +156,8 @@ struct ArrayNode : NodeContext
 			return NOS_RESULT_FAILED;
 
 		auto& rawParams = *params.RawParams;
-		size_t arrayIndex = 0;
 		std::vector<nosObjectId> inputObjects;
+		inputObjects.reserve(rawParams.PinCount);
 		nosName outputTypeName{};
 		for (size_t pinIndex = 0; pinIndex < rawParams.PinCount; pinIndex++)
 		{
@@ -167,13 +167,23 @@ struct ArrayNode : NodeContext
 				outputTypeName = pin->TypeName;
 				continue;
 			}
+			// Only the element pins contribute to the array. Match them by name: an element pin can be shown as a
+			// property rather than an input pin, and it is still executed, so ShowAs must not be used to identify one.
+			if (GetInputElementIndexFromName(pin->Name) == std::numeric_limits<size_t>::max())
+				continue;
+			if (!pin->Object)
+			{
+				// Skipping would shift every later element, and the remove requests index the array by pin name.
+				nosEngine.LogE("Array: Input pin %s has no object", nos::Name(pin->Name).AsCStr());
+				return NOS_RESULT_FAILED;
+			}
 			inputObjects.push_back(*pin->Object);
-			arrayIndex++;
 		}
-		
+
 		ObjectRef newArrayObject{};
-		nosEngine.ObjectAPI->CreateArrayObject(outputTypeName, inputObjects.data(), inputObjects.size(), &newArrayObject.GetStorage());
-		if (!newArrayObject.IsValid())
+		auto res = nosEngine.ObjectAPI->CreateArrayObject(
+			outputTypeName, inputObjects.data(), inputObjects.size(), &newArrayObject.GetStorage());
+		if (res != NOS_RESULT_SUCCESS || !newArrayObject.IsValid())
 			return NOS_RESULT_FAILED;
 		ArrayObject = std::move(newArrayObject);
 		SetPinObject(NSN_Output, ArrayObject);
@@ -246,8 +256,7 @@ struct ArrayNode : NodeContext
 				.Element = newElement
 			}
 		};
-		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.GetStorage());
-		SetPinObject(NSN_Output, ArrayObject);
+		ApplyArrayDelta(delta);
 	}
 
 	void SendRemoveElementRequest(std::optional<size_t> elementIndex = std::nullopt) {
@@ -261,6 +270,12 @@ struct ArrayNode : NodeContext
 		if (!elementIndex)
 			elementIndex = inputs.size() - 1;
 
+		if (*elementIndex >= inputs.size())
+		{
+			nosEngine.LogE("Array: No element at index %zu to remove", *elementIndex);
+			return;
+		}
+
 		std::vector<fb::UUID> id = { inputs[*elementIndex]->Id};
 		HandleEvent(
 			CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &id)));
@@ -271,7 +286,23 @@ struct ArrayNode : NodeContext
 				.Index = *elementIndex
 			}
 		};
-		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.GetStorage());
+		ApplyArrayDelta(delta);
+	}
+
+	// Publishes an edited copy of the output array. Writing into ArrayObject's own storage would leak the reference it
+	// already holds, so the copy goes to a fresh ref and is moved in.
+	void ApplyArrayDelta(nosArrayObjectDelta const& delta)
+	{
+		if (!ArrayObject.IsValid())
+			return; // Nothing published yet, the next execution rebuilds the array from the pins.
+		ObjectRef edited{};
+		auto res = nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &edited.GetStorage());
+		if (res != NOS_RESULT_SUCCESS || !edited.IsValid())
+		{
+			nosEngine.LogE("Array: Failed to apply edit to the output array");
+			return;
+		}
+		ArrayObject = std::move(edited);
 		SetPinObject(NSN_Output, ArrayObject);
 	}
 
@@ -288,7 +319,10 @@ struct ArrayNode : NodeContext
 		{
 			std::optional<size_t> elementIndx = std::nullopt;
 			if (itemId != NodeId) {
-				if (auto pinName = GetPin(itemId)->DisplayName; pinName != NSN_Output)
+				auto* pin = GetPin(itemId);
+				if (!pin)
+					return;
+				if (auto pinName = pin->DisplayName; pinName != NSN_Output)
 					elementIndx = GetInputElementIndexFromName(pinName);
 			}
 			SendRemoveElementRequest(elementIndx);
