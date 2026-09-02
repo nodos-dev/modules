@@ -3,59 +3,93 @@
 #include <nosSysVulkan/Helpers.hpp>
 #include <glm/vec2.hpp>
 
+#include <cstring>
+
 #include "nosCompositing/CanvasMapper_generated.h"
 #include "Names.h"
 
 namespace nos::compositing
 {
+// The shader declares fixed size arrays of this length, see Shaders/CanvasMapper.frag.
+constexpr uint32_t MAX_CANVAS_LAYERS = 16;
+
+// Reads a POD field out of a layer object. Read fields through the object API rather than casting the array's data
+// view to a flatbuffers vector: the view is absent when the pin holds no object, and it belongs to a temporary whose
+// guard reference dies with the statement that produced it.
+template <typename T>
+static bool ReadLayerField(CompositeObjectRef& layer, nos::Name fieldName, T& out)
+{
+	auto field = layer.GetField(fieldName);
+	if (!field || !field->IsValid())
+		return false;
+	auto view = field->GetObjectDataView();
+	auto* buf = view.Ok();
+	if (!buf || !buf->Data || buf->Size < sizeof(T))
+		return false;
+	std::memcpy(&out, buf->Data, sizeof(T));
+	return true;
+}
+
 struct CanvasMapperContext : public NodeContext
 {
-
-	nosResult ExecuteNode(nos::NodeExecuteParams const& params)
+	nosResult ExecuteNode(nos::NodeExecuteParams const& params) override
 	{
-		auto arrayObj = nos::ArrayObjectRef(params.GetPinObject(NSN_Input));
-
-		auto inputs = (flatbuffers::Vector<flatbuffers::Offset<nos::compositing::CanvasLayer>>*)arrayObj.
-			GetObjectDataView().Ok()->Data;
-
-		if (0 == inputs->size())
+		auto arrayObj = params.GetPinObject<ArrayObjectRef>(NSN_Input);
+		if (!arrayObj.IsValid())
 			return NOS_RESULT_SUCCESS;
 
-		int size = inputs->size();
+		size_t layerCount = arrayObj.GetSize();
+		if (0 == layerCount)
+			return NOS_RESULT_SUCCESS;
 
-		auto output = *nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Output));
-		auto outputSize = glm::vec2(output.Texture.Width, output.Texture.Height);
+		auto outputInfo = sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Output));
+		if (!outputInfo || outputInfo->Type != NOS_RESOURCE_TYPE_TEXTURE)
+			return NOS_RESULT_FAILED;
+		auto outputSize = glm::vec2(outputInfo->Texture.Width, outputInfo->Texture.Height);
+		if (0 == outputSize.x || 0 == outputSize.y)
+			return NOS_RESULT_FAILED;
+
 		auto rgss = *params.GetPinValue<bool>(NOS_NAME_STATIC("RGSS"));
 
-		std::array<nos::fb::vec2, 16> pos = {};
-		std::array<nos::fb::vec2, 16> sca = {};
-		std::array<float, 16> rot = {};
-		std::array<nos::fb::vec2, 16> ori = {};
+		std::array<nos::fb::vec2, MAX_CANVAS_LAYERS> pos = {};
+		std::array<nos::fb::vec2, MAX_CANVAS_LAYERS> sca = {};
+		std::array<float, MAX_CANVAS_LAYERS> rot = {};
+		std::array<nos::fb::vec2, MAX_CANVAS_LAYERS> ori = {};
 		u32 ble = 0;
-		std::array<float, 16> opa = {};
+		std::array<float, MAX_CANVAS_LAYERS> opa = {};
 		std::vector<nosTextureObject> textures;
 		std::vector<nosTextureFilter> filters;
+		// Keeps the layer textures alive until the pass is submitted.
+		std::vector<ObjectRef> textureRefs;
 
 		u32 last = 0;
-
-		for (u32 i = 0; i < inputs->size(); ++i)
+		for (size_t i = 0; i < layerCount && last < MAX_CANVAS_LAYERS; ++i)
 		{
-			auto layer = inputs->Get(i);
-			if (!layer->texture())
+			auto layer = arrayObj.GetElement<CompositeObjectRef>(i);
+			if (!layer || !layer->IsValid())
+				continue;
+			auto texture = layer->GetField(NOS_NAME_STATIC("texture"));
+			if (!texture || !texture->IsValid())
 				continue;
 
-			auto texture = *arrayObj.GetElement<nos::CompositeObjectRef>(i)->GetField(NOS_NAME("texture"));
-			textures.push_back(texture);
+			nos::fb::vec2u size{};
+			if (!ReadLayerField(*layer, NOS_NAME_STATIC("size"), size) || 0 == size.x() || 0 == size.y())
+				continue;
+			sca[last] = nos::fb::vec2(float(size.x()) / outputSize.x, float(size.y()) / outputSize.y);
+
+			ReadLayerField(*layer, NOS_NAME_STATIC("position"), pos[last]);
+			ReadLayerField(*layer, NOS_NAME_STATIC("origin"), ori[last]);
+			ReadLayerField(*layer, NOS_NAME_STATIC("rotation"), rot[last]);
+			ReadLayerField(*layer, NOS_NAME_STATIC("opacity"), opa[last]);
+
+			u32 blendMode = 0;
+			ReadLayerField(*layer, NOS_NAME_STATIC("blend_mode"), blendMode);
+			// The shader tests one bit per drawn layer, so index by the packed position, not the source index.
+			ble |= (blendMode & 1u) << last;
+
+			textureRefs.push_back(std::move(*texture));
+			textures.push_back(textureRefs.back());
 			filters.push_back(NOS_TEXTURE_FILTER_LINEAR);
-			pos[last] = *layer->position();
-			rot[last] = layer->rotation();
-			ori[last] = *layer->origin();
-			sca[last] = nos::fb::vec2(
-				float(layer->size()->x()) / outputSize.x,
-				float(layer->size()->y()) / outputSize.y
-				);
-			ble |= u32(layer->blend_mode()) << i;
-			opa[last] = layer->opacity();
 			last++;
 		}
 
@@ -69,7 +103,7 @@ struct CanvasMapperContext : public NodeContext
 				NOS_NAME_STATIC("Textures"),
 				textures.data(),
 				filters.data(),
-				(u32)textures.size()),
+				count),
 			nos::sys::vulkan::ShaderDataBinding(NOS_NAME_STATIC("OutputSize"), outputSize),
 			nos::sys::vulkan::ShaderDataBinding(NOS_NAME_STATIC("BackgroundColor"), backgroundColor),
 			nos::sys::vulkan::ShaderDataBinding(NOS_NAME_STATIC("Positions"), pos),
@@ -94,9 +128,7 @@ struct CanvasMapperContext : public NodeContext
 		nosVulkan->End(cmd, 0);
 		return NOS_RESULT_SUCCESS;
 	}
-
 };
-
 
 void RegisterCanvasMapper(nosNodeFunctions* nodeFunctions)
 {
