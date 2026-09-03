@@ -3,8 +3,6 @@
 #include <nosSysVulkan/Helpers.hpp>
 #include <glm/vec2.hpp>
 
-#include <cstring>
-
 #include "nosCompositing/CanvasMapper_generated.h"
 #include "Names.h"
 
@@ -13,20 +11,19 @@ namespace nos::compositing
 // The shader declares fixed size arrays of this length, see Shaders/CanvasMapper.frag.
 constexpr uint32_t MAX_CANVAS_LAYERS = 16;
 
-// Reads a POD field out of a layer object. Read fields through the object API rather than casting the array's data
-// view to a flatbuffers vector: the view is absent when the pin holds no object, and it belongs to a temporary whose
-// guard reference dies with the statement that produced it.
+// Reads a trivially copyable field out of a layer object. Read fields through the object API rather than casting the
+// array's data view to a flatbuffers vector: the view is absent when the pin holds no object, and it belongs to a
+// temporary whose guard reference dies with the statement that produced it.
 template <typename T>
 static bool ReadLayerField(CompositeObjectRef& layer, nos::Name fieldName, T& out)
 {
 	auto field = layer.GetField(fieldName);
-	if (!field || !field->IsValid())
+	if (!field)
 		return false;
-	auto view = field->GetObjectDataView();
-	auto* buf = view.Ok();
-	if (!buf || !buf->Data || buf->Size < sizeof(T))
+	auto* val = field->GetValue<T>();
+	if (!val)
 		return false;
-	std::memcpy(&out, buf->Data, sizeof(T));
+	out = *val;
 	return true;
 }
 
