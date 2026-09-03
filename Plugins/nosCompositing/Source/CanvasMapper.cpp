@@ -11,22 +11,6 @@ namespace nos::compositing
 // The shader declares fixed size arrays of this length, see Shaders/CanvasMapper.frag.
 constexpr uint32_t MAX_CANVAS_LAYERS = 16;
 
-// Reads a trivially copyable field out of a layer object. Read fields through the object API rather than casting the
-// array's data view to a flatbuffers vector: the view is absent when the pin holds no object, and it belongs to a
-// temporary whose guard reference dies with the statement that produced it.
-template <typename T>
-static bool ReadLayerField(CompositeObjectRef& layer, nos::Name fieldName, T& out)
-{
-	auto field = layer.GetField(fieldName);
-	if (!field)
-		return false;
-	auto* val = field->GetValue<T>();
-	if (!val)
-		return false;
-	out = *val;
-	return true;
-}
-
 struct CanvasMapperContext : public NodeContext
 {
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params) override
@@ -69,18 +53,21 @@ struct CanvasMapperContext : public NodeContext
 			if (!texture || !texture->IsValid())
 				continue;
 
-			nos::fb::vec2u size{};
-			if (!ReadLayerField(*layer, NOS_NAME_STATIC("size"), size) || 0 == size.x() || 0 == size.y())
+			// Read fields through the object API rather than casting the array's data view to a flatbuffers vector:
+			// the view is absent when the pin holds no object, and it belongs to a temporary whose guard reference
+			// dies with the statement that produced it.
+			auto size = layer->GetFieldValue<nos::fb::vec2u>(NOS_NAME_STATIC("size"));
+			if (!size || 0 == size->x() || 0 == size->y())
 				continue;
-			sca[last] = nos::fb::vec2(float(size.x()) / outputSize.x, float(size.y()) / outputSize.y);
+			sca[last] = nos::fb::vec2(float(size->x()) / outputSize.x, float(size->y()) / outputSize.y);
 
-			ReadLayerField(*layer, NOS_NAME_STATIC("position"), pos[last]);
-			ReadLayerField(*layer, NOS_NAME_STATIC("origin"), ori[last]);
-			ReadLayerField(*layer, NOS_NAME_STATIC("rotation"), rot[last]);
-			ReadLayerField(*layer, NOS_NAME_STATIC("opacity"), opa[last]);
+			// A layer that leaves one of these unset is drawn with the zero the arrays were initialized with.
+			pos[last] = layer->GetFieldValue<nos::fb::vec2>(NOS_NAME_STATIC("position")).value_or(nos::fb::vec2());
+			ori[last] = layer->GetFieldValue<nos::fb::vec2>(NOS_NAME_STATIC("origin")).value_or(nos::fb::vec2());
+			rot[last] = layer->GetFieldValue<float>(NOS_NAME_STATIC("rotation")).value_or(0.f);
+			opa[last] = layer->GetFieldValue<float>(NOS_NAME_STATIC("opacity")).value_or(0.f);
 
-			u32 blendMode = 0;
-			ReadLayerField(*layer, NOS_NAME_STATIC("blend_mode"), blendMode);
+			u32 blendMode = layer->GetFieldValue<u32>(NOS_NAME_STATIC("blend_mode")).value_or(0);
 			// The shader tests one bit per drawn layer, so index by the packed position, not the source index.
 			ble |= (blendMode & 1u) << last;
 
