@@ -18,6 +18,7 @@ public:
 	explicit RingBuffer(size_t capacity, RingBufferServeMode mode = RingBufferServeMode::WaitUntilFull)
 		: Capacity(capacity),
 		Buffer(capacity),
+		Garbage(capacity, false),
 		Head(0),
 		Tail(0),
 		CurrentSize(0),
@@ -41,6 +42,7 @@ public:
 	std::optional<std::vector<T*>> BeginPush(size_t count, uint32_t timeoutMs)
 	{
 		std::unique_lock lock(Mutex);
+		DiscardGarbageForPush(count);
 		if (!ReadyForPushCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
 			[this, count]() -> bool {
 				return (CurrentSize + count) <= Capacity || ExitRequested.load();
@@ -59,14 +61,12 @@ public:
 	void EndPush(size_t count = 1)
 	{
 		std::unique_lock lock(Mutex);
+		for (size_t i = 0; i < count; ++i)
+			Garbage[(Head + i) % Capacity] = false;
 		Head = (Head + count) % Capacity;
 		CurrentSize += count;
 		NOS_SOFT_CHECK(CurrentSize <= Capacity, "Push count cannot exceed ring capacity!");
-		if (State != RingState::Filling || CurrentSize == Capacity)
-		{
-			State = RingState::Serving;
-			ReadyForPopCV.notify_all();
-		}
+		ReadyForPopCV.notify_all();
 	}
 
 	T* BeginPop(uint32_t timeoutMs)
@@ -82,11 +82,7 @@ public:
 		std::unique_lock lock(Mutex);
 		if (!ReadyForPopCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
 			[this, count]() -> bool {
-				if (ExitRequested)
-					return true;
-				if (State == RingState::Filling)
-					return CurrentSize == Capacity;
-				return CurrentSize >= count;
+				return CurrentSize >= count || ExitRequested.load();
 			}))
 			return std::nullopt; // timeout
 
@@ -133,6 +129,13 @@ public:
 		return CurrentSize == Capacity;
 	}
 
+	// Whether the entry a pop returns at this offset is garbage kept from before a reset.
+	bool IsGarbage(size_t offset = 0) const
+	{
+		std::unique_lock lock(Mutex);
+		return Garbage[(Tail + offset) % Capacity];
+	}
+
 	size_t GetCurrentSize() const
 	{
 		std::unique_lock lock(Mutex);
@@ -147,22 +150,35 @@ public:
 	void Reset(std::optional<size_t> newCapacity = std::nullopt, std::optional<RingBufferServeMode> newMode = std::nullopt)
 	{
 		std::unique_lock lock(Mutex);
-		Head = 0;
-		Tail = 0;
-		CurrentSize = 0;
-		Buffer.clear();
-		if (newCapacity && *newCapacity != Capacity)
+		const bool capacityChanged = newCapacity && *newCapacity != Capacity;
+		if (capacityChanged)
 			Capacity = *newCapacity;
-		Buffer.resize(Capacity);
 		if (newMode)
 			Mode = *newMode;
 		switch (Mode)
 		{
-		case RingBufferServeMode::ServeImmediately:
-			State = RingState::Serving;
-			break;
 		case RingBufferServeMode::WaitUntilFull:
-			State = RingState::Filling;
+			// Full from the start. The slots hold the last frames in write order, oldest at
+			// Head, and are served as garbage while the producer overwrites them, so the
+			// consumer never waits for the fill. A resize has no frames worth keeping and
+			// starts from empty garbage entries.
+			if (capacityChanged)
+			{
+				Buffer.clear();
+				Buffer.resize(Capacity);
+				Head = 0;
+			}
+			Tail = Head;
+			CurrentSize = Capacity;
+			Garbage.assign(Capacity, true);
+			break;
+		case RingBufferServeMode::ServeImmediately:
+			Head = 0;
+			Tail = 0;
+			CurrentSize = 0;
+			Buffer.clear();
+			Buffer.resize(Capacity);
+			Garbage.assign(Capacity, false);
 			break;
 		}
 		lock.unlock();
@@ -177,23 +193,29 @@ public:
 	}
 
 private:
+	// Garbage only stands in until real frames arrive. When a real frame needs the room,
+	// the oldest garbage goes first rather than making the producer wait. Called under
+	// the lock.
+	void DiscardGarbageForPush(size_t count)
+	{
+		while (CurrentSize + count > Capacity && CurrentSize > 0 && Garbage[Tail])
+		{
+			Tail = (Tail + 1) % Capacity;
+			--CurrentSize;
+		}
+	}
+
 	size_t Capacity;
 	std::vector<T> Buffer;
+	std::vector<bool> Garbage;
 	size_t Head;
 	size_t Tail;
 	size_t CurrentSize;
-
-	enum class RingState
-	{
-		Filling,
-		Serving
-	};
 
 	mutable std::mutex Mutex;
 	std::condition_variable ReadyForPopCV;
 	std::condition_variable ReadyForPushCV;
 	std::atomic_bool ExitRequested;
-	RingState State = RingState::Filling;
 	RingBufferServeMode Mode = RingBufferServeMode::WaitUntilFull;
 };
 
@@ -234,7 +256,6 @@ struct RingBufferNodeBase : NodeContext
 
 	RingBuffer<std::unique_ptr<SlotType>> Ring;
 	uint32_t Capacity = 1;
-	uint32_t RemainingRepeatCount = 0;
 
 	bool CapacityUpdatedViaPathCommand = false;
 
@@ -273,7 +294,6 @@ struct RingBufferNodeBase : NodeContext
 	void OnPathStart() override
 	{
 		Ring.Reset(Capacity);
-		RemainingRepeatCount = Capacity - 1;
 		SendScheduleRequest(Capacity);
 	}
 
@@ -300,18 +320,20 @@ struct RingBufferNodeBase : NodeContext
 	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		SendRingStats("Pre Begin Pop");
-		if (Ring.GetMode() == RingBufferServeMode::WaitUntilFull)
-		{
-			if (RemainingRepeatCount > 0)
-			{
-				--RemainingRepeatCount;
-				return NOS_RESULT_SUCCESS;
-			}
-		}
 		std::unique_ptr<SlotType>* srcSlot;
 		{
 			ScopedProfilerEvent _({ .Name = "Wait For Read" });
 			srcSlot = Ring.BeginPop(100);
+		}
+		if (srcSlot && Ring.IsGarbage())
+		{
+			// A frame from before the restart, shown once more. It carries no frame number
+			// and needs no replacement: the start already scheduled one producer run per slot.
+			if (*srcSlot)
+				if (auto object = (*srcSlot)->GetObject())
+					SetPinObject(NSN_Output, object);
+			Ring.EndPop();
+			return NOS_RESULT_SUCCESS;
 		}
 		if (srcSlot && *srcSlot)
 		{

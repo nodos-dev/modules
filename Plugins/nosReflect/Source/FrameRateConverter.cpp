@@ -17,7 +17,6 @@ struct FrameRateConverterNode : NodeContext
 	RingBuffer<Slot> Ring;
 	uint32_t Capacity = 1;
 	uint32_t EffectiveCapacity = 1;
-	uint32_t RemainingRepeatCount = 0;
 	fb::vec2u Ratio = {1, 1};
 	uint32_t PendingScheduleRemainder = 0;
 
@@ -25,8 +24,7 @@ struct FrameRateConverterNode : NodeContext
 	{
 		Ratio,
 		Capacity,
-		Mode,
-		Repeating
+		Mode
 	};
 
 	std::unordered_map<StatusType, fb::TNodeStatusMessage> StatusMessages;
@@ -109,8 +107,6 @@ struct FrameRateConverterNode : NodeContext
 		SetStatus(StatusType::Mode, "Starting Mode: " + std::string(Mode == RingBufferServeMode::WaitUntilFull ? "Wait Until Full" : "Serve Immediately"), fb::NodeStatusMessageType::INFO);
 		Ring.Reset(EffectiveCapacity, Mode);
 		auto producerExecCount = EffectiveCapacity / Ratio.x();
-		auto consumerExecCount = EffectiveCapacity / Ratio.y();
-		RemainingRepeatCount = consumerExecCount - 1;
 		PendingScheduleRemainder = 0;
 		SendScheduleRequest(producerExecCount);
 	}
@@ -145,71 +141,66 @@ struct FrameRateConverterNode : NodeContext
 	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		SendRingStats("Pre Begin Pop");
-		if (Ring.GetMode() == RingBufferServeMode::WaitUntilFull)
-		{
-			if (RemainingRepeatCount > 0)
-			{
-				SetStatus(StatusType::Repeating,
-						  "Repeating: " + std::to_string(RemainingRepeatCount) + " repeats remaining",
-						  fb::NodeStatusMessageType::WARNING);
-				--RemainingRepeatCount;
-				return NOS_RESULT_SUCCESS;
-			}
-		}
-		ClearStatus(StatusType::Repeating);
 		std::vector<ObjectRef> outputObjectRefs;
-		uint64_t frameNumber;
+		uint64_t frameNumber = 0;
 		uint32_t popCount = Ratio.y();
 		std::optional<std::vector<Slot*>> maybeSrcSlots;
 		{
 			ScopedProfilerEvent _({.Name = "Wait For Read"});
 			maybeSrcSlots = Ring.BeginPop(popCount, 100);
 		}
-		if (maybeSrcSlots)
+		if (!maybeSrcSlots)
+			return Ring.IsShuttingDown() ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
+		auto& srcSlots = *maybeSrcSlots;
+		// Garbage is what the ring held before the restart, shown once more while the
+		// producer overwrites it. A group counts as garbage only when every entry in it is;
+		// one real frame makes it a real group, numbered by its first real entry.
+		bool garbage = true;
+		for (uint32_t i = 0; i < popCount; ++i)
 		{
-			auto& srcSlots = *maybeSrcSlots;
-			for (auto& srcSlot : srcSlots)
-				outputObjectRefs.push_back(std::move(srcSlot->Object));
-			frameNumber = srcSlots[0]->FrameNumber;
-			Ring.EndPop(popCount);
-			SendRingStats("Post Begin Pop");
+			if (Ring.IsGarbage(i))
+				continue;
+			if (garbage)
+				frameNumber = srcSlots[i]->FrameNumber;
+			garbage = false;
 		}
-		else if (Ring.IsShuttingDown())
-		{
-			return NOS_RESULT_FAILED;
-		}
-		else
-		{
-			// Timeout
-			return NOS_RESULT_PENDING;
-		}
-		if (!outputObjectRefs.empty())
-		{
-			// Convert ObjectRefs to IDs for the API call
-			std::vector<nosObjectId> outputObjects;
-			outputObjects.reserve(outputObjectRefs.size());
-			for (const auto& ref : outputObjectRefs)
-				outputObjects.push_back(ref.GetObjectId());
+		for (auto& srcSlot : srcSlots)
+			outputObjectRefs.push_back(std::move(srcSlot->Object));
+		Ring.EndPop(popCount);
+		SendRingStats("Post Begin Pop");
 
-			ObjectRef outputArrayObject;
-			auto res = nosEngine.ObjectAPI->CreateArrayObject(
-				TypeName, outputObjects.data(), outputObjects.size(), &outputArrayObject.GetStorage());
-			if (res != NOS_RESULT_SUCCESS)
-				return res;
-			SetPinObject(NSN_Output, outputArrayObject);
-			cpy->ShouldSetSourceFrameNumber = true;
-			cpy->FrameNumber = frameNumber;
+		// A slot that was never written has nothing to show; leave the output as it is.
+		for (const auto& ref : outputObjectRefs)
+			if (!ref)
+				return NOS_RESULT_SUCCESS;
 
-			// Maintain the ratio by distributing extra frames across multiple schedules
-			PendingScheduleRemainder += Ratio.y() % Ratio.x();
-			uint32_t newCount = Ratio.y() / Ratio.x();
-			newCount += PendingScheduleRemainder / Ratio.x();
-			PendingScheduleRemainder = PendingScheduleRemainder % Ratio.x();
-			if (newCount)
-				SendScheduleRequest(newCount);
+		std::vector<nosObjectId> outputObjects;
+		outputObjects.reserve(outputObjectRefs.size());
+		for (const auto& ref : outputObjectRefs)
+			outputObjects.push_back(ref.GetObjectId());
+		ObjectRef outputArrayObject;
+		auto res = nosEngine.ObjectAPI->CreateArrayObject(
+			TypeName, outputObjects.data(), outputObjects.size(), &outputArrayObject.GetStorage());
+		if (res != NOS_RESULT_SUCCESS)
+			return res;
+		SetPinObject(NSN_Output, outputArrayObject);
+		if (garbage)
+		{
+			// No frame number and no replacement: the start scheduled the producer for
+			// every slot already.
 			return NOS_RESULT_SUCCESS;
 		}
-		return NOS_RESULT_PENDING;
+		cpy->ShouldSetSourceFrameNumber = true;
+		cpy->FrameNumber = frameNumber;
+
+		// Maintain the ratio by distributing extra frames across multiple schedules
+		PendingScheduleRemainder += Ratio.y() % Ratio.x();
+		uint32_t newCount = Ratio.y() / Ratio.x();
+		newCount += PendingScheduleRemainder / Ratio.x();
+		PendingScheduleRemainder = PendingScheduleRemainder % Ratio.x();
+		if (newCount)
+			SendScheduleRequest(newCount);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnPathCommand(const nosPathCommand* command) override
